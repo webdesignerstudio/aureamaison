@@ -65,8 +65,8 @@ test.describe("Aurea Maison E2E Tests", () => {
     console.log("Submit clicked");
 
     // 4. Wait for result - allow 1s propagation + network time
-    console.log("\n=== STEP 4: Waiting for result (up to 15s) ===");
-    await page.waitForTimeout(8000);
+    console.log("\n=== STEP 4: Waiting for result ===");
+    await page.waitForTimeout(4000);
     await page.screenshot({ path: "e2e/screenshots/03-after-submit.png", fullPage: true });
 
     // 5. Check final state
@@ -103,15 +103,8 @@ test.describe("Aurea Maison E2E Tests", () => {
     console.log("Page Errors Count:", errors.length);
     console.log("HTTP Errors Count:", httpErrors.length);
 
-    // For diagnosis, print page content if still on login
-    if (isOnLogin) {
-      const bodyText = await page.locator("body").textContent();
-      console.log("\n=== PAGE BODY TEXT ===");
-      console.log(bodyText?.substring(0, 2000) || "(empty)");
-    }
-
     // Assert: we should reach dashboard
-    expect(isOnDashboard, `Expected dashboard but got: ${currentUrl} | Error: ${errorText}`).toBe(true);
+    expect(isOnDashboard, `Expected dashboard but got: ${currentUrl}`).toBe(true);
   });
 
   test("Auth callback route works", async ({ page }) => {
