@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useOrders } from "@/hooks/use-orders";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -49,15 +50,17 @@ export function OrdersList() {
             {orders.map((order) => (
               <tr
                 key={order.id}
-                className="transition-colors hover:bg-gold/5"
+                className="cursor-pointer transition-colors hover:bg-gold/5"
               >
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">
-                    {order.client_name}
-                  </div>
-                  <div className="text-xs text-muted">
-                    {order.straat}, {order.plaats}
-                  </div>
+                  <Link href={`/dashboard/orders/${order.id}`} className="block">
+                    <div className="font-medium text-foreground">
+                      {order.client_name}
+                    </div>
+                    <div className="text-xs text-muted">
+                      {order.straat}, {order.plaats}
+                    </div>
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-sm text-muted">
                   {order.vloer_type || "—"}
