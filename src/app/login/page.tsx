@@ -49,8 +49,11 @@ export default function LoginPage() {
           company_id: "11111111-1111-1111-1111-111111111111",
         });
         if (insertError) {
-          // 409 = duplicate key = profile already exists (created by API or trigger)
-          if (insertError.code === "23505") {
+          // 409/23505 = duplicate key = profile already exists
+          const isDuplicate = insertError.code === "23505" || 
+            insertError.message?.includes("duplicate key") ||
+            insertError.message?.includes("profiles_pkey");
+          if (isDuplicate) {
             console.log("[Login] Profile already exists, proceeding to dashboard");
           } else {
             console.error("[Login] Profile insert failed:", insertError);
