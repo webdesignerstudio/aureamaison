@@ -64,6 +64,7 @@ export interface Order {
 
 export interface Legger {
   id: string;
+  profiel_id: string | null;
   naam: string;
   email: string;
   telefoon: string | null;
