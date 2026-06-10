@@ -19,13 +19,12 @@ export function useAuth() {
         } = await supabase.auth.getSession();
 
         if (session?.user) {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", session.user.id)
-            .single();
-          if (profileError) throw profileError;
-          setUser(profile as Profile);
+            .maybeSingle();
+          if (profile) setUser(profile as Profile);
         }
       } catch (err) {
         setError(err as Error);
@@ -39,12 +38,12 @@ export function useAuth() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", session.user.id)
-            .single();
-          if (!profileError) {
+            .maybeSingle();
+          if (profile) {
             setUser(profile as Profile);
           }
         } else {
