@@ -32,11 +32,11 @@ export default function Home() {
                 Inloggen
               </GoldButton>
             </Link>
-            <Link href="/login">
+            <a href="mailto:Aureamaisonfloors@gmail.com">
               <GoldButton variant="outline" size="lg">
-                Account aanmaken
+                Contact opnemen
               </GoldButton>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
