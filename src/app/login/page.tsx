@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -18,11 +18,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    // Use standard client for login (localStorage session)
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient();
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
