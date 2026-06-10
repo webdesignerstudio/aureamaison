@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -18,7 +18,11 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const supabase = createClient();
+    // Use standard client for login (localStorage session)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -58,13 +62,7 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        console.log("[Login] Profile created via API, refreshing session...");
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.warn("[Login] Session refresh failed:", refreshError);
-        } else {
-          console.log("[Login] Session refreshed");
-        }
+        console.log("[Login] Profile created via API");
       } else {
         console.log("[Login] Profile found — role:", profile.role);
       }
