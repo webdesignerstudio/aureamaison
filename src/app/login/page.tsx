@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -28,6 +28,21 @@ export default function LoginPage() {
       setError("Ongeldige inloggegevens. Probeer opnieuw.");
       setLoading(false);
       return;
+    }
+
+    const userId = signInData.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!profile) {
+        setError("Je account is nog niet volledig geactiveerd. Neem contact op met de beheerder.");
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
     }
 
     router.push("/dashboard");
