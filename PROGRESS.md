@@ -46,12 +46,12 @@
 
 ---
 
-## Fase 3: Supabase Database — OPEN
+## Fase 3: Supabase Database — AFGEROND
 
-- [ ] SQL schema migratie schrijven (tables: profiles, companies, orders, leggers, offertes, settings)
-- [ ] Row Level Security (RLS) policies definieren
-- [ ] Supabase project aanmaken en environment variabelen invullen
-- [ ] Database migratie uitvoeren
+- [x] SQL schema migratie schrijven (tables: profiles, companies, orders, leggers, offertes, settings)
+- [x] Row Level Security (RLS) policies definieren
+- [ ] Supabase project aanmaken en environment variabelen invullen *(wacht op klant)*
+- [ ] Database migratie uitvoeren *(wacht op klant)*
 
 ---
 
