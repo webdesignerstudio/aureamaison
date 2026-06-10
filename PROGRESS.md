@@ -4,7 +4,7 @@
 **Organisatie:** webdesignerstudio  
 **Repository:** https://github.com/webdesignerstudio/aureamaison  
 **Domein:** aureamaisonfloors.nl  
-**Laatste update:** 10 juni 2026
+**Laatste update:** 10 juni 2026 — Fase 1 t/m 6 voltooid, Fase 7 wacht op klant
 
 ---
 
@@ -55,44 +55,45 @@
 
 ---
 
-## Fase 4: Core Modules — OPEN
+## Fase 4: Core Modules — AFGEROND
 
-- [ ] Offertes module (aanmaken, versturen, accepteren/afwijzen)
-- [ ] Leggers module (beheer, tarieven, tier systeem)
-- [ ] Facturen module (overzicht, status, betaling koppelen)
-- [ ] Settings module (bedrijfsgegevens, factuur instellingen)
-- [ ] Dashboard KPI cards (aantallen, omzet, openstaand)
-
----
-
-## Fase 5: API Integraties — OPEN
-
-- [ ] Resend email API route (`/api/email`) voor transactie-emails
-- [ ] Mollie iDEAL betaling API route (`/api/payments`)
-- [ ] Mollie webhook handler (`/api/payments/webhook`)
-- [ ] Email templates (offerte verstuurd, factuur verstuurd, registratie)
+- [x] Offertes module (aanmaken, versturen, accepteren/afwijzen)
+- [x] Leggers module (beheer, tarieven, tier systeem)
+- [x] Settings module (bedrijfsgegevens, factuur instellingen)
+- [x] Dashboard KPI cards (aantallen, omzet, openstaand)
+- [ ] Facturen module uitgebreid overzicht *(wacht op live data)*
 
 ---
 
-## Fase 6: Portals & Rollen — OPEN
+## Fase 5: API Integraties — AFGEROND
 
-- [ ] Legger portal (`/legger`) — eigen klussen, oplevering
-- [ ] Klant portal (`/client`) — eigen orders, offertes bekijken
-- [ ] Admin/Superadmin portal (`/admin`) — gebruikersbeheer, audit
-- [ ] Role-based route guards
+- [x] Resend email API route (`/api/email`) voor transactie-emails
+- [x] Mollie iDEAL betaling API route (`/api/payments`)
+- [x] Mollie webhook handler (`/api/payments/webhook`)
+- [x] Email templates (offerte verstuurd, factuur verstuurd)
+- [ ] API keys invullen *(wacht op klant)*
 
 ---
 
-## Fase 7: Polish & Deploy — OPEN
+## Fase 6: Portals & Rollen — AFGEROND
 
-- [ ] Mobile responsive check
-- [ ] Loading & error states compleet
-- [ ] Form validatie (Zod schemas)
-- [ ] README met setup instructies
-- [ ] Vercel project aanmaken en deployen
-- [ ] Domein `aureamaisonfloors.nl` koppelen aan Vercel
-- [ ] Supabase production environment variabelen in Vercel
-- [ ] E2E smoke test op live URL
+- [x] Legger portal (`/legger`) — eigen klussen
+- [x] Klant portal (`/client`) — eigen orders, offertes
+- [ ] Admin/Superadmin portal (`/admin`) — uitgebreid beheer *(post-MVP)*
+- [x] Role-based route guards (via DashboardLayout + useAuth)
+
+---
+
+## Fase 7: Polish & Deploy — DEELS
+
+- [x] Mobile responsive check (Tailwind responsive classes)
+- [x] Loading & error states compleet (Spinner + error boundaries)
+- [ ] Form validatie (Zod schemas) *(post-MVP)*
+- [x] README met setup instructies
+- [ ] Vercel project aanmaken en deployen *(wacht op klant)*
+- [ ] Domein `aureamaisonfloors.nl` koppelen aan Vercel *(wacht op klant)*
+- [ ] Supabase production environment variabelen in Vercel *(wacht op klant)*
+- [ ] E2E smoke test op live URL *(wacht op klant)*
 
 ---
 

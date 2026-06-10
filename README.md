@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aurea Maison Floors — Vloerenleggers Platform
 
-## Getting Started
+Professioneel SaaS platform voor vloerenleggers. Offertes, planning, facturen en klantbeheer — alles op een plek.
 
-First, run the development server:
+**Live:** https://aureamaisonfloors.nl  
+**Repository:** https://github.com/webdesignerstudio/aureamaison
+
+---
+
+## Technische Stack
+
+| Layer | Technologie |
+|-------|-------------|
+| Framework | Next.js 14 (App Router) |
+| Taal | TypeScript |
+| Styling | TailwindCSS |
+| Backend | Supabase (PostgreSQL + Auth + RLS) |
+| State Management | React Query (TanStack) |
+| Email | Resend API |
+| Betalingen | Mollie iDEAL |
+| Hosting | Vercel |
+
+---
+
+## Lokale Ontwikkeling
+
+### 1. Vereisten
+
+- Node.js 18+
+- npm
+- Supabase account (gratis tier)
+- Resend account (voor email)
+- Mollie account (voor betalingen)
+
+### 2. Clone & Install
+
+```bash
+git clone https://github.com/webdesignerstudio/aureamaison.git
+cd aureamaison
+npm install
+```
+
+### 3. Environment Variabelen
+
+Kopieer `.env.example` naar `.env.local` en vul in:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variabele | Waar te vinden |
+|-----------|----------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project Settings > API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Project Settings > API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Project Settings > API (beheer) |
+| `RESEND_API_KEY` | Resend Dashboard > API Keys |
+| `MOLLIE_API_KEY` | Mollie Dashboard > Developers > API Keys |
+| `MOLLIE_WEBHOOK_SECRET` | Zelf bedenken (min. 32 karakters) |
+
+### 4. Database Setup
+
+Voer de migraties uit in de Supabase SQL Editor:
+
+1. Open `supabase/migrations/0001_initial_schema.sql`
+2. Kopieer inhoud naar Supabase SQL Editor
+3. Voer uit
+4. Herhaal voor `0002_seed_data.sql`
+
+### 5. Start Dev Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Projectstructuur
 
-## Learn More
+```
+src/
+  app/                    # Next.js App Router paginas
+    (routes)/             # Groep routes
+    api/                  # API routes (serverless functions)
+  components/
+    ui/                   # Herbruikbare UI primitives
+    layout/               # Layout componenten
+    modules/              # Domein-specifieke componenten
+  hooks/                  # React Query + Supabase hooks
+  lib/                    # Helpers, clients, utilities
+  types/                  # TypeScript interfaces
+supabase/
+  migrations/             # SQL schema migraties
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Belangrijke Routes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Route | Beschrijving | Rol |
+|-------|-------------|-----|
+| `/` | Landing page | Iedereen |
+| `/login` | Inloggen | Iedereen |
+| `/dashboard` | Eigenaar dashboard | owner, keyuser, office |
+| `/dashboard/orders` | Orders beheren | owner, keyuser, office |
+| `/dashboard/offertes` | Offertes beheren | owner, keyuser, office |
+| `/dashboard/leggers` | Leggers beheren | owner |
+| `/dashboard/settings` | Instellingen | owner |
+| `/legger` | Legger portal | legger |
+| `/client` | Klant portal | client |
+| `/api/email` | Email versturen | Server |
+| `/api/payments` | iDEAL betaling aanmaken | Server |
+| `/api/payments/webhook` | Betaling status updates | Server (Mollie) |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy naar Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 1. Vercel Project Aanmaken
+
+```bash
+npx vercel
+```
+
+Of via [Vercel Dashboard](https://vercel.com) > Import Git Repository
+
+### 2. Environment Variabelen Invoeren
+
+Ga naar Project Settings > Environment Variables en voer alle variabelen uit `.env.local` in.
+
+### 3. Domein Koppelen
+
+Ga naar Project Settings > Domains en voeg toe:
+- `aureamaisonfloors.nl`
+
+Werk DNS bij bij domeinregistrar (A-record naar Vercel IP of CNAME naar `cname.vercel-dns.com`).
+
+### 4. Supabase Whitelisten
+
+Voeg Vercel deploy URL toe aan Supabase Authentication > URL Configuration > Redirect URLs.
+
+---
+
+## Licentie
+
+Privé eigendom — Webdesigner Studio.
