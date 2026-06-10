@@ -40,7 +40,7 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (!profile) {
-        console.warn("[Login] Profile missing, creating directly for:", userEmail);
+        console.warn("[Login] STEP 3a: No profile, attempting insert");
         const { error: insertError } = await supabase.from("profiles").insert({
           id: userId,
           email: userEmail,
@@ -48,29 +48,17 @@ export default function LoginPage() {
           role: "owner",
           company_id: "11111111-1111-1111-1111-111111111111",
         });
-        if (insertError) {
-          console.warn("[Login] Insert error raw:", JSON.stringify(insertError));
-          // 409/23505 = duplicate key = profile already exists
-          const isDuplicate = insertError.code === "23505" || 
-            (insertError.message && (
-              insertError.message.includes("duplicate key") ||
-              insertError.message.includes("profiles_pkey")
-            ));
-          console.warn("[Login] isDuplicate:", isDuplicate, "code:", insertError.code, "msg:", insertError.message);
-          if (isDuplicate) {
-            console.log("[Login] Profile already exists, proceeding to dashboard");
-          } else {
-            console.error("[Login] Profile insert failed:", insertError);
-            setError("Account activatie mislukt. Probeer opnieuw.");
-            await supabase.auth.signOut();
-            setLoading(false);
-            return;
-          }
-        } else {
-          console.log("[Login] Profile created directly");
+        console.warn("[Login] STEP 3b: Insert result:", insertError ? "ERROR" : "OK", insertError);
+        if (insertError && !insertError.message?.includes("duplicate") && insertError.code !== "23505") {
+          console.error("[Login] STEP 3c: Fatal insert error:", insertError);
+          setError("Account activatie mislukt. Probeer opnieuw.");
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
         }
+        console.warn("[Login] STEP 3d: Profile OK (created or exists)");
       } else {
-        console.log("[Login] Profile found — role:", profile.role);
+        console.log("[Login] STEP 3: Profile found — role:", profile.role);
       }
     }
 

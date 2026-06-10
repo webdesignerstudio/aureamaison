@@ -35,7 +35,8 @@ test.describe("Aurea Maison E2E Tests", () => {
 
     // 1. Open login page
     console.log("\n=== STEP 1: Opening login page ===");
-    await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
+    await page.context().clearCookies();
+    await page.goto(`${BASE_URL}/login?cb=${Date.now()}`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: "e2e/screenshots/01-login-page.png", fullPage: true });
 
@@ -69,17 +70,18 @@ test.describe("Aurea Maison E2E Tests", () => {
     await page.waitForTimeout(4000);
     await page.screenshot({ path: "e2e/screenshots/03-after-submit.png", fullPage: true });
 
-    // Debug: log localStorage and session
-    const localStorage = await page.evaluate(() => {
+    // Debug: log storage
+    const storageData = await page.evaluate(() => {
       const data: Record<string, string> = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key) data[key] = localStorage.getItem(key) || "";
+      const ls = window.localStorage;
+      for (let i = 0; i < ls.length; i++) {
+        const key = ls.key(i);
+        if (key) data[key] = ls.getItem(key) || "";
       }
       return data;
     });
     console.log("\n=== LOCAL STORAGE ===");
-    Object.entries(localStorage).forEach(([k, v]) => {
+    Object.entries(storageData).forEach(([k, v]) => {
       if (k.includes("supabase") || k.includes("auth")) {
         console.log(`${k}: ${v.substring(0, 200)}...`);
       }
