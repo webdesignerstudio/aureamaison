@@ -58,8 +58,13 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        console.log("[Login] Profile created via API, waiting for propagation...");
-        await new Promise((r) => setTimeout(r, 1000));
+        console.log("[Login] Profile created via API, refreshing session...");
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.warn("[Login] Session refresh failed:", refreshError);
+        } else {
+          console.log("[Login] Session refreshed");
+        }
       } else {
         console.log("[Login] Profile found — role:", profile.role);
       }

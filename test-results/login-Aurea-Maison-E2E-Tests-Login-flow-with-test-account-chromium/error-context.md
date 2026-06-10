@@ -101,9 +101,9 @@ Error: locator.textContent: Target page, context or browser has been closed
   64  |     await page.click('button[type="submit"]');
   65  |     console.log("Submit clicked");
   66  | 
-  67  |     // 4. Wait for result - either dashboard redirect or error
-  68  |     console.log("\n=== STEP 4: Waiting for result (up to 10s) ===");
-  69  |     await page.waitForTimeout(5000);
+  67  |     // 4. Wait for result - allow 1s propagation + network time
+  68  |     console.log("\n=== STEP 4: Waiting for result (up to 15s) ===");
+  69  |     await page.waitForTimeout(8000);
   70  |     await page.screenshot({ path: "e2e/screenshots/03-after-submit.png", fullPage: true });
   71  | 
   72  |     // 5. Check final state
