@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -7,7 +8,28 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/dashboard";
 
   if (code) {
-    const supabase = await createClient();
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {
+              // ignore
+            }
+          },
+        },
+      }
+    );
+
     const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && sessionData?.user) {
       const { data: profile } = await supabase
@@ -17,13 +39,28 @@ export async function GET(request: Request) {
         .maybeSingle();
 
       if (!profile) {
-        await supabase.from("profiles").insert({
-          id: sessionData.user.id,
-          email: sessionData.user.email || "",
-          name: sessionData.user.email?.split("@")[0] || "",
-          role: "owner",
-          company_id: "11111111-1111-1111-1111-111111111111",
-        });
+        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (serviceRoleKey) {
+          const adminSupabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            serviceRoleKey,
+            {
+              cookies: {
+                getAll() {
+                  return cookieStore.getAll();
+                },
+                setAll() {},
+              },
+            }
+          );
+          await adminSupabase.from("profiles").insert({
+            id: sessionData.user.id,
+            email: sessionData.user.email || "",
+            name: sessionData.user.email?.split("@")[0] || "",
+            role: "owner",
+            company_id: "11111111-1111-1111-1111-111111111111",
+          });
+        }
       }
       return NextResponse.redirect(`${origin}${next}`);
     }
