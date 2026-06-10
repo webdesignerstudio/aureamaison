@@ -8,8 +8,23 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
+    const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && sessionData?.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", sessionData.user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        await supabase.from("profiles").insert({
+          id: sessionData.user.id,
+          email: sessionData.user.email || "",
+          name: sessionData.user.email?.split("@")[0] || "",
+          role: "owner",
+          company_id: "11111111-1111-1111-1111-111111111111",
+        });
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

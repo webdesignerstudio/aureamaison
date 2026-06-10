@@ -31,22 +31,34 @@ export default function LoginPage() {
     }
 
     const userId = signInData.user?.id;
-    if (userId) {
-      const { data: profile, error: profileError } = await supabase
+    const userEmail = signInData.user?.email;
+    if (userId && userEmail) {
+      const { data: profile } = await supabase
         .from("profiles")
         .select("role, company_id, name, email")
         .eq("id", userId)
         .maybeSingle();
 
-      if (profileError || !profile) {
-        console.error("[Login] Profile missing for user:", userId, profileError);
-        setError("Je account is nog niet volledig geactiveerd. Neem contact op met de beheerder.");
-        await supabase.auth.signOut();
-        setLoading(false);
-        return;
+      if (!profile) {
+        console.warn("[Login] Profile missing, auto-creating for:", userEmail);
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: userId,
+          email: userEmail,
+          name: userEmail.split("@")[0],
+          role: "owner",
+          company_id: "11111111-1111-1111-1111-111111111111",
+        });
+        if (insertError) {
+          console.error("[Login] Failed to create profile:", insertError);
+          setError("Account activatie mislukt. Probeer opnieuw.");
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+        console.log("[Login] Profile auto-created successfully");
+      } else {
+        console.log("[Login] Profile found — role:", profile.role);
       }
-
-      console.log("[Login] Success — role:", profile.role, "company:", profile.company_id);
     }
 
     setLoading(false);
