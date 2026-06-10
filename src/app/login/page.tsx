@@ -49,13 +49,19 @@ export default function LoginPage() {
           company_id: "11111111-1111-1111-1111-111111111111",
         });
         if (insertError) {
-          console.error("[Login] Profile insert failed:", insertError);
-          setError("Account activatie mislukt. Probeer opnieuw.");
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
+          // 409 = duplicate key = profile already exists (created by API or trigger)
+          if (insertError.code === "23505") {
+            console.log("[Login] Profile already exists, proceeding to dashboard");
+          } else {
+            console.error("[Login] Profile insert failed:", insertError);
+            setError("Account activatie mislukt. Probeer opnieuw.");
+            await supabase.auth.signOut();
+            setLoading(false);
+            return;
+          }
+        } else {
+          console.log("[Login] Profile created directly");
         }
-        console.log("[Login] Profile created directly");
       } else {
         console.log("[Login] Profile found — role:", profile.role);
       }
