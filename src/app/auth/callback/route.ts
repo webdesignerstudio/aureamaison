@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
@@ -40,20 +41,12 @@ export async function GET(request: Request) {
 
       if (!profile) {
         const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        if (serviceRoleKey) {
-          const adminSupabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            serviceRoleKey,
-            {
-              cookies: {
-                getAll() {
-                  return cookieStore.getAll();
-                },
-                setAll() {},
-              },
-            }
-          );
-          await adminSupabase.from("profiles").insert({
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (serviceRoleKey && supabaseUrl) {
+          const admin = createClient(supabaseUrl, serviceRoleKey, {
+            auth: { autoRefreshToken: false, persistSession: false },
+          });
+          await admin.from("profiles").insert({
             id: sessionData.user.id,
             email: sessionData.user.email || "",
             name: sessionData.user.email?.split("@")[0] || "",

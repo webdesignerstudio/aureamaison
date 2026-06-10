@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,30 +14,19 @@ export async function POST(req: NextRequest) {
     }
 
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceRoleKey) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!serviceRoleKey || !supabaseUrl) {
       return NextResponse.json(
-        { error: "Service role key not configured" },
+        { error: "Supabase credentials not configured" },
         { status: 500 }
       );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll() {
-            // no-op — service role client doesn't need cookie management
-          },
-        },
-      }
-    );
+    const admin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from("profiles")
       .select("id")
       .eq("id", userId)
@@ -48,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, created: false });
     }
 
-    const { error: insertError } = await supabase.from("profiles").insert({
+    const { error: insertError } = await admin.from("profiles").insert({
       id: userId,
       email,
       name: name || email.split("@")[0],
