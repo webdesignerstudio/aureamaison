@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Settings } from "@/types";
 
-export function useSettings(companyId?: string) {
+export function useSettings(companyId?: string | null) {
   return useQuery({
     queryKey: ["settings", companyId],
     queryFn: async () => {
@@ -13,9 +13,9 @@ export function useSettings(companyId?: string) {
         .from("settings")
         .select("*")
         .eq("company_id", companyId || "")
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as Settings;
+      return (data as Settings) || null;
     },
     enabled: !!companyId,
   });
@@ -35,8 +35,8 @@ export function useUpdateSettings() {
       if (error) throw error;
       return data as Settings;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["settings", variables.company_id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
     },
   });
 }
