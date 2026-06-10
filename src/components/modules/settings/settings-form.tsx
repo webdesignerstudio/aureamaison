@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Spinner } from "@/components/ui/spinner";
+import { useToastContext } from "@/components/toast-provider";
 import type { Settings } from "@/types";
 
 interface SettingsFormProps {
@@ -25,13 +26,20 @@ export function SettingsForm({ companyId }: SettingsFormProps) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const { success, error } = useToastContext();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!settings?.id) return;
-    await updateSettings.mutateAsync({
-      id: settings.id,
-      ...form,
-    });
+    try {
+      await updateSettings.mutateAsync({
+        id: settings.id,
+        ...form,
+      });
+      success("Instellingen succesvol opgeslagen!");
+    } catch (err) {
+      error("Er is een fout opgetreden bij het opslaan van de instellingen.");
+    }
   };
 
   if (isLoading) {

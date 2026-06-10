@@ -7,24 +7,31 @@ import type { Profile, UserRole } from "@/types";
 export function useAuth() {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
 
     const getUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-        setUser(profile as Profile);
+        if (session?.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
+          if (profileError) throw profileError;
+          setUser(profile as Profile);
+        }
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getUser();
@@ -32,12 +39,14 @@ export function useAuth() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", session.user.id)
             .single();
-          setUser(profile as Profile);
+          if (!profileError) {
+            setUser(profile as Profile);
+          }
         } else {
           setUser(null);
         }
@@ -51,14 +60,18 @@ export function useAuth() {
   }, []);
 
   const signOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (err) {
+      setError(err as Error);
+    }
   };
 
   const hasRole = (roles: UserRole[]) => {
     return user ? roles.includes(user.role) : false;
   };
 
-  return { user, loading, signOut, hasRole, isAuthenticated: !!user };
+  return { user, loading, error, signOut, hasRole, isAuthenticated: !!user };
 }

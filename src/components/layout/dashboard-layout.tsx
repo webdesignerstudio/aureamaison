@@ -12,7 +12,6 @@ const NAV_ITEMS: Record<string, { href: string; label: string }[]> = {
     { href: "/dashboard/orders", label: "Orders" },
     { href: "/dashboard/offertes", label: "Offertes" },
     { href: "/dashboard/leggers", label: "Leggers" },
-    { href: "/dashboard/facturen", label: "Facturen" },
     { href: "/dashboard/settings", label: "Instellingen" },
   ],
   keyuser: [
@@ -27,21 +26,19 @@ const NAV_ITEMS: Record<string, { href: string; label: string }[]> = {
   ],
   legger: [
     { href: "/legger", label: "Mijn Klussen" },
-    { href: "/legger/oplevering", label: "Oplevering" },
   ],
   client: [
-    { href: "/client", label: "Mijn Orders" },
-    { href: "/client/offertes", label: "Offertes" },
+    { href: "/client", label: "Mijn Account" },
   ],
   superadmin: [
-    { href: "/admin", label: "Overview" },
-    { href: "/admin/users", label: "Gebruikers" },
-    { href: "/admin/orders", label: "Orders" },
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard/orders", label: "Orders" },
+    { href: "/dashboard/settings", label: "Instellingen" },
   ],
 };
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, error, signOut } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -54,6 +51,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+          <p className="text-sm text-red-400">
+            Er is een fout opgetreden bij het laden van uw sessie. Probeer de pagina te vernieuwen.
+          </p>
+        </div>
       </div>
     );
   }

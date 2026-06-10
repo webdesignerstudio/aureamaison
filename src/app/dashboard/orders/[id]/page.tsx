@@ -16,6 +16,7 @@ export default function OrderDetailPage() {
   const id = params.id as string;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -25,8 +26,12 @@ export default function OrderDetailPage() {
       .select("*")
       .eq("id", id)
       .single()
-      .then(({ data }) => {
-        setOrder(data as Order);
+      .then(({ data, error: fetchError }) => {
+        if (fetchError) {
+          setError(fetchError.message);
+        } else {
+          setOrder(data as Order);
+        }
         setLoading(false);
       });
   }, [id]);
@@ -60,11 +65,11 @@ export default function OrderDetailPage() {
     );
   }
 
-  if (!order) {
+  if (error || !order) {
     return (
       <DashboardLayout>
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-          Order niet gevonden.
+          {error || "Order niet gevonden."}
         </div>
       </DashboardLayout>
     );

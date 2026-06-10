@@ -5,6 +5,7 @@ import { useCreateOrder } from "@/hooks/use-orders";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Spinner } from "@/components/ui/spinner";
 import { generateUAID } from "@/lib/utils";
+import { useToastContext } from "@/components/toast-provider";
 
 interface OrderFormProps {
   onSuccess?: () => void;
@@ -13,6 +14,7 @@ interface OrderFormProps {
 
 export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
   const createOrder = useCreateOrder();
+  const { success, error } = useToastContext();
   const [form, setForm] = useState({
     client_name: "",
     client_email: "",
@@ -34,24 +36,28 @@ export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await createOrder.mutateAsync({
-      uaid: generateUAID(),
-      client_name: form.client_name,
-      client_email: form.client_email,
-      straat: form.straat || null,
-      postcode: form.postcode || null,
-      plaats: form.plaats || null,
-      vloer_type: form.vloer_type || null,
-      oppervlakte: form.oppervlakte ? parseInt(form.oppervlakte) : null,
-      ondergrond: form.ondergrond || null,
-      budget: form.budget ? parseFloat(form.budget) : null,
-      timing: form.timing || null,
-      opmerking: form.opmerking || null,
-      status: "ingediend",
-      company_id: companyId,
-    });
-
-    onSuccess?.();
+    try {
+      await createOrder.mutateAsync({
+        uaid: generateUAID(),
+        client_name: form.client_name,
+        client_email: form.client_email,
+        straat: form.straat || null,
+        postcode: form.postcode || null,
+        plaats: form.plaats || null,
+        vloer_type: form.vloer_type || null,
+        oppervlakte: form.oppervlakte ? parseInt(form.oppervlakte) : null,
+        ondergrond: form.ondergrond || null,
+        budget: form.budget ? parseFloat(form.budget) : null,
+        timing: form.timing || null,
+        opmerking: form.opmerking || null,
+        status: "ingediend",
+        company_id: companyId,
+      });
+      success("Order succesvol aangemaakt!");
+      onSuccess?.();
+    } catch (err) {
+      error("Er is een fout opgetreden bij het aanmaken van de order.");
+    }
   };
 
   const fields = [
