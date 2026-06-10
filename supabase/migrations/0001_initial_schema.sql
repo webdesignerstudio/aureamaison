@@ -160,8 +160,9 @@ CREATE POLICY "companies_write_owner" ON companies FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role IN ('owner','superadmin'))
 );
 
--- Profiles: iedereen kan eigen profiel lezen, superadmin kan alles
+-- Profiles: iedereen kan eigen profiel lezen/inserten, superadmin kan alles
 CREATE POLICY "profiles_read_own" ON profiles FOR SELECT USING (id = auth.uid());
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
 CREATE POLICY "profiles_read_admin" ON profiles FOR SELECT USING (
   EXISTS (SELECT 1 FROM profiles AS p WHERE p.id = auth.uid() AND p.role = 'superadmin')
 );

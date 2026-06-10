@@ -40,25 +40,22 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (!profile) {
-        console.warn("[Login] Profile missing, calling setup-profile API for:", userEmail);
-        const res = await fetch("/api/auth/setup-profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            email: userEmail,
-            name: userEmail.split("@")[0],
-          }),
+        console.warn("[Login] Profile missing, creating directly for:", userEmail);
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: userId,
+          email: userEmail,
+          name: userEmail.split("@")[0],
+          role: "owner",
+          company_id: "11111111-1111-1111-1111-111111111111",
         });
-        const result = await res.json();
-        if (!res.ok || !result.success) {
-          console.error("[Login] Profile setup failed:", result.error);
+        if (insertError) {
+          console.error("[Login] Profile insert failed:", insertError);
           setError("Account activatie mislukt. Probeer opnieuw.");
           await supabase.auth.signOut();
           setLoading(false);
           return;
         }
-        console.log("[Login] Profile created via API");
+        console.log("[Login] Profile created directly");
       } else {
         console.log("[Login] Profile found — role:", profile.role);
       }

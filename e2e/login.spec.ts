@@ -69,6 +69,22 @@ test.describe("Aurea Maison E2E Tests", () => {
     await page.waitForTimeout(4000);
     await page.screenshot({ path: "e2e/screenshots/03-after-submit.png", fullPage: true });
 
+    // Debug: log localStorage and session
+    const localStorage = await page.evaluate(() => {
+      const data: Record<string, string> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) data[key] = localStorage.getItem(key) || "";
+      }
+      return data;
+    });
+    console.log("\n=== LOCAL STORAGE ===");
+    Object.entries(localStorage).forEach(([k, v]) => {
+      if (k.includes("supabase") || k.includes("auth")) {
+        console.log(`${k}: ${v.substring(0, 200)}...`);
+      }
+    });
+
     // 5. Check final state
     const currentUrl = page.url();
     console.log("\n=== STEP 5: Checking result ===");
