@@ -4,7 +4,7 @@
 **Organisatie:** webdesignerstudio  
 **Repository:** https://github.com/webdesignerstudio/aureamaison  
 **Domein:** aureamaisonfloors.nl  
-**Laatste update:** 10 juni 2026 — Fase 1 t/m 6 voltooid, Fase 7 wacht op klant
+**Laatste update:** 10 juni 2026 — Fase 1-6 + Review/Mobile/Toasts/Error handling voltooid, Deploy wacht op klant
 
 ---
 
@@ -84,16 +84,42 @@
 
 ---
 
-## Fase 7: Polish & Deploy — DEELS
+## Review & Debug — AFGEROND
 
-- [x] Mobile responsive check (Tailwind responsive classes)
-- [x] Loading & error states compleet (Spinner + error boundaries)
-- [ ] Form validatie (Zod schemas) *(post-MVP)*
+- [x] Build check — 0 TypeScript errors, 0 build errors
+- [x] useAuth error handling + error state toegevoegd
+- [x] Order detail page error handling op fetch
+- [x] DashboardLayout nav items gefixt (alleen bestaande routes)
+- [x] Auth error display in loading state
+
+## Mobile UX — AFGEROND
+
+- [x] Hamburger menu in Navbar (mobile slide-out)
+- [x] Responsive tables (horizontal scroll)
+- [x] Touch-friendly formulieren
+
+## Form Validatie + Toasts — AFGEROND
+
+- [x] ToastProvider met success/error/info notificaties
+- [x] Toasts op OrderForm ("Order succesvol aangemaakt!")
+- [x] Toasts op SettingsForm ("Instellingen opgeslagen!")
+- [ ] Zod schemas *(post-MVP — native HTML5 validatie werkt nu)*
+
+## Error Handling + Polish — AFGEROND
+
+- [x] Global error boundary (`app/error.tsx`)
+- [x] Custom 404 page (`app/not-found.tsx`)
+- [x] Loading states compleet (Spinner everywhere)
+
+---
+
+## Fase 7: Deploy — WACHT OP KLANT
+
 - [x] README met setup instructies
-- [ ] Vercel project aanmaken en deployen *(wacht op klant)*
-- [ ] Domein `aureamaisonfloors.nl` koppelen aan Vercel *(wacht op klant)*
-- [ ] Supabase production environment variabelen in Vercel *(wacht op klant)*
-- [ ] E2E smoke test op live URL *(wacht op klant)*
+- [ ] Vercel project aanmaken en deployen
+- [ ] Domein `aureamaisonfloors.nl` koppelen aan Vercel
+- [ ] Supabase production environment variabelen in Vercel
+- [ ] E2E smoke test op live URL
 
 ---
 
