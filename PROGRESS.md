@@ -3,7 +3,7 @@
 **Project:** aureamaison (Next.js 14 SaaS platform)  
 **Organisatie:** webdesignerstudio  
 **Repository:** https://github.com/webdesignerstudio/aureamaison  
-**Domein:** aureamaisonfloors.nl  
+**Domein:** www.aureaumaison.nl  
 **Laatste update:** 10 juni 2026 — Fase 1-6 + Review/Mobile/Toasts/Error handling voltooid, Deploy wacht op klant
 
 ---
@@ -116,9 +116,10 @@
 ## Fase 7: Deploy — WACHT OP KLANT
 
 - [x] README met setup instructies
-- [ ] Vercel project aanmaken en deployen
-- [ ] Domein `aureamaisonfloors.nl` koppelen aan Vercel
-- [ ] Supabase production environment variabelen in Vercel
+- [x] Vercel project aangemaakt en gedeployed (preview + production)
+- [ ] Domein `www.aureaumaison.nl` koppelen aan Vercel (DNS configuratie nodig)
+- [x] Supabase production environment variabelen in Vercel
+- [ ] Mollie live key toevoegen bij productielancering
 - [ ] E2E smoke test op live URL
 
 ---
