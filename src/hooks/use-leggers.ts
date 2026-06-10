@@ -4,18 +4,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Legger } from "@/types";
 
-export function useLeggers() {
+export function useLeggers(companyId?: string | null) {
   return useQuery({
-    queryKey: ["leggers"],
+    queryKey: ["leggers", companyId],
     queryFn: async () => {
       const supabase = createClient();
-      const { data, error } = await supabase
+      let query = supabase
         .from("leggers")
         .select("*")
         .order("naam", { ascending: true });
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
-      return data as Legger[];
+      return (data as Legger[]) || [];
     },
+    enabled: !!companyId,
   });
 }
 

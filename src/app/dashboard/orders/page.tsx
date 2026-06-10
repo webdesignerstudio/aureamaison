@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/hooks/use-auth";
 import { OrdersList } from "@/components/modules/orders/orders-list";
 import { OrderForm } from "@/components/modules/orders/order-form";
 import { GoldButton } from "@/components/ui/gold-button";
 
 export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);
+  const { user } = useAuth();
+  const companyId = user?.company_id;
 
   return (
     <DashboardLayout>
@@ -40,13 +43,13 @@ export default function OrdersPage() {
               </button>
             </div>
             <OrderForm
-              companyId="temp-company-id"
+              companyId={companyId || ""}
               onSuccess={() => setShowForm(false)}
             />
           </div>
         )}
 
-        <OrdersList />
+        <OrdersList companyId={companyId} />
       </div>
     </DashboardLayout>
   );

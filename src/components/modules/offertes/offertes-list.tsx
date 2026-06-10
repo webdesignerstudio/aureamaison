@@ -5,8 +5,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
 
-export function OffertesList() {
-  const { data: offertes, isLoading, error } = useOffertes();
+interface OffertesListProps {
+  companyId?: string | null;
+}
+
+export function OffertesList({ companyId }: OffertesListProps) {
+  const { data: offertes, isLoading, error } = useOffertes(companyId);
 
   if (isLoading) {
     return (

@@ -4,8 +4,12 @@ import { useLeggers } from "@/hooks/use-leggers";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 
-export function LeggersList() {
-  const { data: leggers, isLoading, error } = useLeggers();
+interface LeggersListProps {
+  companyId?: string | null;
+}
+
+export function LeggersList({ companyId }: LeggersListProps) {
+  const { data: leggers, isLoading, error } = useLeggers(companyId);
 
   if (isLoading) {
     return (

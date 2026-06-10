@@ -1,13 +1,16 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
 
 export default function LeggerPortalPage() {
-  const { data: orders, isLoading } = useOrders();
+  const { user } = useAuth();
+  const companyId = user?.company_id;
+  const { data: orders, isLoading } = useOrders(companyId);
 
   // TODO: Filter orders assigned to current legger
   const myOrders = orders || [];

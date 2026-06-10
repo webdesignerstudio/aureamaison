@@ -1,9 +1,11 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/hooks/use-auth";
 import { OffertesList } from "@/components/modules/offertes/offertes-list";
 
 export default function OffertesPage() {
+  const { user } = useAuth();
   return (
     <DashboardLayout>
       <div>
@@ -14,7 +16,7 @@ export default function OffertesPage() {
           Overzicht van alle offertes.
         </p>
         <div className="mt-6">
-          <OffertesList />
+          <OffertesList companyId={user?.company_id} />
         </div>
       </div>
     </DashboardLayout>

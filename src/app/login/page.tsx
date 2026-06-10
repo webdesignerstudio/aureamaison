@@ -32,21 +32,25 @@ export default function LoginPage() {
 
     const userId = signInData.user?.id;
     if (userId) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("*")
+        .select("role, company_id, name, email")
         .eq("id", userId)
         .maybeSingle();
-      if (!profile) {
+
+      if (profileError || !profile) {
+        console.error("[Login] Profile missing for user:", userId, profileError);
         setError("Je account is nog niet volledig geactiveerd. Neem contact op met de beheerder.");
         await supabase.auth.signOut();
         setLoading(false);
         return;
       }
+
+      console.log("[Login] Success — role:", profile.role, "company:", profile.company_id);
     }
 
+    setLoading(false);
     router.push("/dashboard");
-    router.refresh();
   };
 
   return (

@@ -6,8 +6,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { formatEuro, formatDate } from "@/lib/utils";
 
-export function OrdersList() {
-  const { data: orders, isLoading, error } = useOrders();
+interface OrdersListProps {
+  companyId?: string | null;
+}
+
+export function OrdersList({ companyId }: OrdersListProps) {
+  const { data: orders, isLoading, error } = useOrders(companyId);
 
   if (isLoading) {
     return (

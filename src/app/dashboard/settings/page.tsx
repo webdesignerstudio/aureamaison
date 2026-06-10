@@ -1,9 +1,13 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/hooks/use-auth";
 import { SettingsForm } from "@/components/modules/settings/settings-form";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
+  const companyId = user?.company_id;
+
   return (
     <DashboardLayout>
       <div>
@@ -14,7 +18,7 @@ export default function SettingsPage() {
           Bedrijfsgegevens en factuurinstellingen beheren.
         </p>
         <div className="mt-6 rounded-xl border border-gold/10 bg-deep p-6">
-          <SettingsForm companyId="11111111-1111-1111-1111-111111111111" />
+          <SettingsForm companyId={companyId || ""} />
         </div>
       </div>
     </DashboardLayout>

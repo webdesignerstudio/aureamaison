@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { useOffertes } from "@/hooks/use-offertes";
 import { useLeggers } from "@/hooks/use-leggers";
@@ -28,9 +29,12 @@ function KPICard({
 }
 
 export default function DashboardPage() {
-  const { data: orders, isLoading: ordersLoading } = useOrders();
-  const { data: offertes, isLoading: offertesLoading } = useOffertes();
-  const { data: leggers, isLoading: leggersLoading } = useLeggers();
+  const { user } = useAuth();
+  const companyId = user?.company_id;
+
+  const { data: orders, isLoading: ordersLoading } = useOrders(companyId);
+  const { data: offertes, isLoading: offertesLoading } = useOffertes(companyId);
+  const { data: leggers, isLoading: leggersLoading } = useLeggers(companyId);
 
   const loading = ordersLoading || offertesLoading || leggersLoading;
 

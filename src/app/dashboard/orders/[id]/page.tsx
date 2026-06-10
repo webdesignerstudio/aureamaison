@@ -26,7 +26,7 @@ export default function OrderDetailPage() {
       .select("*")
       .eq("id", id)
       .single()
-      .then(({ data, error: fetchError }) => {
+      .then(({ data, error: fetchError }: { data: unknown; error: { message: string } | null }) => {
         if (fetchError) {
           setError(fetchError.message);
         } else {

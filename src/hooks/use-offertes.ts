@@ -4,18 +4,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Offerte } from "@/types";
 
-export function useOffertes() {
+export function useOffertes(companyId?: string | null) {
   return useQuery({
-    queryKey: ["offertes"],
+    queryKey: ["offertes", companyId],
     queryFn: async () => {
       const supabase = createClient();
-      const { data, error } = await supabase
+      let query = supabase
         .from("offertes")
         .select("*")
         .order("created_at", { ascending: false });
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
-      return data as Offerte[];
+      return (data as Offerte[]) || [];
     },
+    enabled: !!companyId,
   });
 }
 

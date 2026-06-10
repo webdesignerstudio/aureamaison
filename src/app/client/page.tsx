@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { useOffertes } from "@/hooks/use-offertes";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -8,8 +9,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
 
 export default function ClientPortalPage() {
-  const { data: orders, isLoading: ordersLoading } = useOrders();
-  const { data: offertes, isLoading: offertesLoading } = useOffertes();
+  const { user } = useAuth();
+  const companyId = user?.company_id;
+  const { data: orders, isLoading: ordersLoading } = useOrders(companyId);
+  const { data: offertes, isLoading: offertesLoading } = useOffertes(companyId);
 
   const loading = ordersLoading || offertesLoading;
 
