@@ -49,10 +49,14 @@ export default function LoginPage() {
           company_id: "11111111-1111-1111-1111-111111111111",
         });
         if (insertError) {
+          console.warn("[Login] Insert error raw:", JSON.stringify(insertError));
           // 409/23505 = duplicate key = profile already exists
           const isDuplicate = insertError.code === "23505" || 
-            insertError.message?.includes("duplicate key") ||
-            insertError.message?.includes("profiles_pkey");
+            (insertError.message && (
+              insertError.message.includes("duplicate key") ||
+              insertError.message.includes("profiles_pkey")
+            ));
+          console.warn("[Login] isDuplicate:", isDuplicate, "code:", insertError.code, "msg:", insertError.message);
           if (isDuplicate) {
             console.log("[Login] Profile already exists, proceeding to dashboard");
           } else {
