@@ -58,7 +58,8 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        console.log("[Login] Profile created via API");
+        console.log("[Login] Profile created via API, waiting for propagation...");
+        await new Promise((r) => setTimeout(r, 1000));
       } else {
         console.log("[Login] Profile found — role:", profile.role);
       }

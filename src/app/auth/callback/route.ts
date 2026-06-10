@@ -53,6 +53,8 @@ export async function GET(request: Request) {
             role: "owner",
             company_id: "11111111-1111-1111-1111-111111111111",
           });
+          // Small delay to ensure RLS propagation
+          await new Promise((r) => setTimeout(r, 1000));
         }
       }
       return NextResponse.redirect(`${origin}${next}`);
