@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
           value: amount.toFixed(2),
         },
         description,
-        redirectUrl: redirectUrl || `${process.env.NEXT_PUBLIC_APP_URL || ""}/dashboard`,
-        webhookUrl: `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/payments/webhook`,
+        redirectUrl: redirectUrl || `${process.env.NEXT_PUBLIC_BASE_URL || ""}/dashboard`,
+        webhookUrl: `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/payments/webhook`,
         method: "ideal",
       }),
     });
