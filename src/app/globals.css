@@ -60,9 +60,28 @@ body {
 }
 
 /* ── LandingPage animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-100%); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: .7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.35); }
 }
 
 @keyframes marquee {
@@ -71,16 +90,21 @@ body {
 }
 
 @keyframes heroScale {
-  from { transform: scale(1); }
-  to { transform: scale(1.06); }
+  from { transform: scale(1.06); }
+  to { transform: scale(1.12); }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes successPulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(198,165,107,.15); }
+  50% { box-shadow: 0 0 55px rgba(198,165,107,.35); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }

@@ -1,16 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const BASE_URL = process.env.E2E_BASE_URL || "https://www.aureamaisonfloors.nl";
+
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: "list",
   use: {
-    baseURL: "https://www.aureamaisonfloors.nl",
+    baseURL: BASE_URL,
     trace: "on-first-retry",
-    headless: true,
+    headless: process.env.E2E_HEADLESS !== "false",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },

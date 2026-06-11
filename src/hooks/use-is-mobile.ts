@@ -6,10 +6,9 @@ export function useIsMobile() {
   const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const fn = () => setW(window.innerWidth);
-    window.addEventListener("resize", fn, { passive: true });
-    fn();
-    return () => window.removeEventListener("resize", fn);
+    const onResize = () => setW(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
-  return { isMobile: w <= 768, width: w };
+  return { isMobile: w < 640, isTablet: w >= 640 && w < 1024, width: w };
 }

@@ -1,0 +1,237 @@
+/* eslint-disable */
+
+// ── DATA: PRIJSCALCULATOR ────────────────────────────────────────
+export const DIENST_CALC = {
+  "Visgraat":           { matMin:34, matMax:55,  legMin:18, legMax:25, compare:["Parket","PVC"],      guarantee:"5 jaar garantie op installatie" },
+  "Hongaars Punt":      { matMin:42, matMax:65,  legMin:22, legMax:30, compare:["Parket","Laminaat"], guarantee:"5 jaar garantie op installatie" },
+  "Massief Parket":     { matMin:79, matMax:119, legMin:20, legMax:30, compare:["Laminaat","PVC"],    guarantee:"10 jaar garantie op product" },
+  "PVC Vloeren":        { matMin:24, matMax:31,  legMin:12, legMax:18, compare:["Laminaat","Parket"], guarantee:"8 jaar garantie op product" },
+  "Laminaat":           { matMin:18, matMax:28,  legMin:10, legMax:16, compare:["PVC","Parket"],      guarantee:"5 jaar garantie" },
+  "Vloerverwarming":    { matMin:39, matMax:79,  legMin:35, legMax:55, compare:null,                  guarantee:"3 jaar garantie op systeem" },
+  "Traprenovatie":      { matMin:34, matMax:89,  legMin:25, legMax:45, compare:null,                  guarantee:"5 jaar garantie op legwerk" },
+  "Egaliseren":         { matMin:12, matMax:21,  legMin:8,  legMax:14, compare:null,                  guarantee:"2 jaar garantie" },
+  "Showroom aan Huis":  { matMin:0,  matMax:0,   legMin:0,  legMax:0,  compare:null,                  guarantee:"Gratis & vrijblijvend" },
+};
+
+export const DIENST_REVIEWS = {
+  "Visgraat": [
+    { name:"Lars V.",  date:"Maart 2025",    stars:5, text:"Prachtig visgraatpatroon gelegd in onze woonkamer. Absolute vakmannen, geen stofje te bekennen achteraf." },
+    { name:"Sofie D.", date:"Januari 2025",  stars:5, text:"Snel geleverd en op maat geïnstalleerd. De vloer ziet er ongelooflijk uit — beter dan verwacht." },
+  ],
+  "Massief Parket": [
+    { name:"Erik J.",  date:"April 2025",    stars:5, text:"We kozen voor eikenhout en zijn er verliefd op. Het team was professioneel en netjes." },
+    { name:"Nina M.",  date:"Februari 2025", stars:4, text:"Mooie kwaliteit en prima service. De oplevering verliep soepel." },
+  ],
+  "PVC Vloeren": [
+    { name:"Bas K.",   date:"Mei 2025",      stars:5, text:"Waterbestendig en prachtig in de badkamer. Exact zoals omschreven." },
+    { name:"Anne L.",  date:"Maart 2025",    stars:5, text:"Snelle installatie, vriendelijk team. Aanrader!" },
+  ],
+  "Laminaat": [
+    { name:"Tom B.",    date:"April 2025",   stars:5, text:"Waanzinnig goede prijs-kwaliteitverhouding. De kinderen kunnen er lekker over heen lopen." },
+    { name:"Rianne P.", date:"Februari 2025",stars:4, text:"Netjes gelegd, goede communicatie over de planning." },
+  ],
+};
+export const DEFAULT_REVIEWS = [
+  { name:"Klant A.", date:"2025", stars:5, text:"Uitstekende service en vakkundig werk. Heel tevreden met het resultaat." },
+  { name:"Klant B.", date:"2025", stars:5, text:"Snel, netjes en professioneel. Zeker een aanrader." },
+];
+
+export const DIENST_FAQ = {
+  "Visgraat": [
+    { q:"Kan visgraat op vloerverwarming?",         a:"Ja, wij leggen visgraat op elektrische en watergestookte vloerverwarming. Wij adviseren de juiste materiaalsoort." },
+    { q:"Hoe lang duurt de installatie voor 40m²?", a:"Gemiddeld 2 werkdagen, inclusief egalisatie en plinten." },
+    { q:"Kan ik mijn eigen materiaal aanleveren?",  a:"Dat is mogelijk, maar wij geven dan geen productgarantie. Wij adviseren te kiezen uit ons assortiment." },
+  ],
+  "Massief Parket": [
+    { q:"Hoe vaak kan massief parket worden opgeschuurd?", a:"Massief parket van 20mm kan 5-8 keer worden opgeschuurd over de levensduur." },
+    { q:"Is een ondervloer nodig?",                        a:"Bij een vlakke betonnen ondergrond is een ondervloer optioneel. Wij adviseren altijd ter plaatse." },
+    { q:"Wat is de droogtijd na behandeling?",             a:"Na oliën is de vloer na 24u begaanbaar en na 5-7 dagen volledig uitgehard." },
+  ],
+  "PVC Vloeren": [
+    { q:"Is PVC echt volledig waterbestendig?",      a:"Ja, SPC-core PVC is 100% waterdicht en geschikt voor badkamers en keukens." },
+    { q:"Kan PVC op een onegale ondergrond?",        a:"Max. 3mm hoogteverschil per 2m². Bij meer is egalisatie nodig — wij regelen dat." },
+  ],
+};
+export const DEFAULT_FAQ = [
+  { q:"Kan ik een vrijblijvende offerte aanvragen?", a:"Ja, altijd. Wij komen gratis opnemen en bezorgen u binnen 24u een gedetailleerde offerte." },
+  { q:"Werken jullie door heel Nederland?",           a:"Ja, wij werken door heel Nederland. Reiskosten zijn inbegrepen in de offerte." },
+  { q:"Zijn er verborgen kosten?",                    a:"Nee. Onze offerte is altijd all-in: materiaal, legkosten, plinten en afvoer van verpakkingsmateriaal." },
+];
+
+export const COMPARE_DATA = {
+  "Parket":   { prijs:"€79-119/m²", onderhoud:"Laag (olie 1x/jr)", levensduur:"50+ jaar",   geluid:"Uitstekend", water:"Nee" },
+  "Laminaat": { prijs:"€18-28/m²",  onderhoud:"Zeer laag",          levensduur:"15-20 jaar", geluid:"Goed",       water:"Beperkt" },
+  "PVC":      { prijs:"€24-31/m²",  onderhoud:"Minimaal",           levensduur:"20-25 jaar", geluid:"Goed",       water:"100%" },
+};
+
+// Alle beschikbare Cloudinary foto's — eigenaar kan per product kiezen
+export const PRODUCT_PHOTOS = [
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0277_md6tii.jpg", label:"Visgraat detail",    cat:"Visgraat" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0278_s5wnip.jpg", label:"Woonkamer visgraat", cat:"Visgraat" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0284_zh5sjg.jpg", label:"Visgraat close-up",  cat:"Visgraat" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0282_qxoyw6.jpg", label:"Luxe woning parket", cat:"Massief Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0283_n6l13n.jpg", label:"Luxe interieur",     cat:"Massief Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0272_djuf9p.jpg", label:"Slaapkamer parket",  cat:"Massief Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0273_upnb5g.jpg", label:"Woonkamer parket",   cat:"Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0279_z51tgy.jpg", label:"Entree parket",      cat:"Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0285_x0hylx.jpg", label:"Project parket",     cat:"Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0280_akidjh.jpg", label:"Open keuken",        cat:"Parket" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0281_muwa9p.jpg", label:"PVC badkamer",       cat:"PVC Vloeren" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0288_wvksoq.jpg", label:"PVC afwerking",      cat:"PVC Vloeren" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0274_khegpg.jpg", label:"PVC eetkamer",       cat:"PVC Vloeren" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221277/IMG_0275_z9mzdw.jpg", label:"PVC gang",           cat:"PVC Vloeren" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0286_nb3mus.jpg", label:"Laminaat renovatie", cat:"Laminaat" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221277/IMG_0276_q7m57j.jpg", label:"Laminaat hal",       cat:"Laminaat" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0287_vd1kya.jpg", label:"Laminaat kantoor",   cat:"Laminaat" },
+  { url:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0271_jbpfyq.jpg", label:"Traprenovatie",      cat:"Traprenovatie" },
+];
+
+export const GALLERY_IMGS = [
+  "https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0277_md6tii.jpg",
+  "https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0278_s5wnip.jpg",
+  "https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0282_qxoyw6.jpg",
+  "https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0281_muwa9p.jpg",
+];
+
+export const DIENST_PRODUCTS = {
+  "Visgraat": [
+    { label:"Eiken",   name:"Château Oak Visgraat",    sub:"Laminaat · 8mm · AC5 · Vloerverwarming geschikt", price:34.95, emoji:"🪵", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0277_md6tii.jpg", bg:"linear-gradient(135deg,#2b2318,#3d3020)",
+      specs:[["Dikte","8mm"],["Slijtklasse","AC5"],["Afmeting","600×120mm"],["Vloerverwarming","Ja, max 29°C"],["Waterdicht","Beperkt"]],
+      features:["Warme eiken structuur met authentieke nerf","Geschikt voor drukke ruimtes (AC5)","Click-systeem, eenvoudig te leggen","Inclusief passende plinten leverbaar","Geluidsdempende ondervloer beschikbaar"],
+      longDesc:"De Château Oak Visgraat combineert de tijdloze warmte van eikenhout met het dramatische patroon van visgraat. Met zijn AC5 slijtklasse is hij geschikt voor alle ruimtes, inclusief drukke gangen en woonkamers." },
+    { label:"Antraciet",name:"Noir Visgraat",           sub:"Laminaat · 10mm · AC4 · Modern",                  price:39.50, emoji:"◼",  img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0278_s5wnip.jpg", bg:"linear-gradient(135deg,#1c1c1a,#2e2e2a)",
+      specs:[["Dikte","10mm"],["Slijtklasse","AC4"],["Afmeting","600×120mm"],["Vloerverwarming","Ja, max 27°C"],["Waterdicht","Beperkt"]],
+      features:["Strak antraciet in modern betonlook","10mm dikte voor extra comfort","Geschikt voor woonkamers en slaapkamers","Matte afwerking voor luxe uitstraling","Eenvoudig te reinigen"],
+      longDesc:"De Noir Visgraat is een moderne keuze voor wie houdt van een industriële, strakke look. De 10mm dikte zorgt voor een prettig loopgevoel en goede geluidsisolatie." },
+    { label:"Blond",   name:"Nordic Blond Visgraat",   sub:"Laminaat · 12mm · Geluidsdempend",                price:44.95, emoji:"🌾", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0284_zh5sjg.jpg", bg:"linear-gradient(135deg,#c8b890,#b0a070)",
+      specs:[["Dikte","12mm"],["Slijtklasse","AC4"],["Afmeting","580×115mm"],["Vloerverwarming","Ja, max 29°C"],["Geluid","Extra geluidsdemping"]],
+      features:["Scandinavisch licht blond kleurpallet","12mm = maximale geluidsdemping","Ideaal voor appartementen en bovenwoning","Lichte kleur maakt ruimtes groter","Inclusief ondervloer geleverd"],
+      longDesc:"Nordic Blond brengt de rustige Scandinavische sfeer in huis. De 12mm dikte met geïntegreerde ondervloer zorgt voor uitstekende geluidsisolatie — ideaal voor appartementen." },
+  ],
+  "Hongaars Punt": [
+    { label:"Eiken Naturel", name:"Royal Point Eiken",      sub:"Massief parket · 15mm · Hongaars puntpatroon",   price:74.95, emoji:"🔷", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0282_qxoyw6.jpg", bg:"linear-gradient(135deg,#4a3520,#6b4f30)",
+      specs:[["Dikte","15mm"],["Patroon","Hongaars punt (V-vorm)"],["Breedte","70mm"],["Vloerverwarming","Ja, max 27°C"],["Schuurbaar","4-6x"]],
+      features:["Authentiek Hongaars puntpatroon — V-vormige legmethode","Massief eiken 15mm voor maximale duurzaamheid","Warme naturel kleur past in elk interieur","Schuurbaar en bij te behandelen","Gecombineerd met vloerverwarming mogelijk"],
+      longDesc:"Royal Point Eiken is het meest verfijnde vloerpatroon in ons assortiment. Het Hongaarse puntpatroon geeft elke ruimte een dynamisch, geometrisch karakter. Massief eiken van 15mm garandeert een lange levensduur." },
+    { label:"Gerookt",       name:"Smoked Point Parket",    sub:"Massief parket · 15mm · Gerookt eiken",          price:84.95, emoji:"🟤", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0283_n6l13n.jpg", bg:"linear-gradient(135deg,#2a1e14,#3a2a1c)",
+      specs:[["Dikte","15mm"],["Patroon","Hongaars punt"],["Kleur","Gerookt eiken"],["Vloerverwarming","Ja, max 27°C"],["Afwerking","Geborsteld + geoliëd"]],
+      features:["Diep gerookte tint voor dramatisch effect","Geborsteld oppervlak voor authentieke houtstructuur","Exclusieve kleur — tijdloos en luxe","Geschikt voor vloerverwarming","Elke plank uniek door rookbehandeling"],
+      longDesc:"Smoked Point Parket combineert het verfijnde Hongaarse puntpatroon met de rijke diepte van gerookt eiken. De geborstelde afwerking accentueert de nerftekening voor een ongeëvenaarde luxe uitstraling." },
+    { label:"Wit Geolied",   name:"Blanc Point Massief",    sub:"Massief parket · 15mm · Wit geolied · Licht",    price:79.95, emoji:"⬜", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0272_djuf9p.jpg", bg:"linear-gradient(135deg,#c8c0b0,#b8b0a0)",
+      specs:[["Dikte","15mm"],["Patroon","Hongaars punt"],["Kleur","Wit geolied eiken"],["Vloerverwarming","Ja, max 27°C"],["Schuurbaar","4-6x"]],
+      features:["Frisse witte kleur — Scandinavisch en tijdloos","Maakt ruimtes optisch groter en lichter","Hongaars punt patroon voor extra karakter","Geschikt voor vloerverwarming","Naturel olie voor onderhoudsvriendelijke afwerking"],
+      longDesc:"Blanc Point Massief combineert het elegante Hongaarse puntpatroon met een frisse wit geolied eiken afwerking. Het resultaat is een lichte, ruimtelijke vloer met geometrisch karakter — ideaal voor moderne interieurs." },
+  ],
+  "Massief Parket": [
+    { label:"Eiken",   name:"Royal Oak Massief",       sub:"Massief parket · 20mm · Naturel geolied",         price:89.95, emoji:"🌳", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0282_qxoyw6.jpg", bg:"linear-gradient(135deg,#4a3520,#6b4f30)",
+      specs:[["Dikte","20mm"],["Breedte","180mm"],["Afwerking","Naturel geolied"],["Vloerverwarming","Ja, max 27°C"],["Schuurbaar","5-8x"]],
+      features:["Echt massief eiken — generaties meegaand","Naturel geolied voor levendige nerftekening","Kan 5-8 keer worden opgeschuurd","Breedte 180mm voor royale uitstraling","Beschikbaar in gerookt, wit en naturel"],
+      longDesc:"Royal Oak is de ultieme vloer voor wie het beste wil. Massief eiken van 20mm kan decennialang worden opgeschuurd en bijgewerkt. Een investering die de waarde van uw woning verhoogt." },
+    { label:"Walnoot", name:"Black Walnut Massief",    sub:"Massief parket · 18mm · Gelakt",                  price:119.00,emoji:"🥜", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0283_n6l13n.jpg", bg:"linear-gradient(135deg,#2d1f14,#3d2b1a)",
+      specs:[["Dikte","18mm"],["Breedte","150mm"],["Afwerking","Hoogglans gelakt"],["Vloerverwarming","Nee"],["Schuurbaar","4-6x"]],
+      features:["Zeldzaam Amerikaans walnoten hout","Donkere, rijke kleur voor luxe interieur","Hoogglans lak voor maximale bescherming","Exclusieve breedte- en lengtematen","Elke plank uniek van tekening"],
+      longDesc:"Black Walnut is voor de echte connoisseur. Het zeldzame Amerikaans walnootenhout met zijn diepe, chocoladebruine tint geeft elk interieur een ongeëvenaarde uitstraling." },
+    { label:"Essen",   name:"White Ash Massief",       sub:"Massief parket · 20mm · Witte beitsolie",         price:94.50, emoji:"🪹", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0272_djuf9p.jpg", bg:"linear-gradient(135deg,#c8b89a,#b0a080)",
+      specs:[["Dikte","20mm"],["Breedte","160mm"],["Afwerking","Witte beitsolie"],["Vloerverwarming","Ja, max 27°C"],["Schuurbaar","5-8x"]],
+      features:["Licht essenhout met frisse uitstraling","Witte beitsolie geeft Scandinavische look","Massief 20mm voor maximale levensduur","Warm maar licht — perfect voor kleine ruimtes","Combi met vloerverwarming mogelijk"],
+      longDesc:"White Ash brengt het beste van twee werelden: de warmte van massief hout en de frisse, lichte Scandinavische kleur. Behandeld met witte beitsolie voor een natuurlijke, duurzame afwerking." },
+  ],
+  "PVC Vloeren": [
+    { label:"Warm Grijs",name:"Stone Grey PVC",        sub:"SPC · 5mm · Waterdicht · Betonlook",              price:24.95, emoji:"⬜", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0281_muwa9p.jpg", bg:"linear-gradient(135deg,#3a3530,#4e4840)",
+      specs:[["Dikte","5mm"],["Kern","SPC (steenpoeder)"],["Waterdicht","100%"],["Vloerverwarming","Ja, max 35°C"],["Slijtlaag","0.5mm"]],
+      features:["100% waterdicht — ideaal voor badkamer en keuken","SPC-kern: onbreekbaar stabiel","Betonlook voor industrieel interieur","Geschikt voor vloerverwarming tot 35°C","Anti-kras oppervlak"],
+      longDesc:"Stone Grey PVC is de moderne oplossing voor natte ruimtes. De SPC-kern van steenpoeder maakt deze vloer onbreekbaar stabiel en volledig waterdicht — zelfs bij overstroming." },
+    { label:"Houtlook", name:"Timber PVC Click",       sub:"SPC · 6mm · Ondervloer inbegrepen",               price:28.50, emoji:"🪵", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0288_wvksoq.jpg", bg:"linear-gradient(135deg,#5c4a38,#7a6348)",
+      specs:[["Dikte","6mm + 1mm ondervloer"],["Kern","SPC"],["Waterdicht","100%"],["Vloerverwarming","Ja"],["Ondervloer","Inbegrepen"]],
+      features:["Realistische houtlook textuur","6mm + 1mm ondervloer ingebakken","Snel te leggen dankzij click-systeem","Warm en zacht gevoel onder de voet","Geschikt voor elke ruimte inclusief badkamer"],
+      longDesc:"Timber PVC Click geeft u de warmte van hout met het gemak van PVC. De ingebakken ondervloer zorgt voor extra comfort en geluidsisolatie, terwijl het click-systeem snelle installatie garandeert." },
+    { label:"Marble",  name:"Carrara Marble PVC",      sub:"SPC · 4.5mm · Marmeroptiek",                      price:31.00, emoji:"🔲", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0274_khegpg.jpg", bg:"linear-gradient(135deg,#d8d0c0,#c8c0b0)",
+      specs:[["Dikte","4.5mm"],["Kern","SPC"],["Waterdicht","100%"],["Look","Carrara marmer"],["Vloerverwarming","Ja"]],
+      features:["Luxe Carrara marmeroptiek voor fractie van de prijs","100% waterdicht — ook voor badkamers","Lichte kleur maakt ruimtes groter","Matte afwerking zonder vingerafdrukken","Scratch-resistant slijtlaag"],
+      longDesc:"Carrara Marble PVC geeft u de exclusieve look van Italiaans marmer voor een fractie van de prijs. Volledig waterdicht en onderhoudsvriendelijk — de perfecte keuze voor luxe badkamers en keukens." },
+  ],
+  "Laminaat": [
+    { label:"Eiken Bruin",name:"Classic Brown Laminaat",sub:"Laminaat · 8mm · AC4 · Warm bruin",              price:18.95, emoji:"🟫", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0286_nb3mus.jpg", bg:"linear-gradient(135deg,#5c4232,#7a5a45)",
+      specs:[["Dikte","8mm"],["Slijtklasse","AC4"],["Afmeting","1380×193mm"],["Vloerverwarming","Ja, max 29°C"],["Waterdicht","Beperkt"]],
+      features:["Klassieke warme bruintint — tijdloos","AC4 geschikt voor woon- en slaapkamers","Brede plank voor ruime uitstraling","Eenvoudig te reinigen en te onderhouden","Snelle installatie met click-systeem"],
+      longDesc:"Classic Brown is de meest gekozen laminaatkleur van Nederland — en niet zonder reden. De warme bruintint past in elk interieur en de AC4 kwaliteit gaat jaren mee." },
+    { label:"Grijs Beton",name:"Urban Grey Laminaat",  sub:"Laminaat · 10mm · AC5 · Betonlook",               price:22.50, emoji:"🔘", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221277/IMG_0276_q7m57j.jpg", bg:"linear-gradient(135deg,#404040,#555550)",
+      specs:[["Dikte","10mm"],["Slijtklasse","AC5"],["Afmeting","1380×193mm"],["Vloerverwarming","Ja, max 27°C"],["Geluid","Extra demping"]],
+      features:["Moderne betonlook voor urban interieur","AC5 = commerciële slijtvastheid","10mm dikte voor superieur loopcomfort","Geschikt voor drukke gezinshuishoudens","Strak mat oppervlak zonder glinstering"],
+      longDesc:"Urban Grey brengt de moderne stadse esthetiek in huis. De AC5 slijtklasse maakt het geschikt voor de drukste ruimtes, terwijl de 10mm dikte zorgt voor een prettig en geluidsarm loopgevoel." },
+    { label:"Wit Wash", name:"Blanc Laminaat",         sub:"Laminaat · 8mm · AC4 · Scandinavisch",            price:21.00, emoji:"⬜", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221276/IMG_0287_vd1kya.jpg", bg:"linear-gradient(135deg,#d0ccc0,#c0bdb0)",
+      specs:[["Dikte","8mm"],["Slijtklasse","AC4"],["Afmeting","1380×193mm"],["Vloerverwarming","Ja, max 29°C"],["Kleur","Wit wash eiken"]],
+      features:["Frisse Scandinavische wit-wash kleur","Maakt ruimtes optisch groter en lichter","Perfecte combinatie met donker meubilair","AC4 voor dagelijks gebruik","Eenvoudig te reinigen witte tint"],
+      longDesc:"Blanc Laminaat is de perfecte keuze voor moderne, lichte interieurs. De Scandinavische wit-wash behandeling geeft een frisse, ruimtelijke uitstraling die elke kamer groter en lichter maakt." },
+  ],
+  "Traprenovatie": [
+    { label:"Eiken Treden",name:"Massief Eiken Treden",sub:"20mm massief eiken · Op maat",                    price:89.00, emoji:"🪜", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0271_jbpfyq.jpg", bg:"linear-gradient(135deg,#4a3520,#6b4f30)",
+      specs:[["Materiaal","Massief eiken"],["Dikte","20mm"],["Afwerking","Geolied of gelakt"],["Maatwerk","Ja, op maat gezaagd"],["Kleuroptie","Naturel, gerookt, wit"]],
+      features:["Massief eiken voor maximale duurzaamheid","Op maat gezaagd voor perfecte passing","Diverse kleuropties beschikbaar","Inclusief neus- en stootborden","Kan aansluiten op elke vloer"],
+      longDesc:"Massief Eiken Treden geven uw trap een warme, exclusieve uitstraling. Elke trede wordt op maat gezaagd en afgewerkt passend bij uw nieuwe vloer voor een perfect geïntegreerd interieur." },
+    { label:"PVC Treden",name:"PVC Click Treden",      sub:"Waterdicht · Slijtvast · Snelle montage",         price:49.00, emoji:"🔶", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0271_jbpfyq.jpg", bg:"linear-gradient(135deg,#3a3530,#4e4840)",
+      specs:[["Materiaal","SPC PVC"],["Waterdicht","100%"],["Slijtlaag","0.7mm extra zwaar"],["Montage","Click + lijm"],["Kleur","Passend bij PVC vloer"]],
+      features:["100% waterdicht — ideaal bij PVC vloer","Zware slijtlaag voor trap specifiek gebruik","Snelle montage met click + lijm systeem","Kleuren passend bij uw PVC vloer","Anti-slip optie beschikbaar"],
+      longDesc:"PVC Click Treden zijn de perfecte keuze als aanvulling op uw PVC vloer. De extra zware slijtlaag is speciaal ontwikkeld voor de intensieve belasting van een trap." },
+    { label:"Laminaat",name:"Laminaat Treden AC5",     sub:"Krasvast · Breed assortiment · Budget",           price:34.00, emoji:"🟧", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0271_jbpfyq.jpg", bg:"linear-gradient(135deg,#5c4232,#7a5a45)",
+      specs:[["Materiaal","HDF laminaat"],["Slijtklasse","AC5"],["Dikte","12mm"],["Kleur","Passend bij laminaat"],["Prijs","Voordeligst"]],
+      features:["Voordeligste optie voor traprenovatie","AC5 slijtklasse voor intensief gebruik","Breed kleurassortiment passend bij laminaat","Inclusief aansluittrap voor nette afwerking","Snelle levering uit voorraad"],
+      longDesc:"Laminaat Treden AC5 zijn de kostenefficiënte keuze voor wie een mooie, duurzame trap wil zonder hoge investering. Met AC5 kwaliteit zijn ze bestand tegen het intensieve gebruik van een trap." },
+  ],
+  "Vloerverwarming": [
+    { label:"Elektrisch",name:"Elektrisch Systeem",    sub:"Folie systeem · Snel warm · Tot 150W/m2",         price:39.00, emoji:"⚡", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0285_x0hylx.jpg", bg:"linear-gradient(135deg,#2a1a08,#3d2a10)",
+      specs:[["Type","Elektrische folie"],["Vermogen","100-150W/m²"],["Thermostaat","Inbegrepen"],["Geschikt voor","PVC, laminaat"],["Warmtetijd","Snel, 15-20 min"]],
+      features:["Snel opwarmend elektrisch folie systeem","Ideaal als bijverwarming","Eenvoudig te installeren onder vloer","WiFi thermostaat inbegrepen","Lage installatiekosten"],
+      longDesc:"Het elektrische vloerverwarmingssysteem is perfect als bijverwarming of voor kleinere ruimtes. Het folie verwarmt snel en is eenvoudig te installeren onder PVC of laminaat." },
+    { label:"Water",   name:"Watergevoerd Systeem",    sub:"Laagbouw · Energiezuinig · Thermostaat incl.",    price:79.00, emoji:"💧", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0285_x0hylx.jpg", bg:"linear-gradient(135deg,#0a2030,#103040)",
+      specs:[["Type","Watergevoerd"],["Opbouwhoogte","Laagbouw, 15mm"],["Thermostaat","Smart inbegrepen"],["Energiezuinig","Ja, 35°C aanvoer"],["Geschikt voor","Alle vloertypes"]],
+      features:["Energiezuinig watergevoerd systeem","Laagbouw uitvoering — minimale opbouwhoogte","Slim te combineren met warmtepomp","Gelijkmatige warmteverdeling over de vloer","Inclusief smart thermostaat met app"],
+      longDesc:"Het watergevoerde systeem is de meest energiezuinige oplossing voor vloerverwarming. Met een lage aanvoertemperatuur van 35°C is het ideaal te combineren met een warmtepomp." },
+    { label:"Thermostaat",name:"Smart Thermostaat",    sub:"WiFi · App-bediening · Leerfunctie",              price:149.00,emoji:"🌡", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0285_x0hylx.jpg", bg:"linear-gradient(135deg,#1a1a2a,#252535)",
+      specs:[["Connectiviteit","WiFi + Bluetooth"],["App","iOS & Android"],["Leerfunctie","Ja"],["Installatie","Zelf of door ons"],["Compatibel","Alle systemen"]],
+      features:["Slimme leerfunctie past zich aan uw gewoontes aan","Bediening via smartphone app overal ter wereld","Compatibel met alle vloerverwarmingssystemen","Energiebesparingsprogramma ingebouwd","Eenvoudige installatie of door ons team"],
+      longDesc:"De Smart Thermostaat is de ideale aanvulling op elk vloerverwarmingssysteem. De leerfunctie analyseert uw gedrag en stookt alleen wanneer nodig — voor maximale comfort en minimale energiekosten." },
+  ],
+  "Egaliseren": [
+    { label:"Standaard",name:"Egaline Basis",          sub:"Zelf-nivelerend · Droogtijd 24u · Tot 5mm",       price:12.00, emoji:"⬛", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0279_z51tgy.jpg", bg:"linear-gradient(135deg,#282828,#383835)",
+      specs:[["Type","Zelf-niverelend"],["Max dikte","5mm per laag"],["Droogtijd","24 uur"],["Geschikt voor","Beton, dekvloer"],["Primer","Inbegrepen"]],
+      features:["Zelf-niverelend voor perfect vlakke ondergrond","Droogtijd van slechts 24 uur","Geschikt voor alle vloertypes erboven","Inclusief primer voor goede hechting","Professionele uitvoering door ons team"],
+      longDesc:"Egaline Basis is onze standaard egalisatieoplossing. Zelf-niverelend en snel droog — de perfecte voorbereiding voor elke nieuwe vloer, van PVC tot laminaat en parket." },
+    { label:"Snel Droog",name:"Rapid Egaline",         sub:"Droogtijd 4-6 uur · Ideaal bij tijdsdruk",        price:17.50, emoji:"⏱", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0279_z51tgy.jpg", bg:"linear-gradient(135deg,#1e2a1e,#2a3a2a)",
+      specs:[["Type","Sneldrogende egaline"],["Max dikte","10mm per laag"],["Droogtijd","4-6 uur"],["Sterkte","Hoge vroegsterkte"],["Primer","Inbegrepen"]],
+      features:["Droog in slechts 4-6 uur — perfecte timing","Grotere laagdikte tot 10mm mogelijk","Hoge vroegsterkte — snel belastbaar","Ideaal voor projecten met strakke planning","Professioneel resultaat gegarandeerd"],
+      longDesc:"Rapid Egaline is onze sneldrogende formule voor projecten waarbij tijd kostbaar is. Na slechts 4-6 uur kan de nieuwe vloer gelegd worden — ideaal voor renovaties die snel klaar moeten zijn." },
+    { label:"VV Pro",  name:"Egaline VV Pro",           sub:"Specifiek voor vloerverwarming · Hoge geleidbaarheid",price:21.00,emoji:"🌡", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221278/IMG_0279_z51tgy.jpg", bg:"linear-gradient(135deg,#2a1a08,#3d2a10)",
+      specs:[["Type","Thermisch geleidend"],["Geleidbaarheid","λ = 1.6 W/mK"],["Max dikte","10mm"],["Droogtijd","48 uur"],["Certificaat","VV geschikt"]],
+      features:["Specifiek ontwikkeld voor vloerverwarming","Hoge thermische geleidbaarheid (1.6 W/mK)","Maximale warmteoverdracht naar vloer","Gecertificeerd voor alle VV-systemen","Inclusief thermo-primer"],
+      longDesc:"Egaline VV Pro is specifiek ontwikkeld voor gebruik onder vloerverwarming. De hoge thermische geleidbaarheid zorgt dat de warmte maximaal wordt overgedragen naar uw vloer — voor lagere energiekosten." },
+  ],
+  "Showroom aan Huis": [
+    { label:"Staalkaart",name:"Staalkaartenpakket",    sub:"20+ materiaalstalen · Thuisbezorgd · Gratis",     price:0, emoji:"🎨", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0273_upnb5g.jpg", bg:"linear-gradient(135deg,#1a1a0a,#2a2a18)",
+      specs:[["Aantal stalen","20+"],["Materialen","Parket, PVC, laminaat"],["Levering","Thuisbezorgd"],["Kosten","Gratis"],["Termijn","Binnen 2 werkdagen"]],
+      features:["Meer dan 20 verschillende stalen","Alle populaire materialen en kleuren","Thuisbezorgd, geen showroom nodig","Gratis en zonder verplichting","Met kleuradvies folder inbegrepen"],
+      longDesc:"Ons Staalkaartenpakket brengt de showroom bij u thuis. Meer dan 20 zorgvuldig geselecteerde stalen in alle populaire materialen en kleuren worden gratis thuisbezorgd." },
+    { label:"Advies",  name:"Persoonlijk Vloeradvies", sub:"1 uur aan huis · Inclusief offerte · Gratis",     price:0, emoji:"📐", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0273_upnb5g.jpg", bg:"linear-gradient(135deg,#0a1a2a,#182838)",
+      specs:[["Duur","Ca. 1 uur"],["Locatie","Bij u thuis"],["Offerte","Direct ter plaatse"],["Kosten","Volledig gratis"],["Meegebracht","Stalen + meetapparatuur"]],
+      features:["Persoonlijk advies in uw eigen omgeving","Adviseur neemt stalen en meetapparatuur mee","Direct offerteberekening ter plaatse","Advies over kleur, patroon en materiaal","Gratis en volledig vrijblijvend"],
+      longDesc:"Ons persoonlijk vloeradvies aan huis is de meest complete dienst. Onze adviseur komt met een ruime collectie stalen naar u toe, geeft persoonlijk advies en berekent direct een offerte ter plaatse." },
+    { label:"Collectie",name:"Volledige Collectieshow",sub:"Alle materialen · Direct bestellen · Gratis",     price:0, emoji:"🏠", img:"https://res.cloudinary.com/dqnmlaijc/image/upload/v1779221279/IMG_0273_upnb5g.jpg", bg:"linear-gradient(135deg,#1a0a1a,#2a1a2a)",
+      specs:[["Collectie","Volledige assortiment"],["Duur","Ca. 90 minuten"],["Bestellen","Mogelijk ter plaatse"],["Kosten","Gratis"],["Flexibiliteit","Op uw gewenste moment"]],
+      features:["Volledige collectie aan huis — niets hoeft u te missen","Direct bestellen en plannen ter plaatse","Onze expert begeleidt u door alle opties","Flexibele afspraakmomenten door heel Nederland","Inclusief installatie planning en advies"],
+      longDesc:"De Volledige Collectieshow is onze meest uitgebreide thuisservice. Ons team brengt de complete collectie bij u thuis, zodat u in alle rust kunt kiezen in uw eigen interieur en licht." },
+  ],
+};
+export const DEFAULT_PRODUCTS = [
+  { label:"Standaard",name:"Standaard Uitvoering",     sub:"Professionele installatie op maat",               price:0,     emoji:"🔧", bg:"linear-gradient(135deg,#1a1a1a,#2a2a2a)",
+    specs:[["Kwaliteit","Standaard"],["Garantie","2 jaar"],["Materiaal","Op aanvraag"],["Installatie","Professioneel"],["Prijs","Op offerte"]],
+    features:["Professionele installatie door gecertificeerd team","Standaard materialen van goede kwaliteit","2 jaar garantie op installatie","Inclusief plinten en afwerking","Vrije offerte ter plaatse"],
+    longDesc:"Onze standaard uitvoering biedt professionele installatie met bewezen materialen voor een uitstekende prijs-kwaliteitverhouding." },
+  { label:"Premium", name:"Premium Uitvoering",        sub:"Hoogwaardige materialen en afwerking",            price:0,     emoji:"⭐", bg:"linear-gradient(135deg,#2a1a08,#3a2a15)",
+    specs:[["Kwaliteit","Premium"],["Garantie","5 jaar"],["Materiaal","A-merk"],["Installatie","Senior team"],["Prijs","Op offerte"]],
+    features:["Premium A-merk materialen","Installatie door senior vakmannen","5 jaar volledige garantie","Extra aandacht voor detail en afwerking","Inclusief uitgebreide garantiecertificaten"],
+    longDesc:"De premium uitvoering biedt het allerbeste: top materialen, ons meest ervaren installatieteam en 5 jaar volledige garantie voor maximale zekerheid." },
+  { label:"Maatwerk",name:"Volledig Maatwerk",         sub:"Volledig naar uw wensen en interieur",            price:0,     emoji:"✨", bg:"linear-gradient(135deg,#0a1a0a,#182818)",
+    specs:[["Aanpak","100% op maat"],["Garantie","5 jaar"],["Ontwerp","Persoonlijk"],["Materiaal","Vrije keuze"],["Service","Full-service"]],
+    features:["Volledig maatwerk naar uw persoonlijke wensen","Persoonlijk interieuradvies inbegrepen","Vrije keuze uit het volledige assortiment","Full-service van ontwerp tot oplevering","Exclusieve materialen en patronen mogelijk"],
+    longDesc:"Volledig maatwerk is onze meest exclusieve dienst. Van het eerste adviesgesprek tot de uiteindelijke oplevering begeleiden wij u door het gehele proces voor een resultaat dat precies bij uw interieur past." },
+];

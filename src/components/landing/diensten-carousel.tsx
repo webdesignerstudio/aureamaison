@@ -1,9 +1,13 @@
+// @ts-nocheck
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { C } from "@/lib/landing/colors";
 import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { LLabel } from "./llabel";
+import { useProducten, simuleerEmail, toast, inp } from "@/lib/landing/utils";
+import { DIENST_CALC, DIENST_REVIEWS, DIENST_FAQ, DIENST_PRODUCTS, DEFAULT_PRODUCTS, GALLERY_IMGS, COMPARE_DATA } from "@/lib/landing/data";
 
 /* ─── DATA ────────────────────────────────────────────────────── */
 const DIENSTEN_DATA = [
@@ -79,42 +83,823 @@ function injectStyles() {
   document.head.appendChild(s);
 }
 
-/* ─── DIENST DETAIL (simplified — visual only) ───────────────── */
-function DienstDetail({ det, onClose, onOfferte }: { det: typeof DIENSTEN_DATA[0]; onClose: () => void; onOfferte: () => void }) {
+function ProdDetailView({ prod, dienstCalc, onBack, onKoop, onOfferte }) {
+  const { isMobile } = useIsMobile();
+  const [calcM2, setCalcM2] = useState(30);
+  const [koopNaam, setKoopNaam] = useState("");
+  const [koopEmail, setKoopEmail] = useState("");
+  const [koopTel, setKoopTel] = useState("");
+  const [koopM2, setKoopM2] = useState("");
+  const [koopDone, setKoopDone] = useState(false);
+  const [koopOpen, setKoopOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  // Scroll direct naar boven zodra view opent — fix voor mobiel
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
+
+  const sd = dienstCalc || {};
+  const matPrice = prod.price > 0 ? prod.price : (sd.matMin != null ? (sd.matMin + sd.matMax) / 2 : null);
+  const legPrice = sd.legMin != null ? (sd.legMin + sd.legMax) / 2 : null;
+  const fmtK = n => "€ " + Math.round(n).toLocaleString("nl-NL");
+  const calcMat = matPrice != null ? fmtK(calcM2 * matPrice) : "—";
+  const calcLeg = legPrice != null ? (sd.legMin === 0 ? "Gratis" : fmtK(calcM2 * legPrice)) : "—";
+  const calcTot = matPrice != null && legPrice != null ? fmtK(calcM2 * (matPrice + legPrice)) : "—";
+
   return (
-    <div className="amf-det-panel">
+    <div ref={containerRef} style={{position:"fixed",inset:0,zIndex:3500,background:C.bg,display:"flex",flexDirection:"column",overflowY:"auto",animation:"slideUp .3s ease"}}>
+
+      {/* HERO — direct bovenaan, geen header erboven */}
+      <div style={{height:260,background:prod.bg,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0,overflow:"hidden"}}>
+        {prod.img
+          ? <img src={prod.img} alt={prod.name} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",filter:"brightness(.6) saturate(.75)"}}/>
+          : <div style={{position:"absolute",inset:0,background:prod.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"7rem",filter:"drop-shadow(0 8px 24px rgba(0,0,0,.5))"}}>{prod.emoji}</div>
+        }
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(5,5,5,.85) 0%,transparent 55%)"}}/>
+        {/* Terug knop over de hero */}
+        <button onClick={onBack} style={{position:"absolute",top:16,left:16,background:"rgba(0,0,0,.45)",backdropFilter:"blur(8px)",border:`1px solid rgba(255,255,255,.15)`,color:C.white,cursor:"pointer",borderRadius:"50%",width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem",zIndex:2}}>←</button>
+        {/* Prijs badge rechts boven */}
+        {prod.price > 0 && (
+          <div style={{position:"absolute",top:16,right:16,background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)",border:`1px solid ${C.gold}`,borderRadius:8,padding:"6px 12px",zIndex:2,textAlign:"right"}}>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.2rem",color:C.goldL,lineHeight:1}}>€ {prod.price.toFixed(2).replace(".",",")}</div>
+            <div style={{fontSize:"0.4rem",color:C.dim,letterSpacing:1}}>/m²</div>
+          </div>
+        )}
+        <div style={{position:"absolute",bottom:18,left:20,right:20,zIndex:2}}>
+          <div style={{fontSize:"0.44rem",letterSpacing:3,color:"rgba(198,165,107,.8)",textTransform:"uppercase",marginBottom:4}}>{prod.label}</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem",color:C.white,lineHeight:1.15}}>{prod.name}</div>
+          <div style={{fontSize:"0.62rem",color:"rgba(248,245,239,.5)",marginTop:4}}>{prod.sub}</div>
+        </div>
+      </div>
+
+      <div style={{padding:"20px 18px",maxWidth:640,margin:"0 auto",width:"100%"}}>
+
+        {/* OMSCHRIJVING */}
+        {prod.longDesc && (
+          <p style={{fontSize:"0.76rem",color:C.muted,lineHeight:1.9,marginBottom:22}}>{prod.longDesc}</p>
+        )}
+
+        {/* SPECIFICATIES */}
+        {prod.specs && prod.specs.length > 0 && (
+          <div style={{marginBottom:22}}>
+            <div style={{fontSize:"0.5rem",letterSpacing:3,color:C.gold,textTransform:"uppercase",marginBottom:12}}>Specificaties</div>
+            <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",gap:8}}>
+              {prod.specs.map(([k,v],i)=>(
+                <div key={i} style={{background:"rgba(255,255,255,.035)",border:`1px solid ${C.bdr}`,borderRadius:9,padding:"10px 12px"}}>
+                  <div style={{fontSize:"0.44rem",letterSpacing:2,color:C.dim,textTransform:"uppercase",marginBottom:3}}>{k}</div>
+                  <div style={{fontSize:"0.72rem",color:C.white,fontWeight:500}}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* KENMERKEN */}
+        {prod.features && prod.features.length > 0 && (
+          <div style={{marginBottom:22,borderTop:`1px solid ${C.bdr}`,paddingTop:18}}>
+            <div style={{fontSize:"0.5rem",letterSpacing:3,color:C.gold,textTransform:"uppercase",marginBottom:12}}>Kenmerken</div>
+            {prod.features.map((f,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,paddingBottom:9}}>
+                <div style={{width:6,height:6,borderRadius:"50%",background:C.gold,flexShrink:0,marginTop:5}}/>
+                <span style={{fontSize:"0.72rem",color:C.muted,lineHeight:1.65}}>{f}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── PRIJSCALCULATOR ── */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:20,marginBottom:22}}>
+          <div style={{fontSize:"0.5rem",letterSpacing:3,color:C.gold,textTransform:"uppercase",marginBottom:14}}>Prijscalculator</div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.62rem",color:C.muted,marginBottom:8}}>
+            <span>Oppervlakte</span>
+            <span style={{color:C.goldL,fontWeight:600}}>{calcM2} m²</span>
+          </div>
+          <input type="range" min={5} max={200} value={calcM2} onChange={e=>setCalcM2(Number(e.target.value))}
+            style={{WebkitAppearance:"none",width:"100%",height:4,background:"rgba(198,165,107,.2)",borderRadius:99,outline:"none",cursor:"pointer",marginBottom:16}}/>
+          <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",gap:8}}>
+            {[["Materiaal",calcMat],["Legkosten",calcLeg],["Totaal (est.)",calcTot]].map(([lbl,val])=>(
+              <div key={lbl} style={{background:"rgba(255,255,255,.03)",border:`1px solid ${C.bdr}`,borderRadius:10,padding:"12px 8px",textAlign:"center"}}>
+                <div style={{fontSize:"0.44rem",letterSpacing:1.5,color:C.dim,textTransform:"uppercase",marginBottom:6}}>{lbl}</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.1rem",color:C.goldL}}>{val}</div>
+              </div>
+            ))}
+          </div>
+          {prod.price > 0 && calcM2 > 0 && (
+            <div style={{marginTop:10,padding:"8px 12px",background:"rgba(198,165,107,.05)",borderRadius:7,fontSize:"0.58rem",color:C.dim}}>
+              {calcM2} m² × € {prod.price.toFixed(2)}/m² = <strong style={{color:C.goldL}}>€ {(calcM2*prod.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}</strong> materiaal
+            </div>
+          )}
+        </div>
+
+        {/* ── ACTIE KNOPPEN ── */}
+        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:32}}>
+          <button onClick={()=>setKoopOpen(true)}
+            style={{width:"100%",padding:"15px",background:C.gold,border:"none",color:"#050505",fontSize:"0.68rem",fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",cursor:"pointer",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+            🛒 Bestellen / offerte aanvragen
+          </button>
+          <button onClick={onOfferte}
+            style={{width:"100%",padding:"13px",background:"rgba(255,255,255,.04)",border:`1px solid ${C.bdr}`,color:C.muted,fontSize:"0.62rem",fontWeight:600,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:10}}>
+            📋 Vrijblijvende offerte aanvragen
+          </button>
+          <button onClick={onBack}
+            style={{width:"100%",padding:"11px",background:"transparent",border:`1px solid rgba(255,255,255,.08)`,color:C.dim,fontSize:"0.58rem",letterSpacing:1.5,textTransform:"uppercase",cursor:"pointer",borderRadius:10}}>
+            ← Terug naar producten
+          </button>
+        </div>
+      </div>
+
+      {/* ── KOOP / BESTEL MODAL ── */}
+      {koopOpen && (
+        <div style={{position:"fixed",inset:0,zIndex:4000,background:"rgba(5,5,5,.92)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}
+          onClick={e=>{if(e.target===e.currentTarget)setKoopOpen(false);}}>
+          <div style={{background:C.deep,border:`1px solid ${C.bdr}`,borderTopLeftRadius:20,borderTopRightRadius:20,width:"100%",maxWidth:500,padding:"24px 20px 40px",animation:"slideUp .3s ease",maxHeight:"92vh",overflowY:"auto"}}>
+            {!koopDone ? (
+              <>
+                <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:20}}>
+                  <div style={{width:48,height:48,borderRadius:10,background:prod.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.5rem",flexShrink:0}}>{prod.emoji}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"0.46rem",letterSpacing:2,color:C.gold,textTransform:"uppercase"}}>{prod.label}</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",color:C.white}}>{prod.name}</div>
+                    {prod.price > 0 && <div style={{fontSize:"0.58rem",color:C.muted}}>€ {prod.price.toFixed(2).replace(".",",")} /m²</div>}
+                  </div>
+                  <button onClick={()=>setKoopOpen(false)} style={{background:"none",border:"none",color:C.muted,fontSize:22,cursor:"pointer"}}>✕</button>
+                </div>
+                {[["Uw naam *",koopNaam,setKoopNaam,"Jan de Vries","text"],
+                  ["E-mailadres *",koopEmail,setKoopEmail,"jan@email.nl","email"],
+                  ["Telefoonnummer",koopTel,setKoopTel,"06 12 34 56 78","tel"],
+                  ["Oppervlakte (m²)",koopM2,setKoopM2,String(calcM2),"number"],
+                ].map(([l,v,s,p,t])=>(
+                  <div key={l} style={{marginBottom:10}}>
+                    <div style={{fontSize:"0.5rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>{l}</div>
+                    <input type={t} value={v} onChange={e=>s(e.target.value)} placeholder={p} style={{...inp,fontSize:14,padding:"10px 14px"}}/>
+                  </div>
+                ))}
+                {prod.price > 0 && koopM2 && Number(koopM2) > 0 && (
+                  <div style={{padding:"10px 14px",background:"rgba(198,165,107,.07)",border:`1px solid ${C.bdr}`,borderRadius:8,marginBottom:14,display:"flex",justifyContent:"space-between",fontSize:"0.68rem"}}>
+                    <span style={{color:C.muted}}>{koopM2} m² × € {prod.price.toFixed(2)}/m²</span>
+                    <span style={{color:C.gold,fontWeight:700}}>€ {(Number(koopM2)*prod.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}</span>
+                  </div>
+                )}
+                <button onClick={async()=>{
+                  if(!koopNaam.trim()||!koopEmail.trim()) return;
+                  await simuleerEmail({aan:"Aureamaisonfloors@gmail.com",
+                    onderwerp:`🛒 Bestelling — ${prod.name} — ${koopNaam}`,
+                    type:"status_update",orderId:null,
+                    data:{product:prod.name,naam:koopNaam,email:koopEmail,tel:koopTel,m2:koopM2||calcM2,
+                      prijs:prod.price>0?`€ ${((Number(koopM2)||calcM2)*prod.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}`:"Offerte gewenst"}});
+                  setKoopDone(true);
+                }} style={{width:"100%",padding:"13px",background:C.gold,border:"none",color:"#050505",fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:9}}>
+                  Aanvraag versturen →
+                </button>
+                <p style={{fontSize:"0.58rem",color:C.dim,textAlign:"center",marginTop:8,lineHeight:1.6}}>Wij nemen binnen 24 uur contact op. Geen aanbetaling vereist.</p>
+              </>
+            ) : (
+              <div style={{textAlign:"center",padding:"32px 0"}}>
+                <div style={{fontSize:52,marginBottom:14}}>✓</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.6rem",color:C.white,marginBottom:10}}>Aanvraag ontvangen!</div>
+                <p style={{fontSize:"0.7rem",color:C.muted,lineHeight:1.8,marginBottom:24}}>Bedankt{koopNaam?" "+koopNaam.split(" ")[0]:""}! Wij nemen binnen 24 uur contact op.</p>
+                <button onClick={()=>{ setKoopOpen(false); onBack(); }} style={{padding:"11px 28px",background:"rgba(198,165,107,.12)",border:`1px solid ${C.gold}`,color:C.gold,cursor:"pointer",borderRadius:8,fontSize:"0.62rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase"}}>← Terug</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function DienstDetail({ det, onClose, onOfferte, onShowroom, detailRef }) {
+  const { isMobile } = useIsMobile();
+  // ── Alle hooks bovenaan (Rules of Hooks) ──────────────────────
+  const [calcM2, setCalcM2]         = useState(30);
+  const [openFaq, setOpenFaq]       = useState(null);
+  // Producten
+  const [prodIdx, setProdIdx]       = useState(0);
+  const [prodInfoOpen, setProdInfoOpen] = useState(false);
+  const [prodInfoItem, setProdInfoItem] = useState(null);
+  const [prodDetailOpen, setProdDetailOpen] = useState(false);
+  const [prodDetailItem, setProdDetailItem] = useState(null);
+  const [koopOpen, setKoopOpen]     = useState(false);
+  const [koopProd, setKoopProd]     = useState(null);
+  const [koopNaam, setKoopNaam]     = useState("");
+  const [koopEmail, setKoopEmail]   = useState("");
+  const [koopTel, setKoopTel]       = useState("");
+  const [koopM2, setKoopM2]         = useState("");
+  const [koopDone, setKoopDone]     = useState(false);
+  // Terugbelverzoek
+  const [tbOpen, setTbOpen]         = useState(false);
+  const [tbNaam, setTbNaam]         = useState("");
+  const [tbTel, setTbTel]           = useState("");
+  const [tbTijd, setTbTijd]         = useState("");
+  const [tbVraag, setTbVraag]       = useState("");
+  const [tbDone, setTbDone]         = useState(false);
+  // Showroom aan huis
+  const [shOpen, setShOpen]         = useState(false);
+  const [shNaam, setShNaam]         = useState("");
+  const [shEmail, setShEmail]       = useState("");
+  const [shTel, setShTel]           = useState("");
+  const [shAdres, setShAdres]       = useState("");
+  const [shDone, setShDone]         = useState(false);
+
+  // ── Data ──────────────────────────────────────────────────────
+  const sd    = DIENST_CALC[det.title]     || {};
+  const revs  = DIENST_REVIEWS[det.title]  || DEFAULT_REVIEWS;
+  const faqs  = DIENST_FAQ[det.title]      || DEFAULT_FAQ;
+  // Laad live producten uit storage (eigenaar-beheerd), fallback naar DIENST_PRODUCTS
+  const [liveProducten] = useProducten();
+  const prods = (liveProducten && liveProducten[det.title]) ? liveProducten[det.title] : (DIENST_PRODUCTS[det.title] || DEFAULT_PRODUCTS);
+  const fmtEurCalc = n => "€ " + n.toLocaleString("nl-NL");
+  // Use selected product price when available, fallback to service range averages
+  const selectedProd = prods[prodIdx];
+  const selectedMatPrice = selectedProd && selectedProd.price > 0 ? selectedProd.price : null;
+  const calcMatPrice = selectedMatPrice !== null ? selectedMatPrice
+    : (sd.matMin != null ? (sd.matMin + sd.matMax) / 2 : null);
+  const calcLegPrice = sd.legMin != null ? (sd.legMin + sd.legMax) / 2 : null;
+  const calcMat = sd.matMin === 0 && !selectedMatPrice ? "Gratis"
+    : (calcMatPrice != null ? fmtEurCalc(Math.round(calcM2 * calcMatPrice)) : "—");
+  const calcLeg = sd.legMin === 0 ? "Gratis" : (calcLegPrice != null ? fmtEurCalc(Math.round(calcM2 * calcLegPrice)) : "—");
+  const calcTot = (sd.matMin === 0 && !selectedMatPrice) ? "Gratis"
+    : (calcMatPrice != null && calcLegPrice != null ? fmtEurCalc(Math.round(calcM2 * (calcMatPrice + calcLegPrice))) : "—");
+  const compareKeys = [["prijs","Prijs"],["levensduur","Levensduur"],["onderhoud","Onderhoud"],["geluid","Geluid"],["water","Waterdicht"]];
+
+  const openKoop = (p) => { setKoopProd(p); setKoopDone(false); setKoopNaam(""); setKoopEmail(""); setKoopTel(""); setKoopM2(""); setKoopOpen(true); };
+  const openTb   = () => { setTbDone(false); setTbNaam(""); setTbTel(""); setTbTijd(""); setTbVraag(""); setTbOpen(true); };
+  const openSh   = () => { setShDone(false); setShNaam(""); setShEmail(""); setShTel(""); setShAdres(""); setShOpen(true); };
+
+  const delen = () => {
+    const txt = `Aurea Maison Floors — ${det.title}`;
+    if (navigator.share) { navigator.share({ title: txt, url: window.location.href }); }
+    else { navigator.clipboard?.writeText(window.location.href); toast("Link gekopieerd ✓","success"); }
+  };
+
+  return (
+    <div className="amf-det-panel" ref={detailRef}>
       <button className="amf-det-close" onClick={onClose}>✕</button>
+
+      {/* HERO */}
       <div className="amf-det-hero">
-        <img src={det.img} alt={det.title} />
-        <div className="amf-det-hero-grad" />
+        <img src={det.img} alt={det.title}/>
+        <div className="amf-det-hero-grad"/>
         <div className="amf-det-hero-content">
           <div className="amf-det-num">{det.num}</div>
           <h2 className="amf-det-title">{det.title}</h2>
         </div>
       </div>
+
       <div className="amf-det-body">
+        {/* TAG */}
         <div className="amf-det-tag">{det.tag}</div>
+
+        {/* GARANTIE BADGE */}
+        {sd.guarantee && (
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(60,184,122,.07)",border:"1px solid rgba(60,184,122,.25)",borderRadius:8,padding:"8px 14px",fontSize:"0.62rem",color:"#5ad4a2",marginBottom:20}}>
+            <span>🛡</span> {sd.guarantee}
+          </div>
+        )}
+
+        {/* BESCHRIJVING */}
         <p className="amf-det-desc">{det.desc}</p>
+
+        {/* WAT WIJ BIEDEN */}
         <div className="amf-det-features">
           <div className="amf-det-feat-title">Wat wij bieden</div>
-          {det.features.map((f, i) => (
+          {det.features.map((f,i) => (
             <div key={i} className="amf-det-feat-item">
-              <div className="amf-det-feat-dot" />
+              <div className="amf-det-feat-dot"/>
               <span>{f}</span>
             </div>
           ))}
         </div>
-        <div className="amf-det-cta">
+
+        {/* ══ ONZE PRODUCTEN ══ */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+          <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold,marginBottom:14}}>Onze producten</div>
+          {/* Scrollbare kaarten */}
+          <div style={{display:"flex",gap:12,overflowX:"auto",paddingBottom:10,scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
+            {prods.map((p,i)=>(
+              <div key={i}
+                style={{flexShrink:0,width:185,background:"rgba(255,255,255,.025)",border:`2px solid ${prodIdx===i?C.gold:C.bdr}`,borderRadius:12,overflow:"hidden",cursor:"pointer",transition:"all .2s",position:"relative"}}
+                onClick={()=>{ setProdIdx(i); setProdDetailItem(p); setProdDetailOpen(true); }}>
+                {prodIdx===i && (
+                  <div style={{position:"absolute",top:7,right:7,background:C.gold,borderRadius:99,padding:"2px 7px",fontSize:"0.42rem",color:"#0a0a08",fontWeight:700,letterSpacing:1,textTransform:"uppercase",zIndex:2}}>Geselecteerd</div>
+                )}
+                <div style={{height:88,background:p.bg,position:"relative",overflow:"hidden",flexShrink:0}}>
+                  {p.img
+                    ? <img src={p.img} alt={p.name} style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(.75) saturate(.8)"}}/>
+                    : <div style={{width:"100%",height:"100%",background:p.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2rem"}}>{p.emoji}</div>
+                  }
+                  <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(5,5,5,.5) 0%,transparent 60%)"}}/>
+                </div>
+                <div style={{padding:"10px 12px"}}>
+                  <div style={{fontSize:"0.46rem",letterSpacing:2,color:C.gold,textTransform:"uppercase",marginBottom:2}}>{p.label}</div>
+                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"0.9rem",color:C.white,marginBottom:3,lineHeight:1.3}}>{p.name}</div>
+                  <div style={{fontSize:"0.54rem",color:C.muted,marginBottom:8,lineHeight:1.5}}>{p.sub}</div>
+                  <div style={{display:"flex",alignItems:"baseline",gap:3,marginBottom:8}}>
+                    <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.1rem",color:C.goldL}}>
+                      {p.price>0 ? `€ ${p.price.toFixed(2).replace(".",",")}` : "Gratis"}
+                    </span>
+                    {p.price>0 && <span style={{fontSize:"0.48rem",color:C.dim}}>/ m²</span>}
+                  </div>
+                  <div style={{display:"flex",gap:6}}>
+                    <button onClick={e=>{e.stopPropagation();setProdInfoItem(p);setProdInfoOpen(true);}}
+                      style={{flex:1,padding:"6px 4px",background:"rgba(255,255,255,.05)",border:`1px solid ${C.bdr}`,color:C.muted,fontSize:"0.52rem",fontWeight:600,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",borderRadius:6}}>
+                      ℹ Info
+                    </button>
+                    {prodIdx===i ? (
+                      <button onClick={e=>{e.stopPropagation();setProdDetailItem(p);setProdDetailOpen(true);}}
+                        style={{flex:1,padding:"6px 4px",background:"rgba(198,165,107,.25)",border:`1px solid ${C.gold}`,color:C.gold,fontSize:"0.52rem",fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",borderRadius:6}}>
+                        ✓ Gekozen
+                      </button>
+                    ) : (
+                      <button onClick={e=>{e.stopPropagation();setProdIdx(i);setProdDetailItem(p);setProdDetailOpen(true);}}
+                        style={{flex:1,padding:"6px 4px",background:"rgba(198,165,107,.12)",border:`1px solid ${C.bdr}`,color:C.gold,fontSize:"0.52rem",fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",borderRadius:6}}>
+                        Bekijken →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Dots indicator */}
+          <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8}}>
+            {prods.map((_,i)=>(
+              <div key={i} onClick={()=>setProdIdx(i)}
+                style={{width:i===prodIdx?20:6,height:6,borderRadius:99,background:i===prodIdx?C.gold:"rgba(198,165,107,.2)",cursor:"pointer",transition:"all .3s"}}/>
+            ))}
+          </div>
+          {/* Selected product indicator for calculator */}
+          {selectedProd && selectedProd.price > 0 && (
+            <div style={{marginTop:10,padding:"8px 12px",background:"rgba(198,165,107,.06)",border:`1px solid rgba(198,165,107,.2)`,borderRadius:8,fontSize:"0.56rem",color:C.muted,display:"flex",alignItems:"center",gap:8}}>
+              <span style={{color:C.gold}}>✓</span>
+              <span>Calculator gebaseerd op: <strong style={{color:C.goldL}}>{selectedProd.name}</strong> — € {selectedProd.price.toFixed(2).replace(".",",")} /m²</span>
+            </div>
+          )}
+        </div>
+
+        {/* ══ PRIJSCALCULATOR ══ */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold}}>Prijscalculator</div>
+            {selectedProd && selectedProd.price>0 && (
+              <div style={{fontSize:"0.5rem",color:C.muted,textAlign:"right"}}>
+                <span style={{color:C.gold}}>{selectedProd.emoji}</span> {selectedProd.name}
+              </div>
+            )}
+          </div>
+          <div style={{marginBottom:12}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.6rem",color:C.muted,marginBottom:6}}>
+              <span>Oppervlakte</span>
+              <span style={{color:C.goldL,fontWeight:600}}>{calcM2} m²</span>
+            </div>
+            <input type="range" min={5} max={200} value={calcM2}
+              onChange={e=>setCalcM2(Number(e.target.value))}
+              style={{WebkitAppearance:"none",width:"100%",height:3,background:"rgba(198,165,107,.2)",borderRadius:99,outline:"none",cursor:"pointer"}}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",gap:7,marginTop:14}}>
+            {[["Materiaal",calcMat],["Legkosten",calcLeg],["Totaal (est.)",calcTot]].map(([lbl,val])=>(
+              <div key={lbl} style={{background:"rgba(255,255,255,.025)",border:`1px solid ${C.bdr}`,borderRadius:9,padding:10,textAlign:"center"}}>
+                <div style={{fontSize:"0.46rem",letterSpacing:1.5,color:C.dim,textTransform:"uppercase",marginBottom:5}}>{lbl}</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.1rem",color:C.goldL}}>{val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ══ PROJECT GALERIJ — VOOR & NA ══ */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+          <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold,marginBottom:14}}>Project galerij — voor &amp; na</div>
+          <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",gap:8}}>
+            {["Voor","Na","Detail","Sfeer"].map((lbl,i)=>(
+              <div key={lbl} style={{borderRadius:8,overflow:"hidden",aspectRatio:"4/3",position:"relative",cursor:"pointer"}}>
+                <img src={GALLERY_IMGS[i % GALLERY_IMGS.length]} alt={lbl}
+                  style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(.6) saturate(.7)",transition:"all .4s",display:"block"}}
+                  onMouseEnter={e=>{e.currentTarget.style.filter="brightness(.45) saturate(.6)";e.currentTarget.style.transform="scale(1.05)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.filter="brightness(.6) saturate(.7)";e.currentTarget.style.transform="scale(1)";}}
+                />
+                <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"6px 8px",background:"linear-gradient(to top,rgba(5,5,5,.9),transparent)",fontSize:"0.48rem",letterSpacing:1.5,textTransform:"uppercase",color:C.gold}}>{lbl}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ══ KLANTREVIEWS ══ */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+          <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold,marginBottom:14}}>Klantreviews</div>
+          {revs.map((r,i)=>(
+            <div key={i} style={{background:"rgba(255,255,255,.025)",border:`1px solid ${C.bdr}`,borderRadius:10,padding:14,marginBottom:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,rgba(198,165,107,.3),rgba(198,165,107,.1))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.8rem",color:C.gold,fontWeight:600,flexShrink:0}}>
+                  {r.name.charAt(0)}
+                </div>
+                <div>
+                  <div style={{fontSize:"0.72rem",color:C.white,fontWeight:500}}>{r.name}</div>
+                  <div style={{fontSize:"0.52rem",color:C.dim}}>{r.date}</div>
+                </div>
+                <div style={{marginLeft:"auto",color:C.gold,fontSize:"0.65rem"}}>{"★".repeat(r.stars)}</div>
+              </div>
+              <div style={{fontSize:"0.68rem",color:C.muted,lineHeight:1.75}}>{r.text}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ══ VEELGESTELDE VRAGEN ══ */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+          <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold,marginBottom:14}}>Veelgestelde vragen</div>
+          {faqs.map((f,i)=>(
+            <div key={i} style={{borderBottom:"1px solid rgba(255,255,255,.04)"}}>
+              <div onClick={()=>setOpenFaq(openFaq===i?null:i)}
+                style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 0",cursor:"pointer",fontSize:"0.75rem",color:openFaq===i?C.goldL:C.white,gap:12}}>
+                <span>{f.q}</span>
+                <span style={{flexShrink:0,fontSize:"0.7rem",color:C.gold,transition:"transform .25s",transform:openFaq===i?"rotate(45deg)":"none"}}>+</span>
+              </div>
+              {openFaq===i && (
+                <div style={{fontSize:"0.7rem",color:C.muted,lineHeight:1.75,paddingBottom:12}}>{f.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* ══ VERGELIJKINGSTOOL ══ */}
+        {sd.compare && sd.compare.length===2 && (()=>{
+          const [c1k,c2k] = sd.compare;
+          const c1 = COMPARE_DATA[c1k]||{};
+          const c2 = COMPARE_DATA[c2k]||{};
+          return (
+            <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+              <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold,marginBottom:14}}>Vergelijkingstool</div>
+              <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",gap:8}}>
+                {[{label:c1k,data:c1},{label:c2k,data:c2}].map(({label,data})=>(
+                  <div key={label} style={{background:"rgba(255,255,255,.025)",border:`1px solid ${C.bdr}`,borderRadius:10,padding:13}}>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",marginBottom:10,color:C.white}}>{label}</div>
+                    {compareKeys.map(([k,l])=>(
+                      <div key={k} style={{display:"flex",flexDirection:"column",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.04)"}}>
+                        <span style={{fontSize:"0.47rem",letterSpacing:2,color:C.dim,textTransform:"uppercase"}}>{l}</span>
+                        <span style={{fontSize:"0.68rem",color:C.muted,marginTop:2}}>{data[k]||"—"}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ══ UW AANVRAAG — HOE WERKT HET? ══ */}
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:22,marginBottom:24}}>
+          <div style={{fontSize:"0.55rem",letterSpacing:3,textTransform:"uppercase",color:C.gold,marginBottom:14}}>Uw aanvraag — hoe werkt het?</div>
+          {[
+            {num:"✓",state:"done",    label:"Offerte aanvragen",      sub:"Vul uw gegevens in via het formulier"},
+            {num:"2",state:"current", label:"Opname ter plaatse",     sub:"Wij komen gratis opnemen binnen 2-3 werkdagen"},
+            {num:"3",state:"",        label:"Offerte ontvangen",      sub:"Gedetailleerde offerte binnen 24 uur na opname"},
+            {num:"4",state:"",        label:"Uitvoering & oplevering",sub:"Vakkundige leggers, nette oplevering"},
+          ].map((s,i,arr)=>(
+            <div key={i} style={{display:"flex",alignItems:"flex-start",gap:13,paddingBottom:16,position:"relative"}}>
+              {i<arr.length-1 && <div style={{position:"absolute",left:11,top:24,bottom:0,width:1,background:C.bdr}}/>}
+              <div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.55rem",
+                background:s.state==="done"?"rgba(60,184,122,.15)":s.state==="current"?"rgba(198,165,107,.15)":"rgba(198,165,107,.08)",
+                border:`1px solid ${s.state==="done"?"rgba(60,184,122,.4)":s.state==="current"?C.gold:C.bdr}`,
+                color:s.state==="done"?"#5ad4a2":s.state==="current"?C.gold:C.dim}}>
+                {s.num}
+              </div>
+              <div>
+                <div style={{fontSize:"0.68rem",color:C.white,marginBottom:2}}>{s.label}</div>
+                <div style={{fontSize:"0.58rem",color:C.dim}}>{s.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ══ CTA KNOPPEN ══ */}
+        <div style={{display:"flex",gap:10,flexDirection:"column",marginBottom:8}}>
           <button className="amf-det-btn-gold" onClick={onOfferte}>📋 Offerte aanvragen →</button>
+          <button className="amf-det-btn-outline" onClick={onShowroom||openSh}>🏠 Showroom aan huis boeken</button>
+          <button className="amf-det-btn-outline" onClick={delen}>↑ Delen via WhatsApp / link</button>
+          <button className="amf-det-btn-outline" onClick={openTb}>📞 Terugbelverzoek</button>
           <button className="amf-det-btn-outline" onClick={onClose}>← Terug naar diensten</button>
         </div>
       </div>
+
+      {/* ══ PRODUCT DETAIL VIEW ══ */}
+      {prodDetailOpen && prodDetailItem && (
+        <ProdDetailView
+          prod={prodDetailItem}
+          dienstCalc={sd}
+          onBack={()=>setProdDetailOpen(false)}
+          onOfferte={()=>{ setProdDetailOpen(false); onOfferte(); }}
+          onKoop={()=>{}}
+        />
+      )}
+
+      {/* ══ PRODUCT INFO MODAL ══ */}
+      {prodInfoOpen && prodInfoItem && (
+        <div style={{position:"fixed",inset:0,zIndex:9500,background:"rgba(5,5,5,.92)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}
+          onClick={e=>{if(e.target===e.currentTarget){setProdInfoOpen(false);}}}>
+          <div style={{background:C.deep,border:`1px solid ${C.bdr}`,borderTopLeftRadius:20,borderTopRightRadius:20,width:"100%",maxWidth:500,padding:"0 0 40px",animation:"slideUp .3s ease",maxHeight:"92vh",overflowY:"auto"}}>
+            {/* Header met achtergrond */}
+            <div style={{height:120,background:prodInfoItem.bg,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0}}>
+              <div style={{fontSize:"3.5rem"}}>{prodInfoItem.emoji}</div>
+              <button onClick={()=>setProdInfoOpen(false)} style={{position:"absolute",top:14,right:14,background:"rgba(0,0,0,.4)",border:"none",color:"rgba(255,255,255,.7)",fontSize:20,cursor:"pointer",borderRadius:"50%",width:34,height:34,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>✕</button>
+            </div>
+            <div style={{padding:"20px 20px 0"}}>
+              {/* Naam & prijs */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:"0.48rem",letterSpacing:2,color:C.gold,textTransform:"uppercase",marginBottom:3}}>{prodInfoItem.label}</div>
+                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",color:C.white,lineHeight:1.2}}>{prodInfoItem.name}</div>
+                  <div style={{fontSize:"0.58rem",color:C.muted,marginTop:4}}>{prodInfoItem.sub}</div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0,marginLeft:12}}>
+                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.6rem",color:C.goldL}}>
+                    {prodInfoItem.price>0 ? `€ ${prodInfoItem.price.toFixed(2).replace(".",",")}` : "Gratis"}
+                  </div>
+                  {prodInfoItem.price>0 && <div style={{fontSize:"0.48rem",color:C.dim}}>per m²</div>}
+                </div>
+              </div>
+
+              {/* Omschrijving */}
+              {prodInfoItem.longDesc && (
+                <p style={{fontSize:"0.7rem",color:C.muted,lineHeight:1.75,marginBottom:16}}>{prodInfoItem.longDesc}</p>
+              )}
+
+              {/* Specificaties */}
+              {prodInfoItem.specs && prodInfoItem.specs.length > 0 && (
+                <div style={{marginBottom:16}}>
+                  <div style={{fontSize:"0.48rem",letterSpacing:2.5,color:C.gold,textTransform:"uppercase",marginBottom:8}}>Specificaties</div>
+                  <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",gap:6}}>
+                    {prodInfoItem.specs.map(([k,v],i)=>(
+                      <div key={i} style={{background:"rgba(255,255,255,.03)",border:`1px solid ${C.bdr}`,borderRadius:7,padding:"8px 10px"}}>
+                        <div style={{fontSize:"0.44rem",letterSpacing:1.5,color:C.dim,textTransform:"uppercase",marginBottom:2}}>{k}</div>
+                        <div style={{fontSize:"0.66rem",color:C.white,fontWeight:500}}>{v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Features */}
+              {prodInfoItem.features && prodInfoItem.features.length > 0 && (
+                <div style={{marginBottom:20}}>
+                  <div style={{fontSize:"0.48rem",letterSpacing:2.5,color:C.gold,textTransform:"uppercase",marginBottom:8}}>Kenmerken</div>
+                  {prodInfoItem.features.map((f,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,paddingBottom:7}}>
+                      <div style={{width:5,height:5,borderRadius:"50%",background:C.gold,flexShrink:0,marginTop:5}}/>
+                      <span style={{fontSize:"0.66rem",color:C.muted,lineHeight:1.6}}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Actie knoppen */}
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <button onClick={()=>{ setProdInfoOpen(false); openKoop(prodInfoItem); }}
+                  style={{width:"100%",padding:"12px",background:"rgba(198,165,107,.15)",border:`1px solid ${C.gold}`,color:C.gold,fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:8}}>
+                  Kopen / Bestellen →
+                </button>
+                <button onClick={()=>{ setProdIdx(prods.findIndex(p=>p.name===prodInfoItem.name)); setProdInfoOpen(false); }}
+                  style={{width:"100%",padding:"10px",background:"rgba(255,255,255,.04)",border:`1px solid ${C.bdr}`,color:C.muted,fontSize:"0.6rem",fontWeight:600,letterSpacing:1.5,textTransform:"uppercase",cursor:"pointer",borderRadius:8}}>
+                  ✓ Selecteer voor calculator
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ KOOP MODAL ══ */}
+      {koopOpen && koopProd && (
+        <div style={{position:"fixed",inset:0,zIndex:9500,background:"rgba(5,5,5,.92)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}
+          onClick={e=>{if(e.target===e.currentTarget)setKoopOpen(false);}}>
+          <div style={{background:C.deep,border:`1px solid ${C.bdr}`,borderTopLeftRadius:20,borderTopRightRadius:20,width:"100%",maxWidth:500,padding:"24px 20px 40px",animation:"slideUp .3s ease",maxHeight:"90vh",overflowY:"auto"}}>
+            {!koopDone ? (
+              <>
+                <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18}}>
+                  <div style={{width:50,height:50,borderRadius:10,background:koopProd.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.6rem",flexShrink:0}}>{koopProd.emoji}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"0.5rem",letterSpacing:2,color:C.gold,textTransform:"uppercase"}}>{koopProd.label}</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",color:C.white}}>{koopProd.name}</div>
+                    <div style={{fontSize:"0.58rem",color:C.muted}}>{koopProd.sub}</div>
+                  </div>
+                  <button onClick={()=>setKoopOpen(false)} style={{background:"none",border:"none",color:C.muted,fontSize:22,cursor:"pointer",lineHeight:1,padding:4}}>✕</button>
+                </div>
+                {[["Uw naam *",koopNaam,setKoopNaam,"Jan de Vries","text"],
+                  ["E-mailadres *",koopEmail,setKoopEmail,"jan@email.nl","email"],
+                  ["Telefoonnummer",koopTel,setKoopTel,"06 12 34 56 78","tel"],
+                  ["Oppervlakte (m²) *",koopM2,setKoopM2,"bijv. 35","number"],
+                ].map(([l,v,s,p,t])=>(
+                  <div key={l} style={{marginBottom:10}}>
+                    <div style={{fontSize:"0.52rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>{l}</div>
+                    <input type={t} value={v} onChange={e=>s(e.target.value)} placeholder={p} style={{...inp,fontSize:13,padding:"9px 12px"}}/>
+                  </div>
+                ))}
+                {koopProd.price>0 && koopM2 && Number(koopM2)>0 && (
+                  <div style={{padding:"10px 14px",background:"rgba(198,165,107,.06)",border:`1px solid ${C.bdr}`,borderRadius:8,marginBottom:14,display:"flex",justifyContent:"space-between",fontSize:"0.68rem"}}>
+                    <span style={{color:C.muted}}>{koopM2} m² × € {koopProd.price.toFixed(2)}/m²</span>
+                    <span style={{color:C.gold,fontWeight:700}}>€ {(Number(koopM2)*koopProd.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}</span>
+                  </div>
+                )}
+                <button onClick={async()=>{
+                  if(!koopNaam.trim()||!koopEmail.trim()||!koopM2) return;
+                  await simuleerEmail({aan:"Aureamaisonfloors@gmail.com",
+                    onderwerp:`🛒 Bestelling — ${koopProd.name} — ${koopNaam}`,
+                    type:"status_update",orderId:null,
+                    data:{product:koopProd.name,naam:koopNaam,email:koopEmail,tel:koopTel,m2:koopM2,
+                      prijs:koopProd.price>0?`€ ${(Number(koopM2)*koopProd.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}`:"Gratis"}});
+                  setKoopDone(true);
+                }} style={{width:"100%",padding:"12px",background:"rgba(198,165,107,.15)",border:`1px solid ${C.gold}`,color:C.gold,fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:8}}>
+                  Bestelling plaatsen →
+                </button>
+                <p style={{fontSize:"0.58rem",color:C.dim,textAlign:"center",marginTop:8}}>Na uw bestelling nemen wij binnen 24 uur contact op. Geen aanbetaling vereist.</p>
+              </>
+            ) : (
+              <div style={{textAlign:"center",padding:"24px 0"}}>
+                <div style={{fontSize:44,marginBottom:12}}>✓</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.5rem",color:C.white,marginBottom:8}}>Bestelling ontvangen!</div>
+                <p style={{fontSize:"0.7rem",color:C.muted,marginBottom:20}}>Bedankt, {koopNaam.split(" ")[0]}! Wij nemen binnen 24 uur contact op.</p>
+                <button onClick={()=>setKoopOpen(false)} style={{padding:"10px 24px",background:"none",border:`1px solid ${C.bdr}`,color:C.muted,cursor:"pointer",borderRadius:7,fontSize:"0.62rem"}}>← Sluiten</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ══ TERUGBELVERZOEK MODAL ══ */}
+      {tbOpen && (
+        <div style={{position:"fixed",inset:0,zIndex:9500,background:"rgba(5,5,5,.92)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}
+          onClick={e=>{if(e.target===e.currentTarget)setTbOpen(false);}}>
+          <div style={{background:C.deep,border:`1px solid ${C.bdr}`,borderTopLeftRadius:20,borderTopRightRadius:20,width:"100%",maxWidth:500,padding:"24px 20px 40px",animation:"slideUp .3s ease"}}>
+            {!tbDone ? (
+              <>
+                <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18}}>
+                  <div style={{width:50,height:50,borderRadius:10,background:"linear-gradient(135deg,#0a1a2a,#182838)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.8rem",flexShrink:0}}>📞</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"0.5rem",letterSpacing:2,color:C.gold,textTransform:"uppercase"}}>Snel contact</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",color:C.white}}>Terugbelverzoek</div>
+                    <div style={{fontSize:"0.6rem",color:C.muted}}>Wij bellen u terug op uw gewenste moment.</div>
+                  </div>
+                  <button onClick={()=>setTbOpen(false)} style={{background:"none",border:"none",color:C.muted,fontSize:22,cursor:"pointer"}}>✕</button>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",gap:10,marginBottom:12}}>
+                  {[["Voornaam *",tbNaam,setTbNaam,"Jan"],["Telefoonnummer *",tbTel,setTbTel,"06 12 34 56 78"]].map(([l,v,s,p])=>(
+                    <div key={l}>
+                      <div style={{fontSize:"0.52rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>{l}</div>
+                      <input value={v} onChange={e=>s(e.target.value)} placeholder={p} style={{...inp,fontSize:13,padding:"9px 12px"}}/>
+                    </div>
+                  ))}
+                </div>
+                <div style={{marginBottom:14}}>
+                  <div style={{fontSize:"0.52rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:8}}>Gewenst tijdstip</div>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    {[["☀️ Ochtend","Ochtend 09-12"],["🌤 Middag","Middag 12-17"],["🌙 Avond","Avond 17-20"]].map(([lbl,val])=>(
+                      <button key={val} onClick={()=>setTbTijd(tbTijd===val?"":val)}
+                        style={{padding:"8px 14px",borderRadius:99,background:tbTijd===val?"rgba(198,165,107,.15)":"rgba(255,255,255,.04)",border:`1px solid ${tbTijd===val?C.gold:C.bdr}`,color:tbTijd===val?C.gold:C.muted,fontSize:"0.66rem",cursor:"pointer",transition:"all .2s"}}>
+                        {lbl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginBottom:14}}>
+                  <div style={{fontSize:"0.52rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>Korte vraag (optioneel)</div>
+                  <textarea value={tbVraag} onChange={e=>setTbVraag(e.target.value)} placeholder="Bijv. prijs visgraat voor 40m²..." rows={3} style={{...inp,resize:"vertical",fontSize:13,padding:"9px 12px"}}/>
+                </div>
+                <button onClick={async()=>{
+                  if(!tbNaam.trim()||!tbTel.trim()) return;
+                  await simuleerEmail({aan:"Aureamaisonfloors@gmail.com",
+                    onderwerp:`📞 Terugbelverzoek — ${tbNaam} — ${tbTijd||"Geen voorkeur"}`,
+                    type:"status_update",orderId:null,
+                    data:{naam:tbNaam,tel:tbTel,tijdstip:tbTijd||"Geen voorkeur",vraag:tbVraag}});
+                  setTbDone(true);
+                }} style={{width:"100%",padding:"12px",background:"rgba(198,165,107,.15)",border:`1px solid ${C.gold}`,color:C.gold,fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:8}}>
+                  Terugbelverzoek indienen →
+                </button>
+                <p style={{fontSize:"0.58rem",color:C.dim,textAlign:"center",marginTop:8}}>Wij bellen u terug binnen 4 uur tijdens kantoortijden.</p>
+              </>
+            ) : (
+              <div style={{textAlign:"center",padding:"24px 0"}}>
+                <div style={{fontSize:44,marginBottom:12}}>📞</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.5rem",color:C.white,marginBottom:8}}>Verzoek ontvangen!</div>
+                <p style={{fontSize:"0.7rem",color:C.muted,marginBottom:20}}>Wij bellen u zo snel mogelijk terug{tbTijd?` (${tbTijd})`:""}.</p>
+                <button onClick={()=>setTbOpen(false)} style={{padding:"10px 24px",background:"none",border:`1px solid ${C.bdr}`,color:C.muted,cursor:"pointer",borderRadius:7,fontSize:"0.62rem"}}>← Sluiten</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ══ SHOWROOM AAN HUIS MODAL ══ */}
+      {shOpen && (
+        <div style={{position:"fixed",inset:0,zIndex:9500,background:"rgba(5,5,5,.92)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}
+          onClick={e=>{if(e.target===e.currentTarget)setShOpen(false);}}>
+          <div style={{background:C.deep,border:`1px solid ${C.bdr}`,borderTopLeftRadius:20,borderTopRightRadius:20,width:"100%",maxWidth:500,animation:"slideUp .3s ease",maxHeight:"92vh",overflowY:"auto"}}>
+
+            {/* Sticky header */}
+            <div style={{position:"sticky",top:0,background:C.deep,borderBottom:`1px solid ${C.bdr}`,padding:"16px 20px",display:"flex",alignItems:"center",gap:14,zIndex:2}}>
+              <div style={{width:46,height:46,borderRadius:10,background:"rgba(198,165,107,.1)",border:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.6rem",flexShrink:0}}>🏠</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:"0.46rem",letterSpacing:2,color:C.gold,textTransform:"uppercase"}}>Gratis service</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",color:C.white}}>Showroom aan Huis</div>
+              </div>
+              <button onClick={()=>setShOpen(false)} style={{background:"none",border:"none",color:C.muted,fontSize:22,cursor:"pointer",flexShrink:0}}>✕</button>
+            </div>
+
+            <div style={{padding:"18px 20px 36px"}}>
+              {!shDone ? (
+                <>
+                  <div style={{padding:"10px 14px",background:"rgba(60,184,122,.05)",border:"1px solid rgba(60,184,122,.2)",borderRadius:8,marginBottom:18,fontSize:"0.64rem",color:"#5ad4a2",lineHeight:1.8}}>
+                    ✓ Volledig gratis &nbsp;·&nbsp; Wij brengen 20+ stalen mee &nbsp;·&nbsp; U hoeft niets te doen
+                  </div>
+
+                  {/* Velden */}
+                  {[
+                    ["Uw naam *",       shNaam,  setShNaam,  "Jan de Vries",         "text"],
+                    ["E-mailadres",     shEmail, setShEmail, "jan@email.nl",         "email"],
+                    ["Telefoonnummer *",shTel,   setShTel,   "06 12 34 56 78",       "tel"],
+                    ["Bezoekadres *",   shAdres, setShAdres, "Straat + nr, Postcode, Stad","text"],
+                  ].map(([l,v,s,p,t])=>(
+                    <div key={l} style={{marginBottom:10}}>
+                      <div style={{fontSize:"0.5rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>{l}</div>
+                      <input type={t} value={v} onChange={e=>s(e.target.value)} placeholder={p} style={{...inp,fontSize:13,padding:"9px 12px"}}/>
+                    </div>
+                  ))}
+
+                  {/* Voorkeur datum */}
+                  <div style={{display:"grid",gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",gap:10,marginBottom:10}}>
+                    <div>
+                      <div style={{fontSize:"0.5rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>Voorkeursdatum</div>
+                      <input type="date" style={{...inp,fontSize:13,padding:"9px 12px"}} min={new Date().toISOString().split("T")[0]}
+                        onChange={e=>setShNaam(prev=>prev)} /* datum in aparte var — zie hieronder */
+                        id="sh-datum"/>
+                    </div>
+                    <div>
+                      <div style={{fontSize:"0.5rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>Voorkeurstijd</div>
+                      <select style={{...inp,fontSize:13,padding:"9px 12px"}} id="sh-tijd">
+                        {["Ochtend (9-12)","Middag (12-17)","Avond (17-20)","Gehele dag"].map(t=>(
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Dienst van interesse */}
+                  <div style={{marginBottom:16}}>
+                    <div style={{fontSize:"0.5rem",letterSpacing:1.5,color:C.muted,textTransform:"uppercase",marginBottom:4}}>Dienst van interesse</div>
+                    <select style={{...inp,fontSize:13,padding:"9px 12px"}} id="sh-dienst" defaultValue={det.title}>
+                      {Object.keys(DIENST_PRODUCTS).map(d=>(
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button onClick={async()=>{
+                    if(!shNaam.trim()||!shTel.trim()||!shAdres.trim()) { toast("Vul naam, telefoon en adres in","error"); return; }
+                    const datum = document.getElementById("sh-datum")?.value || "Niet opgegeven";
+                    const tijd  = document.getElementById("sh-tijd")?.value  || "Niet opgegeven";
+                    const dienst= document.getElementById("sh-dienst")?.value || det.title;
+                    const aanvraag = {
+                      id:"sh-"+Date.now(), naam:shNaam.trim(), email:shEmail.trim(),
+                      tel:shTel.trim(), adres:shAdres.trim(), datum, tijd, dienst,
+                      aangemeldAt:new Date().toISOString(), status:"Nieuw", bron:"dienst_detail",
+                    };
+                    await saveShowroomAanvraag(aanvraag);
+                    await simuleerEmail({aan:"Aureamaisonfloors@gmail.com",
+                      onderwerp:`🏠 Showroom aan huis — ${shNaam} — ${shAdres}`,
+                      type:"status_update",orderId:null,
+                      data:{naam:shNaam,email:shEmail,tel:shTel,adres:shAdres,
+                        datum,tijd,dienst,
+                        bericht:`Showroom aan huis aanvraag voor ${dienst}`}});
+                    setShDone(true);
+                  }} style={{width:"100%",padding:"13px",background:C.gold,border:"none",color:"#050505",fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:9}}>
+                    🏠 Afspraak aanvragen →
+                  </button>
+                  <p style={{fontSize:"0.58rem",color:C.dim,textAlign:"center",marginTop:8,lineHeight:1.7}}>Wij bevestigen uw afspraak binnen 24 uur. Volledig vrijblijvend.</p>
+                </>
+              ) : (
+                <div style={{textAlign:"center",padding:"32px 0"}}>
+                  <div style={{fontSize:52,marginBottom:14}}>🏠</div>
+                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.6rem",color:C.white,marginBottom:10}}>Aanvraag ontvangen!</div>
+                  <p style={{fontSize:"0.7rem",color:C.muted,lineHeight:1.8,marginBottom:24}}>
+                    Bedankt {shNaam.split(" ")[0] ? `, ${shNaam.split(" ")[0]}` : ""}! Wij nemen binnen 24 uur contact op om uw afspraak te bevestigen.
+                  </p>
+                  <button onClick={()=>setShOpen(false)} style={{padding:"11px 28px",background:"rgba(198,165,107,.1)",border:`1px solid ${C.gold}`,color:C.gold,cursor:"pointer",borderRadius:8,fontSize:"0.62rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase"}}>
+                    ← Sluiten
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
+
 /* ─── DIENSTEN CAROUSEL ──────────────────────────────────────── */
-export function DienstenCarousel({ goOfferte }: { goOfferte: () => void }) {
+export function DienstenCarousel({ goOfferte, goShowroom }: { goOfferte: () => void; goShowroom?: () => void }) {
   const mobile = useMobile();
   const [activeIdx, setActiveIdx] = useState(0);
   const [detail, setDetail] = useState<number | null>(null);
@@ -216,7 +1001,7 @@ export function DienstenCarousel({ goOfferte }: { goOfferte: () => void }) {
       </section>
       <div className={"amf-det-overlay" + (detail !== null ? " open" : "")} onClick={(e) => { if (e.target === e.currentTarget) setDetail(null); }}>
         <div className="amf-det-backdrop" onClick={() => setDetail(null)} />
-        {det && <DienstDetail det={det} onClose={() => setDetail(null)} onOfferte={() => { setDetail(null); goOfferte(); }} />}
+        {det && <DienstDetail det={det} onClose={() => setDetail(null)} onOfferte={() => { setDetail(null); goOfferte(); }} onShowroom={goShowroom} />}
       </div>
     </>
   );

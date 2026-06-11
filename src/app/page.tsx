@@ -7,6 +7,9 @@ import { useMobile } from "@/hooks/use-mobile";
 import { LLabel } from "@/components/landing/llabel";
 import { DienstenCarousel } from "@/components/landing/diensten-carousel";
 import { GallerySection } from "@/components/landing/gallery-section";
+import { LandingToastContainer } from "@/components/landing/toast-container";
+import QuoteForm from "@/components/landing/quote-form";
+import ShowroomModal from "@/components/landing/showroom-modal";
 
 const faqItems = [
   ["Hoe lang duurt het leggen van een vloer?","De meeste projecten worden afgerond in 1 tot 3 dagen. Bij grotere projecten bespreken wij de planning vooraf."],
@@ -15,131 +18,6 @@ const faqItems = [
   ["Zijn uw vloeren geschikt voor vloerverwarming?","Ja, wij installeren vloeren die geschikt zijn voor vloerverwarming. Dit bespreken wij altijd vooraf."],
   ["Wat kost een nieuwe vloer gemiddeld?","De prijs hangt af van het vloertype en de oppervlakte. Vraag een vrijblijvende offerte aan voor een nauwkeurige prijs op maat."],
 ];
-
-/* ─── SIMPLIFIED QUOTE FORM ─── */
-function QuoteForm({ onClose }: { onClose: () => void }) {
-  const mobile = useMobile();
-  const [step, setStep] = useState(1);
-  const [done, setDone] = useState(false);
-  const [form, setForm] = useState({ naam: "", email: "", tel: "", adres: "", vloer: "", m2: "", datum: "" });
-
-  if (done) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px", background: C.bg }}>
-        <div style={{ textAlign: "center", maxWidth: 400 }}>
-          <div style={{ fontSize: "3rem", marginBottom: 16 }}>✓</div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.8rem", fontWeight: 300, color: C.goldL, marginBottom: 10 }}>Offerte aanvraag ontvangen</h2>
-          <p style={{ fontSize: "0.75rem", color: C.muted, lineHeight: 1.8, marginBottom: 24 }}>Bedankt! Wij nemen binnen 24 uur contact met u op.</p>
-          <button onClick={onClose} style={{ padding: "12px 28px", background: C.gold, color: C.bg, fontSize: "0.65rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", border: "none", cursor: "pointer", borderRadius: 4 }}>Sluiten</button>
-        </div>
-      </div>
-    );
-  }
-
-  const field = (label: string, key: keyof typeof form, type = "text", placeholder = "", required = false) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: "block", fontSize: "0.56rem", letterSpacing: 2.5, textTransform: "uppercase", color: C.gold, marginBottom: 6 }}>{label}{required ? " *" : ""}</label>
-      <input type={type} value={form[key]} placeholder={placeholder} required={required}
-        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-        style={{ width: "100%", padding: "13px 16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(198,165,107,0.2)", borderRadius: 10, color: C.white, fontSize: 15, outline: "none", colorScheme: "dark" }} />
-    </div>
-  );
-
-  return (
-    <div style={{ minHeight: "100vh", background: C.bg, padding: mobile ? "80px 5% 40px" : "100px 7% 60px" }}>
-      <div style={{ maxWidth: 520, margin: "0 auto" }}>
-        <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>Stap {step} van 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: mobile ? "1.8rem" : "2.4rem", fontWeight: 300, color: C.white, marginBottom: 28 }}>
-          {step === 1 ? "Offerte aanvragen" : step === 2 ? "Projectgegevens" : "Contactgegevens"}
-        </h2>
-        {step === 1 && (
-          <>
-            {field("Vloertype", "vloer", "text", "bijv. Visgraat, PVC, Parket", true)}
-            {field("Oppervlakte (m²)", "m2", "number", "bijv. 45", true)}
-            <button onClick={() => setStep(2)} style={{ width: "100%", padding: "14px", background: C.gold, color: C.bg, fontSize: "0.65rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", border: "none", cursor: "pointer", borderRadius: 4, marginTop: 8 }}>Volgende stap →</button>
-          </>
-        )}
-        {step === 2 && (
-          <>
-            {field("Adres", "adres", "text", "Straat + huisnummer, postcode, stad", true)}
-            {field("Gewenste datum", "datum", "date")}
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setStep(1)} style={{ flex: 1, padding: "14px", background: "transparent", border: `1px solid ${C.bdr}`, color: C.muted, fontSize: "0.65rem", fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", borderRadius: 4 }}>← Terug</button>
-              <button onClick={() => setStep(3)} style={{ flex: 1, padding: "14px", background: C.gold, color: C.bg, fontSize: "0.65rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", border: "none", cursor: "pointer", borderRadius: 4 }}>Volgende stap →</button>
-            </div>
-          </>
-        )}
-        {step === 3 && (
-          <>
-            {field("Naam", "naam", "text", "Uw naam", true)}
-            {field("E-mail", "email", "email", "uw@email.nl", true)}
-            {field("Telefoon", "tel", "tel", "06 xxxxxxxx")}
-            <button onClick={() => setDone(true)} style={{ width: "100%", padding: "14px", background: C.gold, color: C.bg, fontSize: "0.65rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", border: "none", cursor: "pointer", borderRadius: 4, marginTop: 8 }}>Offerte aanvragen →</button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ─── SIMPLIFIED SHOWROOM MODAL ─── */
-function ShowroomModal({ onClose }: { onClose: () => void }) {
-  const mobile = useMobile();
-  const [done, setDone] = useState(false);
-  const [form, setForm] = useState({ naam: "", email: "", tel: "", adres: "" });
-
-  if (done) {
-    return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 9500, background: "rgba(5,5,5,.92)", backdropFilter: "blur(8px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderTopLeftRadius: 20, borderTopRightRadius: 20, width: "100%", maxWidth: 500, padding: "32px 20px", animation: "slideUp .3s ease" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 52, marginBottom: 14 }}>🏠</div>
-            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.5rem", color: C.white, marginBottom: 8 }}>Afspraak ontvangen!</div>
-            <p style={{ fontSize: "0.7rem", color: C.muted, marginBottom: 20 }}>Wij bevestigen uw showroombezoek binnen 24 uur.</p>
-            <button onClick={onClose} style={{ padding: "10px 24px", background: "none", border: `1px solid ${C.bdr}`, color: C.muted, cursor: "pointer", borderRadius: 7, fontSize: "0.62rem" }}>← Sluiten</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 9500, background: "rgba(5,5,5,.92)", backdropFilter: "blur(8px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderTopLeftRadius: 20, borderTopRightRadius: 20, width: "100%", maxWidth: 500, animation: "slideUp .3s ease", maxHeight: "92vh", overflowY: "auto" }}>
-        <div style={{ position: "sticky", top: 0, background: C.deep, borderBottom: `1px solid ${C.bdr}`, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, zIndex: 2 }}>
-          <div style={{ width: 46, height: 46, borderRadius: 10, background: "rgba(198,165,107,.1)", border: `1px solid ${C.bdr}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", flexShrink: 0 }}>🏠</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: "0.46rem", letterSpacing: 2, color: C.gold, textTransform: "uppercase" }}>Gratis service</div>
-            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1rem", color: C.white }}>Showroom aan Huis</div>
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer", flexShrink: 0 }}>✕</button>
-        </div>
-        <div style={{ padding: "18px 20px 36px" }}>
-          <div style={{ padding: "10px 14px", background: "rgba(60,184,122,.05)", border: "1px solid rgba(60,184,122,.2)", borderRadius: 8, marginBottom: 18, fontSize: "0.64rem", color: "#5ad4a2", lineHeight: 1.8 }}>
-            ✓ Volledig gratis · Wij brengen 20+ stalen mee · U hoeft niets te doen
-          </div>
-          {[
-            ["Uw naam *", "naam", "text", "Jan de Vries"],
-            ["E-mailadres", "email", "email", "jan@email.nl"],
-            ["Telefoonnummer *", "tel", "tel", "06 12 34 56 78"],
-            ["Bezoekadres *", "adres", "text", "Straat + nr, Postcode, Stad"],
-          ].map(([l, k, t, p]) => (
-            <div key={k} style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: "0.5rem", letterSpacing: 1.5, color: C.muted, textTransform: "uppercase", marginBottom: 4 }}>{l}</div>
-              <input type={t} value={form[k as keyof typeof form]} placeholder={p}
-                onChange={(e) => setForm((f) => ({ ...f, [k]: e.target.value }))}
-                style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(198,165,107,0.2)", borderRadius: 10, color: C.white, fontSize: 13, outline: "none", colorScheme: "dark" }} />
-            </div>
-          ))}
-          <button onClick={() => setDone(true)} style={{ width: "100%", padding: "13px", background: C.gold, border: "none", color: "#050505", fontSize: "0.65rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", borderRadius: 9, marginTop: 8 }}>
-            🏠 Afspraak aanvragen →
-          </button>
-          <p style={{ fontSize: "0.58rem", color: C.dim, textAlign: "center", marginTop: 8, lineHeight: 1.7 }}>Wij bevestigen uw afspraak binnen 24 uur. Volledig vrijblijvend.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ═══════════════════════════════════════════════════════════════
    LANDING PAGE
@@ -152,6 +30,7 @@ export default function Home() {
   const [faq, setFaq] = useState<number | null>(null);
   const [contactSent, setContactSent] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [quoteSent, setQuoteSent] = useState(false);
   const [showroomOpen, setShowroomOpen] = useState(false);
 
   useEffect(() => {
@@ -294,7 +173,7 @@ export default function Home() {
       </div>
 
       {/* DIENSTEN */}
-      <DienstenCarousel goOfferte={() => setQuoteOpen(true)} />
+      <DienstenCarousel goOfferte={() => setQuoteOpen(true)} goShowroom={() => setShowroomOpen(true)} />
 
       {/* PORTAAL SECTIE */}
       <section id="portaal" style={{ padding: mobile ? "60px 5%" : "100px 7%", background: C.bg, position: "relative", overflow: "hidden" }}>
@@ -571,8 +450,8 @@ export default function Home() {
       {/* QUOTE MODAL */}
       {quoteOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9500, background: C.bg, overflowY: "auto", animation: "fadeIn .3s ease" }}>
-          <button onClick={() => { setQuoteOpen(false); }} style={{ position: "fixed", top: 20, right: 24, zIndex: 9600, fontFamily: "'Cormorant Garamond',serif", fontSize: "2.2rem", color: C.muted, cursor: "pointer", background: "none", border: "none", lineHeight: 1 }}>×</button>
-          <QuoteForm onClose={() => { setQuoteOpen(false); }} />
+          <button onClick={() => { setQuoteOpen(false); setQuoteSent(false); }} style={{ position: "fixed", top: 20, right: 24, zIndex: 9600, fontFamily: "'Cormorant Garamond',serif", fontSize: "2.2rem", color: C.muted, cursor: "pointer", background: "none", border: "none", lineHeight: 1 }}>×</button>
+          <QuoteForm onClose={() => { setQuoteOpen(false); }} onDone={() => setQuoteSent(true)} />
         </div>
       )}
 
@@ -580,6 +459,8 @@ export default function Home() {
       {showroomOpen && (
         <ShowroomModal onClose={() => setShowroomOpen(false)} />
       )}
+
+      <LandingToastContainer />
     </div>
   );
 }
