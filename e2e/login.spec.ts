@@ -5,7 +5,10 @@ const BASE_URL = "https://www.aureamaisonfloors.nl";
 test.describe("Aurea Maison E2E Tests", () => {
   test.setTimeout(60000);
 
-  test("Login flow with test account", async ({ page }) => {
+  test("Login flow with test account", async ({ browser }) => {
+    // Create fresh incognito context
+    const context = await browser.newContext();
+    const page = await context.newPage();
     const consoleLogs: string[] = [];
     const errors: string[] = [];
     const httpErrors: string[] = [];
@@ -36,6 +39,7 @@ test.describe("Aurea Maison E2E Tests", () => {
     // 1. Open login page
     console.log("\n=== STEP 1: Opening login page ===");
     await page.context().clearCookies();
+    await page.setExtraHTTPHeaders({ "Cache-Control": "no-cache", "Pragma": "no-cache" });
     await page.goto(`${BASE_URL}/login?cb=${Date.now()}`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: "e2e/screenshots/01-login-page.png", fullPage: true });

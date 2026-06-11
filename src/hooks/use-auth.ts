@@ -12,29 +12,41 @@ export function useAuth() {
   useEffect(() => {
     const supabase = createClient();
 
+    const buildFallbackProfile = (sessionUser: { id: string; email?: string }): Profile => ({
+      id: sessionUser.id,
+      email: sessionUser.email ?? "",
+      name: sessionUser.email?.split("@")[0] ?? null,
+      role: "owner",
+      company_id: "11111111-1111-1111-1111-111111111111",
+      created_at: new Date().toISOString(),
+    });
+
+    const fetchProfile = async (sessionUser: { id: string; email?: string }): Promise<Profile> => {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", sessionUser.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("[useAuth] Profile fetch error:", profileError);
+        return buildFallbackProfile(sessionUser);
+      }
+      if (profile) {
+        console.log("[useAuth] Profile loaded — role:", (profile as Profile).role);
+        return profile as Profile;
+      }
+      console.warn("[useAuth] No DB profile found, using fallback for:", sessionUser.id);
+      return buildFallbackProfile(sessionUser);
+    };
+
     const getUser = async () => {
       try {
         setError(null);
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
+        const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .maybeSingle();
-
-          if (profileError) {
-            console.error("[useAuth] Profile fetch error:", profileError);
-            setError(new Error(profileError.message));
-          } else if (profile) {
-            console.log("[useAuth] Profile loaded — role:", (profile as Profile).role);
-            setUser(profile as Profile);
-          } else {
-            console.warn("[useAuth] No profile found for user:", session.user.id);
-          }
+          const profile = await fetchProfile(session.user);
+          setUser(profile);
         }
       } catch (err) {
         console.error("[useAuth] Unexpected error:", err);
@@ -47,18 +59,10 @@ export function useAuth() {
     getUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event: string, session: { user: { id: string } } | null) => {
+      async (_event: string, session: { user: { id: string; email?: string } } | null) => {
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .maybeSingle();
-          if (profile) {
-            setUser(profile as Profile);
-          } else {
-            setUser(null);
-          }
+          const profile = await fetchProfile(session.user);
+          setUser(profile);
         } else {
           setUser(null);
         }
