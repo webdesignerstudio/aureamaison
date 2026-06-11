@@ -39,19 +39,13 @@ export function captureErrors(page: Page): CaptureResult {
   return result;
 }
 
-export function assertNoCriticalErrors(result: CaptureResult, allowKnown403 = true) {
+export function assertNoCriticalErrors(result: CaptureResult) {
   const criticalConsole = result.consoleLogs.filter((l) =>
     l.includes("42P17") || l.includes("infinite recursion") || l.includes("Profile fetch error")
   );
-  const criticalHttp = result.httpErrors.filter((l) => {
-    // Allow known 403 from orders_read_client using auth.users subquery
-    // This is fixed in fix_rls_recursion.sql but needs to be run in Supabase
-    if (allowKnown403 && l.includes("42501") && l.includes("auth.users")) {
-      console.warn("[KNOWN ISSUE] 403 from orders_read_client — run fix_rls_recursion.sql in Supabase");
-      return false;
-    }
-    return l.includes("supabase") && (l.includes("500") || l.includes("42P17"));
-  });
+  const criticalHttp = result.httpErrors.filter((l) =>
+    l.includes("supabase") && (l.includes("500") || l.includes("42P17") || l.includes("403"))
+  );
 
   if (criticalConsole.length > 0 || criticalHttp.length > 0) {
     const msg = [
