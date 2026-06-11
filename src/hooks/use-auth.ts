@@ -33,8 +33,14 @@ export function useAuth() {
         return buildFallbackProfile(sessionUser);
       }
       if (profile) {
-        console.log("[useAuth] Profile loaded — role:", (profile as Profile).role);
-        return profile as Profile;
+        const p = profile as Profile;
+        // If company_id is null, use default so data queries work
+        if (!p.company_id) {
+          console.warn("[useAuth] Profile has no company_id, applying default");
+          p.company_id = "11111111-1111-1111-1111-111111111111";
+        }
+        console.log("[useAuth] Profile loaded — role:", p.role, "company:", p.company_id);
+        return p;
       }
       console.warn("[useAuth] No DB profile found, using fallback for:", sessionUser.id);
       return buildFallbackProfile(sessionUser);

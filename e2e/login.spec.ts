@@ -50,6 +50,9 @@ test.describe("Aurea Maison E2E Tests", () => {
     // 3. Submit and wait for dashboard
     await page.click('button[type="submit"]');
     await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    // Wait for dashboard content to fully render
+    await page.waitForSelector("h1", { timeout: 10000 });
+    await page.waitForLoadState("networkidle");
     await page.screenshot({ path: "e2e/screenshots/03-dashboard.png", fullPage: true });
 
     // 4. Log results
