@@ -20,8 +20,8 @@ export default function AdminPage() {
     const supabase = createClient();
     Promise.all([
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("companies").select("*").order("created_at", { ascending: false }),
+      supabase.rpc("get_all_profiles"),
+      supabase.rpc("get_all_companies"),
       supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(100),
     ]).then(([oRes, pRes, cRes, aRes]) => {
       setOrders((oRes.data as Order[]) || []);

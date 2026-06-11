@@ -47,6 +47,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- STAP 5: Drop en herstel alle RLS policies (schoon slate)
+-- WAARSCHUWING: profiles_read_admin met "SELECT FROM profiles" veroorzaakt
+-- infinite recursion (42P17). Gebruik SECURITY DEFINER RPC functies voor admin data.
 DROP POLICY IF EXISTS "profiles_read_own" ON profiles;
 DROP POLICY IF EXISTS "profiles_read_admin" ON profiles;
 DROP POLICY IF EXISTS "profiles_insert_own" ON profiles;
@@ -55,9 +57,6 @@ DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
 CREATE POLICY "profiles_read_own" ON profiles FOR SELECT USING (id = auth.uid());
 CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (id = auth.uid());
-CREATE POLICY "profiles_read_admin" ON profiles FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles AS p WHERE p.id = auth.uid() AND p.role = 'superadmin')
-);
 
 -- STAP 6: Verifieer het resultaat
 SELECT 
