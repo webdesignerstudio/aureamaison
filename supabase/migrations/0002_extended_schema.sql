@@ -164,6 +164,12 @@ CREATE POLICY "orders_read_legger" ON orders FOR SELECT USING (
   legger_id = auth.uid()
 );
 
+-- ── Extra RLS: klanten mogen orders lezen waar zij de klant zijn ──
+CREATE POLICY "orders_read_client" ON orders FOR SELECT USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'client')
+  AND client_email = (SELECT email FROM auth.users WHERE id = auth.uid())
+);
+
 -- ═══════════════════════════════════════════════════════════════
 -- 4. HUIDIGE PROFIELEN BIJWERKEN
 -- ═══════════════════════════════════════════════════════════════
