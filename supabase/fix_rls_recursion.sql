@@ -10,6 +10,7 @@
 DROP POLICY IF EXISTS "profiles_read_admin" ON profiles;
 
 -- STAP 2: Zorg dat alleen de veilige policies overblijven
+DROP POLICY IF EXISTS "profiles_read_own" ON profiles;
 DROP POLICY IF EXISTS "profiles_insert_own" ON profiles;
 DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
 
@@ -39,8 +40,17 @@ AS $$
   SELECT * FROM companies ORDER BY created_at DESC;
 $$;
 
--- STAP 5: Verifieer dat policies correct zijn
+-- STAP 5: Fix orders_read_client die auth.users query doet (403 permission denied)
+-- auth.users is niet toegankelijk voor authenticated role; gebruik auth.email() ipv subquery
+DROP POLICY IF EXISTS "orders_read_client" ON orders;
+CREATE POLICY "orders_read_client" ON orders FOR SELECT USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'client')
+  AND client_email = auth.email()
+);
+
+-- STAP 6: Verifieer dat policies correct zijn
 SELECT 
   schemaname, tablename, policyname, permissive, roles, cmd, qual
 FROM pg_policies 
-WHERE tablename = 'profiles';
+WHERE tablename IN ('profiles', 'orders')
+ORDER BY tablename, policyname;

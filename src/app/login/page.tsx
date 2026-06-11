@@ -91,10 +91,11 @@ export default function LoginPage() {
           )}
 
           <div className="mb-4">
-            <label className="mb-1.5 block text-sm font-medium text-muted">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-muted">
               E-mailadres
             </label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -105,10 +106,11 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-6">
-            <label className="mb-1.5 block text-sm font-medium text-muted">
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-muted">
               Wachtwoord
             </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

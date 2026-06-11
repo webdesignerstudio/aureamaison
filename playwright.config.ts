@@ -8,8 +8,11 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "list",
   use: {
+    baseURL: "https://www.aureamaisonfloors.nl",
     trace: "on-first-retry",
     headless: true,
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   projects: [
     {
