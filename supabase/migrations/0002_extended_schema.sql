@@ -159,6 +159,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- ── Extra RLS: leggers mogen eigen toegewezen orders lezen ──
+CREATE POLICY "orders_read_legger" ON orders FOR SELECT USING (
+  legger_id = auth.uid()
+);
+
 -- ═══════════════════════════════════════════════════════════════
 -- 4. HUIDIGE PROFIELEN BIJWERKEN
 -- ═══════════════════════════════════════════════════════════════
