@@ -6,6 +6,8 @@ export interface Profile {
   name: string | null;
   role: UserRole;
   company_id: string | null;
+  onboarding_status: "pending" | "approved" | "rejected";
+  onboarding_data: Record<string, unknown>;
   created_at: string;
 }
 
@@ -54,9 +56,16 @@ export interface Order {
   legger_id: string | null;
   legger_naam: string | null;
   legger_prijs: number | null;
+  legger_geaccepteerd: boolean | null;
+  legger_gestart_at: string | null;
+  legger_afgerond_at: string | null;
   opmerking: string | null;
   kamers: string | null;
   notes: string | null;
+  datum: string | null;
+  bedrijf: string | null;
+  kvk: string | null;
+  btw: string | null;
   company_id: string;
   created_at: string;
   updated_at: string;
@@ -74,6 +83,8 @@ export interface Legger {
   iban: string | null;
   tarief: number | null;
   tier: number;
+  stad: string | null;
+  beschikbaarheid: unknown;
   status: "actief" | "inactief";
   company_id: string;
   created_at: string;
@@ -89,6 +100,8 @@ export interface Offerte {
   status: "ingediend" | "verstuurd" | "geaccepteerd" | "afgewezen";
   verstuurd_at: string | null;
   geaccepteerd_at: string | null;
+  notities: string | null;
+  geldigheid_dagen: number | null;
   company_id: string;
   created_at: string;
 }
@@ -109,4 +122,55 @@ export interface Settings {
   factuur_voetnoot: string | null;
   offerte_geldigheid: number;
   company_id: string | null;
+}
+
+export interface AuditLog {
+  id: string;
+  actie: string;
+  entity_type: string;
+  entity_id: string | null;
+  user_id: string | null;
+  user_naam: string | null;
+  user_rol: string | null;
+  oude_data: Record<string, unknown> | null;
+  nieuwe_data: Record<string, unknown> | null;
+  notitie: string | null;
+  company_id: string | null;
+  created_at: string;
+}
+
+export interface ShowroomAanvraag {
+  id: string;
+  naam: string;
+  email: string;
+  telefoon: string | null;
+  adres: string | null;
+  postcode: string | null;
+  datum_voorkeur: string | null;
+  opmerking: string | null;
+  company_id: string | null;
+  status: "open" | "afgerond" | "geannuleerd";
+  created_at: string;
+}
+
+export interface Review {
+  id: string;
+  order_id: string | null;
+  legger_id: string | null;
+  sterren: number;
+  opmerking: string | null;
+  company_id: string;
+  created_at: string;
+}
+
+export interface Abonnement {
+  id: string;
+  company_id: string | null;
+  type: "bedrijf" | "legger";
+  plan: "starter" | "professional" | "business";
+  tier: number | null;
+  status: "proefperiode" | "actief" | "verlopen" | "bevroren" | "openstaand";
+  start_datum: string | null;
+  maanden: number | null;
+  created_at: string;
 }

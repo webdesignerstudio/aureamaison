@@ -18,6 +18,8 @@ export function useAuth() {
       name: sessionUser.email?.split("@")[0] ?? null,
       role: "owner",
       company_id: "11111111-1111-1111-1111-111111111111",
+      onboarding_status: "approved",
+      onboarding_data: {},
       created_at: new Date().toISOString(),
     });
 
