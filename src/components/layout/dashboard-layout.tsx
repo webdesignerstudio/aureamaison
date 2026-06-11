@@ -12,12 +12,14 @@ const NAV_ITEMS: Record<string, { href: string; label: string }[]> = {
     { href: "/dashboard/orders", label: "Orders" },
     { href: "/dashboard/offertes", label: "Offertes" },
     { href: "/dashboard/leggers", label: "Leggers" },
+    { href: "/dashboard/klanten", label: "Klanten" },
     { href: "/dashboard/settings", label: "Instellingen" },
   ],
   keyuser: [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/orders", label: "Orders" },
     { href: "/dashboard/offertes", label: "Offertes" },
+    { href: "/dashboard/klanten", label: "Klanten" },
   ],
   office: [
     { href: "/dashboard", label: "Dashboard" },

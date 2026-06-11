@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLeggers } from "@/hooks/use-leggers";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -55,9 +56,9 @@ export function LeggersList({ companyId }: LeggersListProps) {
                 className="transition-colors hover:bg-gold/5"
               >
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">
+                  <Link href={`/dashboard/leggers/${legger.id}`} className="font-medium text-foreground hover:text-gold">
                     {legger.naam}
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-sm text-muted">
                   <div>{legger.email}</div>

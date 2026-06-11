@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useOffertes } from "@/hooks/use-offertes";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -56,9 +57,9 @@ export function OffertesList({ companyId }: OffertesListProps) {
                 className="transition-colors hover:bg-gold/5"
               >
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">
+                  <Link href={`/dashboard/offertes/${offerte.id}`} className="font-medium text-foreground hover:text-gold">
                     {offerte.client_name}
-                  </div>
+                  </Link>
                   <div className="text-xs text-muted">{offerte.client_email}</div>
                 </td>
                 <td className="px-4 py-3 text-sm text-muted">
