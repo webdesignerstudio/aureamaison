@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { amount, description, redirectUrl } = body;
+    const { amount, description, redirectUrl, metadata } = body;
 
     if (!amount || !description) {
       return NextResponse.json(
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
         redirectUrl: redirectUrl || `${process.env.NEXT_PUBLIC_BASE_URL || ""}/dashboard`,
         webhookUrl: `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/payments/webhook`,
         method: "ideal",
+        metadata: body.metadata || {},
       }),
     });
 
