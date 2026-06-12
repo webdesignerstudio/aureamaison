@@ -233,32 +233,51 @@ export async function POST(req: NextRequest) {
 
     const data = generateData();
 
-    // ── CREATE AUTH USERS ──
-    const ownerId = (await supabase.auth.admin.createUser({
-      email: "eigenaar@aurea.nl", password: "aurea2025", email_confirm: true,
-      user_metadata: { name: "Aurea Eigenaar", role: "owner", company_id: COMPANY_ID },
-    })).data.user!.id;
+    // ── FETCH EXISTING USERS ──
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const existingByEmail = new Map<string, string>();
+    for (const u of existingUsers?.users || []) {
+      if (u.email) existingByEmail.set(u.email.toLowerCase(), u.id);
+    }
 
-    const adminId = (await supabase.auth.admin.createUser({
-      email: "admin@aurea.nl", password: "admin2025", email_confirm: true,
-      user_metadata: { name: "Super Admin", role: "superadmin", company_id: COMPANY_ID },
-    })).data.user!.id;
+    // ── CREATE AUTH USERS (skip if exists) ──
+    async function getOrCreateUser(email: string, password: string, meta: any): Promise<string> {
+      const lower = email.toLowerCase();
+      if (existingByEmail.has(lower)) return existingByEmail.get(lower)!;
+
+      const { data, error } = await supabase.auth.admin.createUser({
+        email, password, email_confirm: true, user_metadata: meta,
+      });
+      if (error) throw new Error(`Auth create failed for ${email}: ${error.message}`);
+      if (!data?.user?.id) throw new Error(`Auth returned null for ${email}`);
+      existingByEmail.set(lower, data.user.id);
+      return data.user.id;
+    }
+
+    const ownerId = await getOrCreateUser(
+      "eigenaar@aurea.nl", "aurea2025",
+      { name: "Aurea Eigenaar", role: "owner", company_id: COMPANY_ID }
+    );
+    const adminId = await getOrCreateUser(
+      "admin@aurea.nl", "admin2025",
+      { name: "Super Admin", role: "superadmin", company_id: COMPANY_ID }
+    );
 
     const leggerIds: string[] = [];
     for (const leg of data.leggers) {
-      const uid = (await supabase.auth.admin.createUser({
-        email: leg.email, password: "legger123", email_confirm: true,
-        user_metadata: { name: leg.name, role: "legger", company_id: COMPANY_ID },
-      })).data.user!.id;
+      const uid = await getOrCreateUser(
+        leg.email, "legger123",
+        { name: leg.name, role: "legger", company_id: COMPANY_ID }
+      );
       leggerIds.push(uid);
     }
 
     const clientIds: string[] = [];
     for (const client of data.clients) {
-      const uid = (await supabase.auth.admin.createUser({
-        email: client.email, password: "klant123", email_confirm: true,
-        user_metadata: { name: client.name, role: "client", company_id: COMPANY_ID },
-      })).data.user!.id;
+      const uid = await getOrCreateUser(
+        client.email, "klant123",
+        { name: client.name, role: "client", company_id: COMPANY_ID }
+      );
       clientIds.push(uid);
     }
 
