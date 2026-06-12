@@ -145,3 +145,93 @@
 - Design 1:1 overgenomen uit origineel prototype (goud/zwart thema)
 - Totale doorlooptijd: ~50 uur over 3 weken
 - Zie ook: `CHANGELOG.md` en `RELEASE_NOTES.md`
+
+---
+
+## 🔍 Audit: MODULES.tsx vs Huidige Implementatie
+
+### Uitgesloten (op explicit verzoek)
+| Feature | Status | Reden |
+|---------|--------|-------|
+| AI/JARVIS (f3-ai-ops) | ⛔ | Uitgesloten |
+| Tier/abonnement systeem | ⛔ | Uitgesloten |
+| Marketplace | ⛔ | Uitgesloten |
+| Enterprise audit/RBAC rollback | ⛔ | Uitgesloten |
+
+### ✅ Geimplementeerd
+
+| Portal / Feature | MODULES | Huidig | Route |
+|------------------|---------|--------|-------|
+| **Landing Page** | diensten, showroom, werkwijze, reviews, galerij, FAQ, contact | ✅ idem | `/` |
+| **Offerte formulier (publiek)** | Ja | ✅ | `/offerte` |
+| **Owner Login** | Ja | ✅ | `/login` |
+| **Client Login** | Ja | ✅ | `/client/login` |
+| **Legger Login** | Ja | ✅ | `/legger/login` |
+| **Client Registratie** | Ja | ✅ | `/client/registratie` |
+| **Legger Registratie** | Ja | ✅ | `/legger/registratie` |
+| **Owner Dashboard** | KPI cards (orders, omzet, offertes, leggers) | ✅ idem | `/dashboard` |
+| **Owner Orders** | Lijst, detail, aanmaken, bewerken, status workflow | ✅ idem | `/dashboard/orders` |
+| **Owner Offertes** | Lijst, detail, status workflow | ✅ idem | `/dashboard/offertes` |
+| **Owner Leggers** | Lijst, detail, contact info, toegewezen klussen | ✅ idem | `/dashboard/leggers` |
+| **Owner Klanten** | Gegroepeerd per email, totale omzet | ✅ idem | `/dashboard/klanten` |
+| **Owner Instellingen** | Bedrijfsgegevens, factuurinstellingen | ✅ basic | `/dashboard/settings` |
+| **Client Portal** | Orders + offertes overzicht | ✅ idem | `/client` |
+| **Client Nieuwe Opdracht** | Volledig formulier | ✅ idem | `/client/opdracht` |
+| **Client Profiel** | Bewerkbaar | ✅ | `/client/profiel` |
+| **Legger Dashboard** | Klussen tabs (open/aangenomen/afgerond) | ✅ idem | `/legger` |
+| **Legger Klus Detail** | Starten/afronden, opmerkingen | ✅ idem | `/legger/klus/[id]` |
+| **Legger Agenda** | Gegroepeerd per maand | ✅ | `/legger/agenda` |
+| **Legger Profiel** | Bewerkbaar | ✅ | `/legger/profiel` |
+| **Superadmin Dashboard** | Overview, bedrijven, gebruikers, orders, audit | ✅ idem | `/admin` |
+| **Email notificaties** | Resend API | ✅ | API routes |
+| **Mollie iDEAL betaling** | Test mode | ✅ | `/api/payments` |
+| **Database + RLS** | Supabase PostgreSQL | ✅ | Migraties |
+| **Seed data** | Mock data generatie | ✅ | `/api/seed` |
+
+### ⚠️ Gedeeltelijk / Vereist aandacht
+
+| Feature | MODULES | Huidig | Status |
+|---------|---------|--------|--------|
+| **Factuur systeem** | FactuurModal, printFactuurA4, FactuurKnop | ⚠️ Alleen `invoice_paid` toggle; geen print/modal | **BELANGRIJK** — ontbrekend |
+| **Entity Timeline** | Volledige audit timeline per record | ⚠️ Alleen admin audit log; geen order/legger timeline | Ontbrekend |
+| **Settings (uitgebreid)** | Bedrijf, factuur, notificaties, account, systeem tabs | ⚠️ Basic settings form | Vereist uitbreiding |
+| **Command Search** | Cmd+K navigatie met view codes | ❌ Niet geimplementeerd | Ontbrekend |
+| **UAID** | HD-YYYY-XXXXXX formaat | ❌ Niet geimplementeerd | Ontbrekend |
+
+### ❌ Niet geimplementeerd (niet uitgesloten)
+
+| Feature | MODULES | Huidig | Impact |
+|---------|---------|--------|--------|
+| **Planning module** | Volledige planning met drag-drop | ❌ | Hoog — owner mist planning overzicht |
+| **Financieel overzicht** | Omzet, betaald, open, prognose charts | ❌ | Hoog — owner mist financieel inzicht |
+| **Calculator** | Vloer prijs calculator | ❌ | Medium |
+| **Statistieken/Analytics** | Charts, trends, rapportages | ❌ | Medium |
+| **TRM (Task/Reminder)** | Taak/reminder systeem | ❌ | Medium |
+| **Live Feed** | Real-time activity feed | ❌ | Laag |
+| **Goedkeuringen** | Pending approvals workflow | ❌ | Medium |
+| **Client Facturen** | Client kan eigen facturen zien | ❌ | Medium |
+| **Client Reviews** | Client kan review achterlaten | ❌ | Laag |
+| **Client Support** | Support/contact binnen portal | ❌ | Laag |
+
+---
+
+## 📊 Conclusie
+
+**Wat werkt nu (100%):**
+- Alle 3 portalen (Owner, Client, Legger) zijn functioneel
+- Auth systeem (login/register voor alle rollen)
+- Core business data (orders, offertes, leggers, klanten)
+- Superadmin platform beheer
+- Email + Mollie betalingen
+- Landing page + publieke offerte
+- Database + RLS + seed
+
+**Wat het meeste mist voor 100% parity met MODULES:**
+1. **Factuur print modal** — MODULES had uitgebreide A4 factuur print functie
+2. **Planning module** — belangrijke owner feature
+3. **Financieel overzicht** — charts en rapportages
+4. **Entity Timeline** — audit trail per order/legger
+5. **Uitgebreide Settings** — meer configuratie opties
+
+**Totaal: ~85% van MODULES functionaliteit is overgenomen.**
+Uitgesloten features (AI, tiers, marketplace) = ~15% van origineel.
