@@ -37,9 +37,9 @@ export default function LeggerProfielPage() {
       .select("*")
       .eq("profiel_id", user.id)
       .single()
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: Legger | null; error: { message: string } | null }) => {
         if (!error && data) {
-          const l = data as Legger;
+          const l = data;
           setLegger(l);
           setForm({
             naam: l.naam,

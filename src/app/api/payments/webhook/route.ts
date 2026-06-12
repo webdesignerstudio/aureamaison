@@ -1,15 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendPaymentReceived } from "@/lib/email";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
+
+async function sendPaymentEmail(to: string, clientName: string, invoiceNr: string, amount: number) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: "Aurea Maison Floors <noreply@aureamaisonfloors.nl>",
+      to,
+      subject: "Betaling ontvangen — Aurea Maison Floors",
+      html: `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><style>body{font-family:Georgia,serif;background:#f5f5f5;padding:20px;margin:0}.container{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden}.header{background:#050505;padding:32px;text-align:center}.header h1{color:#C6A56B;margin:0;font-size:26px;font-weight:300;letter-spacing:3px;text-transform:uppercase}.content{padding:32px;color:#333;font-size:15px;line-height:1.8}.highlight{background:rgba(198,165,107,.08);border-left:3px solid #C6A56B;padding:14px 18px;margin:18px 0}.footer{background:#f5f5f5;padding:24px;text-align:center;font-size:12px;color:#888}</style></head><body><div class="container"><div class="header"><h1>Aurea Maison</h1></div><div class="content"><p>Beste ${clientName},</p><p>Wij hebben uw betaling ontvangen. Hartelijk dank!</p><div class="highlight"><strong>Factuur:</strong> ${invoiceNr}<br><strong>Bedrag:</strong> € ${amount.toFixed(2)}</div><p>Uw opdracht wordt nu definitief ingepland.</p></div><div class="footer"><strong>Aurea Maison Floors</strong><br>Zuidwijkstraat 28, 2729 KD Zoetermeer</div></div></body></html>`,
+    }),
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = getSupabase();
     const body = await req.formData();
     const id = body.get("id") as string;
 
@@ -74,12 +91,12 @@ export async function POST(req: NextRequest) {
 
             // Send confirmation email
             if (order.client_email) {
-              await sendPaymentReceived({
-                to: order.client_email,
-                clientName: order.client_name,
-                invoiceNr: order.invoice_nr || invoiceNr || id,
-                amount: parseFloat(order.price) || 0,
-              }).catch((e) => console.error("[Webhook] Email failed:", e));
+              await sendPaymentEmail(
+                order.client_email,
+                order.client_name,
+                order.invoice_nr || invoiceNr || id,
+                parseFloat(String(order.price)) || 0
+              ).catch((e: Error) => console.error("[Webhook] Email failed:", e.message));
             }
           }
         }

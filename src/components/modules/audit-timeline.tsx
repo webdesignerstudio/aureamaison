@@ -23,8 +23,8 @@ export function AuditTimeline({ entityId, entityType }: AuditTimelineProps) {
       .eq("entity_id", entityId)
       .eq("entity_type", entityType)
       .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setEvents((data as AuditLog[]) || []);
+      .then(({ data }: { data: AuditLog[] | null }) => {
+        setEvents(data || []);
         setLoading(false);
       });
   }, [entityId, entityType]);

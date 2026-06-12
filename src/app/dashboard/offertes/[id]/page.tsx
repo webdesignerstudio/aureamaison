@@ -34,11 +34,11 @@ export default function OfferteDetailPage() {
       .select("*")
       .eq("id", id)
       .single()
-      .then(({ data, error: fetchError }) => {
+      .then(({ data, error: fetchError }: { data: Offerte | null; error: { message: string } | null }) => {
         if (fetchError) {
           setError(fetchError.message);
         } else {
-          setOfferte(data as Offerte);
+          setOfferte(data);
         }
         setLoading(false);
       });

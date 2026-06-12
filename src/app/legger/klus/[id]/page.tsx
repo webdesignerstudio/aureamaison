@@ -31,9 +31,9 @@ export default function LeggerKlusPage() {
       .select("*")
       .eq("id", id)
       .single()
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: Order | null; error: { message: string } | null }) => {
         if (error) { console.error(error); }
-        else { setOrder(data as Order); }
+        else { setOrder(data); }
         setLoading(false);
       });
   }, [id]);
