@@ -4,8 +4,9 @@
 import { useState } from "react";
 import { C } from "@/lib/landing/colors";
 import { useMobile } from "@/hooks/use-mobile";
-import { saveShowroomAanvraag, simuleerEmail, inp } from "@/lib/landing/utils";
+import { saveShowroomAanvraag, inp } from "@/lib/landing/utils";
 import { DIENST_PRODUCTS } from "@/lib/landing/data";
+import { sendEmail, sendShowroomConfirmation } from "@/lib/email";
 
 function ShowroomModal({ onClose, prefDienst="" }: { onClose: () => void; prefDienst?: string }) {
   const mobile = useMobile();
@@ -31,10 +32,25 @@ function ShowroomModal({ onClose, prefDienst="" }: { onClose: () => void; prefDi
       status: "Nieuw", bron: "website",
     };
     await saveShowroomAanvraag(aanvraag);
-    await simuleerEmail({ aan:"Aureamaisonfloors@gmail.com",
-      onderwerp:`🏠 Showroom aan huis — ${naam} — ${adres}`,
-      type:"status_update", orderId:null,
-      data:{ naam, email, tel, adres, datum:datum||"Niet opgegeven", tijd, dienst }});
+
+    // Notify owner via email
+    await sendEmail(
+      "Aureamaisonfloors@gmail.com",
+      `🏠 Showroom aan huis — ${naam} — ${adres}`,
+      `<p><strong>Nieuwe showroom aanvraag</strong></p>
+      <p>Naam: ${naam}<br>Email: ${email}<br>Tel: ${tel}<br>Adres: ${adres}<br>Datum: ${datum || "Niet opgegeven"}<br>Tijd: ${tijd}<br>Dienst: ${dienst}</p>`
+    );
+
+    // Send confirmation to user if email provided
+    if (email.trim()) {
+      await sendShowroomConfirmation({
+        to: email.trim(),
+        naam: naam.trim(),
+        datum: datum || "binnenkort",
+        tijd,
+      }).catch(() => {});
+    }
+
     setSending(false); setDone(true);
   };
 

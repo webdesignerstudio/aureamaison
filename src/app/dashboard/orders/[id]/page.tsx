@@ -16,6 +16,7 @@ import { useToastContext } from "@/components/toast-provider";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Order } from "@/types";
+import { sendStatusUpdate, sendLeggerAssigned } from "@/lib/email";
 
 const STATUS_FLOW: Record<string, string[]> = {
   ingediend: ["in behandeling"],
@@ -50,11 +51,11 @@ export default function OrderDetailPage() {
       .select("*")
       .eq("id", id)
       .single()
-      .then(({ data, error: fetchError }) => {
+      .then(({ data, error: fetchError }: { data: Order | null; error: { message: string } | null }) => {
         if (fetchError) {
           setError(fetchError.message);
         } else {
-          setOrder(data as Order);
+          setOrder(data);
         }
         setLoading(false);
       });
@@ -66,6 +67,17 @@ export default function OrderDetailPage() {
       await updateOrder.mutateAsync({ id: order.id, status: newStatus as Order["status"] });
       setOrder((prev) => prev ? { ...prev, status: newStatus as Order["status"] } : null);
       toast.success(`Status gewijzigd naar: ${newStatus}`);
+
+      // Send email notification to client
+      if (order.client_email) {
+        sendStatusUpdate({
+          to: order.client_email,
+          clientName: order.client_name,
+          orderId: order.uaid || order.id.slice(0, 8),
+          status: newStatus,
+          vloerType: order.vloer_type || "vloer",
+        }).catch(() => {}); // silently fail — don't block UX
+      }
     } catch {
       toast.error("Status wijzigen mislukt");
     }
@@ -84,6 +96,17 @@ export default function OrderDetailPage() {
         prev ? { ...prev, legger_id: leggerId, legger_naam: legger?.naam || null } : null
       );
       toast.success("Legger toegewezen");
+
+      // Send email notification to client
+      if (order.client_email && legger) {
+        sendLeggerAssigned({
+          to: order.client_email,
+          clientName: order.client_name,
+          leggerNaam: legger.naam,
+          orderId: order.uaid || order.id.slice(0, 8),
+          datum: order.datum ? new Date(order.datum).toLocaleDateString("nl-NL") : undefined,
+        }).catch(() => {});
+      }
     } catch {
       toast.error("Legger toewijzen mislukt");
     }

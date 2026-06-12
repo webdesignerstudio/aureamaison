@@ -6,6 +6,7 @@ import { GoldButton } from "@/components/ui/gold-button";
 import { Spinner } from "@/components/ui/spinner";
 import { generateUAID } from "@/lib/utils";
 import { useToastContext } from "@/components/toast-provider";
+import { sendOrderConfirmation } from "@/lib/email";
 
 interface OrderFormProps {
   onSuccess?: () => void;
@@ -37,7 +38,7 @@ export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
     e.preventDefault();
 
     try {
-      await createOrder.mutateAsync({
+      const newOrder = await createOrder.mutateAsync({
         uaid: generateUAID(),
         client_name: form.client_name,
         client_email: form.client_email,
@@ -54,11 +55,28 @@ export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
         company_id: companyId,
       });
       success("Order succesvol aangemaakt!");
+
+      // Send confirmation email to client
+      if (form.client_email) {
+        sendOrderConfirmation({
+          to: form.client_email,
+          clientName: form.client_name,
+          orderId: newOrder.uaid || newOrder.id.slice(0, 8),
+          vloerType: form.vloer_type || "vloer",
+          oppervlakte: form.oppervlakte ? parseInt(form.oppervlakte) : null,
+        }).catch(() => {});
+      }
+
       onSuccess?.();
     } catch (err) {
       error("Er is een fout opgetreden bij het aanmaken van de order.");
     }
   };
+
+  const VLOER_TYPES = [
+    "Visgraat", "Laminaat", "PVC Vloeren", "Massief Parket",
+    "Hongaars Punt", "Traprenovatie", "Egaliseren"
+  ];
 
   const fields = [
     { label: "Klantnaam", field: "client_name", required: true },
@@ -66,7 +84,6 @@ export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
     { label: "Straat", field: "straat" },
     { label: "Postcode", field: "postcode" },
     { label: "Plaats", field: "plaats" },
-    { label: "Vloertype", field: "vloer_type" },
     { label: "Oppervlakte (m²)", field: "oppervlakte", type: "number" },
     { label: "Ondergrond", field: "ondergrond" },
     { label: "Budget (€)", field: "budget", type: "number" },
@@ -76,6 +93,22 @@ export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
+        {/* Vloer type dropdown */}
+        <div className="sm:col-span-2">
+          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
+            Vloertype
+          </label>
+          <select
+            value={form.vloer_type}
+            onChange={(e) => handleChange("vloer_type", e.target.value)}
+            className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
+          >
+            <option value="">Selecteer vloertype...</option>
+            {VLOER_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
         {fields.map(({ label, field, type = "text", required }) => (
           <div key={field}>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
