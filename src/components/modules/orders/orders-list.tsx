@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useOrders } from "@/hooks/use-orders";
+import { useSettings } from "@/hooks/use-settings";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { formatEuro, formatDate } from "@/lib/utils";
+import { printInvoice } from "@/lib/invoice";
+import type { Order, Settings } from "@/types";
 
 interface OrdersListProps {
   companyId?: string | null;
@@ -12,6 +15,26 @@ interface OrdersListProps {
 
 export function OrdersList({ companyId }: OrdersListProps) {
   const { data: orders, isLoading, error } = useOrders(companyId);
+  const { data: settings } = useSettings(companyId);
+
+  const handlePrintInvoice = (order: Order) => {
+    if (!order.price) return;
+    const s: Partial<Settings> = settings || {};
+    printInvoice(order, {
+      bedrijf_naam: s.bedrijf_naam || "Aurea Maison Floors",
+      bedrijf_adres: s.bedrijf_adres || "Zuidwijkstraat 28",
+      bedrijf_postcode: s.bedrijf_postcode || "2729 KD",
+      bedrijf_plaats: s.bedrijf_plaats || "Zoetermeer",
+      bedrijf_tel: s.bedrijf_tel || "06 28 27 35 70",
+      bedrijf_email: s.bedrijf_email || "Aureamaisonfloors@gmail.com",
+      kvk: s.kvk || "42032896",
+      btw: s.btw || "NL00544489B03",
+      iban: s.iban || "NL66 KNAB 0800 1498 74",
+      factuur_btw_pct: s.factuur_btw_pct ?? 21,
+      factuur_betaal_termijn: 14,
+      factuur_voetnoot: s.factuur_voetnoot || "",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -48,6 +71,7 @@ export function OrdersList({ companyId }: OrdersListProps) {
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3 text-right">Prijs</th>
               <th className="px-4 py-3">Datum</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gold/5">
@@ -82,6 +106,21 @@ export function OrdersList({ companyId }: OrdersListProps) {
                 </td>
                 <td className="px-4 py-3 text-sm text-muted">
                   {formatDate(order.created_at)}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {order.price && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handlePrintInvoice(order);
+                      }}
+                      className="rounded bg-gold/10 px-2 py-1 text-xs font-bold uppercase tracking-wider text-gold transition hover:bg-gold/20"
+                      title="Factuur printen"
+                    >
+                      🖨 Factuur
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

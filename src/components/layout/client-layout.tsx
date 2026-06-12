@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 const CLIENT_NAV = [
   { href: "/client", label: "Mijn Account" },
   { href: "/client/opdracht", label: "Nieuwe Opdracht" },
+  { href: "/client/facturen", label: "Facturen" },
   { href: "/client/profiel", label: "Profiel" },
 ];
 

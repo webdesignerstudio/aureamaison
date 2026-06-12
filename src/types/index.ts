@@ -51,6 +51,7 @@ export interface Order {
   status: OrderStatus;
   price: number | null;
   invoice_nr: string | null;
+  invoice_date: string | null;
   invoice_paid: boolean;
   invoice_paid_at: string | null;
   legger_id: string | null;

@@ -13,6 +13,9 @@ const NAV_ITEMS: Record<string, { href: string; label: string }[]> = {
     { href: "/dashboard/offertes", label: "Offertes" },
     { href: "/dashboard/leggers", label: "Leggers" },
     { href: "/dashboard/klanten", label: "Klanten" },
+    { href: "/dashboard/planning", label: "Planning" },
+    { href: "/dashboard/financieel", label: "Financieel" },
+    { href: "/dashboard/calculator", label: "Calculator" },
     { href: "/dashboard/settings", label: "Instellingen" },
   ],
   keyuser: [

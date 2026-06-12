@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Spinner } from "@/components/ui/spinner";
-import { formatEuro, formatDate } from "@/lib/utils";
+import { formatEuro, formatDate, generateUAID } from "@/lib/utils";
 import { useUpdateOfferte } from "@/hooks/use-offertes";
 import { useCreateOrder } from "@/hooks/use-orders";
 import { useToastContext } from "@/components/toast-provider";
@@ -59,6 +59,7 @@ export default function OfferteDetailPage() {
     if (!offerte) return;
     try {
       const newOrder = await createOrder.mutateAsync({
+        uaid: generateUAID(),
         client_name: offerte.client_name,
         client_email: offerte.client_email,
         vloer_type: offerte.vloer_type,

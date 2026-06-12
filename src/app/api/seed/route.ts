@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+function generateUAID(): string {
+  const year = new Date().getFullYear();
+  const rand = Math.floor(100000 + Math.random() * 900000);
+  return `HD-${year}-${rand}`;
+}
+
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -361,6 +367,7 @@ export async function POST(req: NextRequest) {
       }
 
       const { error } = await supabase.from("orders").insert({
+        uaid: generateUAID(),
         client_name: o.clientName,
         client_email: o.clientEmail,
         straat: o.straat,
