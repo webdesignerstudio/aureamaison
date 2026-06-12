@@ -21,6 +21,7 @@ export function useLeggers(companyId?: string | null) {
       if (error) throw error;
       return (data as Legger[]) || [];
     },
+    enabled: !!companyId,
   });
 }
 
