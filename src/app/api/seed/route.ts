@@ -233,14 +233,20 @@ export async function POST(req: NextRequest) {
 
     const data = generateData();
 
-    // ── FETCH EXISTING USERS ──
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    // ── FETCH EXISTING USERS (get ALL with high perPage) ──
+    const { data: existingUsers, error: listErr } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+    if (listErr) console.error("[Seed] listUsers error:", listErr.message);
+
     const existingByEmail = new Map<string, string>();
     for (const u of existingUsers?.users || []) {
       if (u.email) existingByEmail.set(u.email.toLowerCase(), u.id);
     }
+    console.log("[Seed] Found", existingByEmail.size, "existing auth users");
 
-    // ── CREATE AUTH USERS (skip if exists) ──
+    // ── CREATE AUTH USERS (skip if exists, handle already-registered gracefully) ──
     async function getOrCreateUser(email: string, password: string, meta: any): Promise<string> {
       const lower = email.toLowerCase();
       if (existingByEmail.has(lower)) return existingByEmail.get(lower)!;
@@ -248,6 +254,18 @@ export async function POST(req: NextRequest) {
       const { data, error } = await supabase.auth.admin.createUser({
         email, password, email_confirm: true, user_metadata: meta,
       });
+
+      // User already exists — fetch fresh list to get their ID
+      if (error?.message?.includes("already been registered")) {
+        const { data: fresh } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+        const user = fresh?.users?.find((u: any) => u.email?.toLowerCase() === lower);
+        if (user) {
+          existingByEmail.set(lower, user.id);
+          return user.id;
+        }
+        throw new Error(`User ${email} exists but ID not found`);
+      }
+
       if (error) throw new Error(`Auth create failed for ${email}: ${error.message}`);
       if (!data?.user?.id) throw new Error(`Auth returned null for ${email}`);
       existingByEmail.set(lower, data.user.id);
