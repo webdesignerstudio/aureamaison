@@ -17,10 +17,10 @@ export function useLeggers(companyId?: string | null) {
         query = query.eq("company_id", companyId);
       }
       const { data, error } = await query;
+      console.log("[useLeggers] Result:", data?.length, "rows, error:", error?.message);
       if (error) throw error;
       return (data as Legger[]) || [];
     },
-    enabled: !!companyId,
   });
 }
 

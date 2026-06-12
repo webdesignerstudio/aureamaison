@@ -24,6 +24,7 @@ export function useAuth() {
     });
 
     const fetchProfile = async (sessionUser: { id: string; email?: string }): Promise<Profile> => {
+      console.log("[useAuth] Fetching profile for:", sessionUser.id, sessionUser.email);
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
