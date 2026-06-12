@@ -60,7 +60,6 @@ const sr = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 const sri = (a: number, b: number) => Math.floor(Math.random() * (b - a + 1)) + a;
 const srf = (a: number, b: number) => parseFloat((Math.random() * (b - a) + a).toFixed(2));
 const sda = (n: number) => new Date(Date.now() - n * 86400000).toISOString();
-const sfmt = (iso: string) => new Date(iso).toLocaleDateString("nl-NL");
 
 /* ═══════════════════════════════════════════════════════════════
    DATA GENERATION
@@ -169,7 +168,7 @@ function generateData() {
           ? `FACT-${new Date(cr).getFullYear()}-${String(ki * 3 + oi + 1).padStart(4, "0")}`
           : null,
         invoicePaid: invPaid,
-        invoiceDate: hasInv ? sfmt(sda(sri(1, da))) : null,
+        invoiceDate: hasInv ? sda(sri(1, da)) : null,
         bron: Math.random() > 0.55 ? "website_offerte" : "direct",
         prioriteit: Math.random() > 0.88 ? "Spoed" : "Normaal",
       });
@@ -198,7 +197,7 @@ function generateData() {
     email: k.email,
     tel: k.tel,
     adres: `${k.straat}, ${k.postcode} ${k.plaats}`,
-    datum: sfmt(sda(sri(1, 25))),
+    datum: sda(sri(1, 25)),
     tijd: sr(["Ochtend (9-12)", "Middag (12-17)", "Avond (17-20)"]),
     dienst: sr(SEED_VLOER),
     status: sr(["open", "open", "afgerond", "geannuleerd"]),
@@ -312,7 +311,7 @@ export async function POST(req: NextRequest) {
         price: o.totaalInclBTW,
         invoice_nr: o.invoiceNr,
         invoice_paid: o.invoicePaid,
-        invoice_paid_at: o.invoicePaid && o.invoiceDate ? new Date(o.invoiceDate).toISOString() : null,
+        invoice_paid_at: o.invoicePaid && o.invoiceDate ? o.invoiceDate : null,
         legger_id: leggerId,
         legger_naam: o.leggerNaam,
         legger_prijs: o.leggerPrijs,
@@ -351,7 +350,7 @@ export async function POST(req: NextRequest) {
         email: s.email,
         telefoon: s.tel,
         adres: s.adres,
-        datum_voorkeur: new Date(s.datum).toISOString().split("T")[0],
+        datum_voorkeur: s.datum.split("T")[0],
         opmerking: s.dienst,
         status: s.status,
         company_id: COMPANY_ID,
