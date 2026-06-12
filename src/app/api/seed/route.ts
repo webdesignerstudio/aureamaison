@@ -225,8 +225,8 @@ export async function POST(req: NextRequest) {
 
     const COMPANY_ID = "11111111-1111-1111-1111-111111111111";
 
-    // ── CLEAR EXISTING DATA ──
-    const tables = ["reviews", "showroom_aanvragen", "offertes", "orders", "leggers", "profiles"];
+    // ── CLEAR DATA (keep auth users + profiles — only business tables) ──
+    const tables = ["reviews", "showroom_aanvragen", "offertes", "orders", "leggers"];
     for (const t of tables) {
       await supabase.from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
     }
@@ -281,15 +281,34 @@ export async function POST(req: NextRequest) {
       clientIds.push(uid);
     }
 
-    // Link profiles to company
+    const allIds = [ownerId, adminId, ...leggerIds, ...clientIds];
+
+    // ── ENSURE PROFILES EXIST (create missing ones for existing auth users) ──
+    const { data: existingProfiles } = await supabase.from("profiles").select("id").in("id", allIds);
+    const existingProfileIds = new Set((existingProfiles || []).map((p: any) => p.id));
+
+    for (const id of allIds) {
+      if (!existingProfileIds.has(id)) {
+        const userEmail = [...existingByEmail.entries()].find(([, v]) => v === id)?.[0] || "";
+        const userName = userEmail.split("@")[0];
+        const role = userEmail.includes("legger") ? "legger" : userEmail.includes("admin") ? "superadmin" : userEmail.includes("eigenaar") ? "owner" : "client";
+        await supabase.from("profiles").insert({
+          id, email: userEmail, name: userName, role, company_id: COMPANY_ID,
+        });
+        console.log("[Seed] Created missing profile:", userEmail);
+      }
+    }
+
+    // Update company_id on all profiles
     await supabase.from("profiles").update({ company_id: COMPANY_ID })
-      .in("id", [ownerId, adminId, ...leggerIds, ...clientIds]);
+      .in("id", allIds);
 
     // ── INSERT LEGGERS ──
+    let leggerCount = 0;
+    let leggerErrors: string[] = [];
     for (let i = 0; i < data.leggers.length; i++) {
       const leg = data.leggers[i];
-      await supabase.from("leggers").insert({
-        id: leggerIds[i],
+      const { error } = await supabase.from("leggers").insert({
         profiel_id: leggerIds[i],
         naam: leg.name,
         email: leg.email,
@@ -305,10 +324,17 @@ export async function POST(req: NextRequest) {
         status: leg.status,
         company_id: COMPANY_ID,
       });
+      if (error) {
+        leggerErrors.push(`${leg.name}: ${error.message}`);
+        console.error("[Seed] Legger error:", leg.name, error.message);
+      } else {
+        leggerCount++;
+      }
     }
 
     // ── INSERT ORDERS ──
     let orderCount = 0;
+    let orderErrors: string[] = [];
     for (const o of data.orders) {
       let leggerId: string | null = null;
       if (o.leggerNaam) {
@@ -341,11 +367,17 @@ export async function POST(req: NextRequest) {
         created_at: o.createdAt,
         updated_at: o.createdAt,
       });
-      if (!error) orderCount++;
+      if (error) {
+        orderErrors.push(`${o.clientName}: ${error.message}`);
+        console.error("[Seed] Order error:", o.clientName, error.message);
+      } else {
+        orderCount++;
+      }
     }
 
     // ── INSERT OFFERTES ──
     let offCount = 0;
+    let offerteErrors: string[] = [];
     for (const o of data.offertes) {
       const { error } = await supabase.from("offertes").insert({
         client_name: o.clientName,
@@ -359,12 +391,19 @@ export async function POST(req: NextRequest) {
         company_id: COMPANY_ID,
         created_at: o.aangemaakt,
       });
-      if (!error) offCount++;
+      if (error) {
+        offerteErrors.push(`${o.clientName}: ${error.message}`);
+        console.error("[Seed] Offerte error:", o.clientName, error.message);
+      } else {
+        offCount++;
+      }
     }
 
     // ── INSERT SHOWROOM ──
+    let showCount = 0;
+    let showroomErrors: string[] = [];
     for (const s of data.showroom) {
-      await supabase.from("showroom_aanvragen").insert({
+      const { error } = await supabase.from("showroom_aanvragen").insert({
         naam: s.naam,
         email: s.email,
         telefoon: s.tel,
@@ -375,18 +414,26 @@ export async function POST(req: NextRequest) {
         company_id: COMPANY_ID,
         created_at: s.aangemeldAt,
       });
+      if (error) {
+        showroomErrors.push(`${s.naam}: ${error.message}`);
+        console.error("[Seed] Showroom error:", s.naam, error.message);
+      } else {
+        showCount++;
+      }
     }
 
+    const allErrors = [...leggerErrors, ...orderErrors, ...offerteErrors, ...showroomErrors];
+
     return NextResponse.json({
-      success: true,
+      success: allErrors.length === 0,
       summary: {
-        users: 50,
-        leggers: data.leggers.length,
-        clients: data.clients.length,
+        users: allIds.length,
+        leggers: leggerCount,
         orders: orderCount,
         offertes: offCount,
-        showroom: data.showroom.length,
+        showroom: showCount,
       },
+      errors: allErrors.length ? allErrors : undefined,
       logins: {
         owner: "eigenaar@aurea.nl / aurea2025",
         admin: "admin@aurea.nl / admin2025",
