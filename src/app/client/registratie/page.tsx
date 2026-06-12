@@ -40,6 +40,22 @@ export default function ClientRegistratiePage() {
       return;
     }
 
+    // Insert profile so login can verify role
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: data.user.id,
+      email: data.user.email!,
+      name: naam || email.split("@")[0],
+      role: "client",
+      company_id: "11111111-1111-1111-1111-111111111111",
+      onboarding_status: "approved",
+      onboarding_data: {},
+    });
+
+    if (profileError) {
+      console.error("[ClientRegistratie] Profile insert error:", profileError);
+      // Don't fail registration if profile insert fails — auth user exists
+    }
+
     router.push("/client/login");
     setLoading(false);
   };

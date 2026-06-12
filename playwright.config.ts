@@ -9,6 +9,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: "list",
+  globalSetup: require.resolve("./e2e/global-setup"),
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",
