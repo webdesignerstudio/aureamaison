@@ -164,6 +164,19 @@ export interface Review {
   created_at: string;
 }
 
+export interface Leverancier {
+  id: string;
+  company_id: string;
+  naam: string;
+  categorie: string | null;
+  lead: number;
+  korting: number;
+  min_order: number;
+  producten: number;
+  actief: boolean;
+  created_at: string;
+}
+
 export interface Abonnement {
   id: string;
   company_id: string | null;

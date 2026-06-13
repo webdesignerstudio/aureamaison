@@ -1,16 +1,11 @@
 "use client";
 
-import { Navbar } from "./navbar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Spinner } from "@/components/ui/spinner";
-
-const LEGGER_NAV = [
-  { href: "/legger", label: "Mijn Klussen" },
-  { href: "/legger/agenda", label: "Agenda" },
-  { href: "/legger/profiel", label: "Profiel" },
-];
+import { SidebarShell, type NavCat } from "./sidebar-shell";
+import { SettingsGear } from "@/components/modules/settings-gear";
 
 export function LeggerLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, error, signOut } = useAuth();
@@ -49,17 +44,27 @@ export function LeggerLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const cats: NavCat[] = [
+    {
+      id: "legger", icon: "🔨", label: "Legger Portaal",
+      tabs: [
+        { href: "/legger", icon: "🔨", label: "Mijn Klussen" },
+        { href: "/legger/agenda", icon: "📅", label: "Agenda" },
+        { href: "/legger/profiel", icon: "👤", label: "Profiel" },
+      ],
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar
-        items={LEGGER_NAV}
-        userName={user.name || user.email}
-        userRole={user.role}
-        onLogout={signOut}
-      />
-      <main className="pt-16">
-        <div className="mx-auto max-w-7xl px-4 py-8">{children}</div>
-      </main>
-    </div>
+    <SidebarShell
+      cats={cats}
+      flat
+      logoSubtitle="Legger Portaal"
+      userName={user.name || user.email}
+      settingsSlot={<SettingsGear userId={user.id} email={user.email} name={user.name || ""} />}
+      onLogout={signOut}
+    >
+      {children}
+    </SidebarShell>
   );
 }

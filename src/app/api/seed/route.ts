@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     const COMPANY_ID = "11111111-1111-1111-1111-111111111111";
 
     // ── CLEAR DATA (keep auth users + profiles — only business tables) ──
-    const tables = ["reviews", "showroom_aanvragen", "offertes", "orders", "leggers"];
+    const tables = ["reviews", "showroom_aanvragen", "offertes", "orders", "leggers", "leveranciers"];
     for (const t of tables) {
       await supabase.from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
     }
@@ -447,7 +447,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const allErrors = [...leggerErrors, ...orderErrors, ...offerteErrors, ...showroomErrors];
+    // ── INSERT LEVERANCIERS ──
+    const LEVERANCIERS = [
+      { naam: "Barlinek Parket", categorie: "Parket", lead: 7, korting: 12, min_order: 500, producten: 847, actief: true },
+      { naam: "Quick-Step Laminaat", categorie: "Laminaat", lead: 5, korting: 15, min_order: 300, producten: 1243, actief: true },
+      { naam: "Moduleo PVC", categorie: "PVC / LVT", lead: 10, korting: 8, min_order: 800, producten: 632, actief: true },
+      { naam: "Kahrs Eiken", categorie: "Massief Parket", lead: 14, korting: 18, min_order: 1200, producten: 289, actief: false },
+      { naam: "Egger Laminaat", categorie: "Laminaat", lead: 3, korting: 10, min_order: 250, producten: 1876, actief: true },
+    ];
+    let levCount = 0;
+    const leverancierErrors: string[] = [];
+    for (const l of LEVERANCIERS) {
+      const { error } = await supabase.from("leveranciers").insert({ ...l, company_id: COMPANY_ID });
+      if (error) {
+        leverancierErrors.push(`${l.naam}: ${error.message}`);
+        console.error("[Seed] Leverancier error:", l.naam, error.message);
+      } else {
+        levCount++;
+      }
+    }
+
+    const allErrors = [...leggerErrors, ...orderErrors, ...offerteErrors, ...showroomErrors, ...leverancierErrors];
 
     return NextResponse.json({
       success: allErrors.length === 0,
@@ -457,6 +477,7 @@ export async function POST(req: NextRequest) {
         orders: orderCount,
         offertes: offCount,
         showroom: showCount,
+        leveranciers: levCount,
       },
       errors: allErrors.length ? allErrors : undefined,
       logins: {
