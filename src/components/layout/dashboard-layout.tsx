@@ -59,6 +59,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       tabs: [
         { href: "/dashboard", icon: "📊", label: "Dashboard" },
         { href: "/dashboard/orders", icon: "📋", label: "Opdrachten", badge: nieuw },
+        { href: "/dashboard/aanvragen", icon: "🌐", label: "Aanvragen", badge: nieuw },
+        { href: "/dashboard/uitzetten", icon: "🔨", label: "Uitzetten" },
+        { href: "/dashboard/oplevering", icon: "✅", label: "Oplevering" },
         { href: "/dashboard/planning", icon: "📅", label: "Planning" },
         { href: "/dashboard/calculator", icon: "📐", label: "Calculator" },
       ],
@@ -67,6 +70,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       id: "mensen", icon: "👥", label: "Mensen",
       tabs: [
         { href: "/dashboard/leggers", icon: "👷", label: "Leggers" },
+        { href: "/dashboard/aanmeldingen", icon: "📝", label: "Aanmeldingen" },
         { href: "/dashboard/klanten", icon: "👥", label: "Klanten" },
       ],
     },
@@ -74,13 +78,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       id: "financieel", icon: "💰", label: "Financieel",
       tabs: [
         { href: "/dashboard/offertes", icon: "📄", label: "Offertes" },
-        { href: "/dashboard/financieel", icon: "💶", label: "Financieel overzicht" },
+        { href: "/dashboard/facturen", icon: "🧾", label: "Facturen" },
+        { href: "/dashboard/uitbetalingen", icon: "💸", label: "Uitbetalingen" },
+        { href: "/dashboard/statistieken", icon: "�", label: "Statistieken" },
+        { href: "/dashboard/financieel", icon: "💶", label: "Fin. overzicht" },
       ],
     },
     {
       id: "beheer", icon: "⚙️", label: "Beheer",
       tabs: [
         { href: "/dashboard/leveranciers", icon: "🚚", label: "Leveranciers" },
+        { href: "/dashboard/audit", icon: "🔒", label: "Audit log" },
         { href: "/dashboard/settings", icon: "⚙️", label: "Instellingen" },
       ],
     },
