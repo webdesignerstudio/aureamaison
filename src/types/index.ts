@@ -51,7 +51,7 @@ export interface Order {
   status: OrderStatus;
   price: number | null;
   invoice_nr: string | null;
-  invoice_date: string | null;
+  invoice_date: string | null;  // added via migration 0005
   invoice_paid: boolean;
   invoice_paid_at: string | null;
   legger_id: string | null;
@@ -97,9 +97,13 @@ export interface Offerte {
   id: string;
   client_name: string;
   client_email: string;
+  order_id: string | null;
+  nr: string | null;
   vloer_type: string | null;
   oppervlakte: number | null;
   budget: number | null;
+  prijs: number | null;
+  geldig_tot: string | null;
   status: "ingediend" | "verstuurd" | "geaccepteerd" | "afgewezen";
   verstuurd_at: string | null;
   geaccepteerd_at: string | null;
