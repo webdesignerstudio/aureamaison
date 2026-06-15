@@ -78,6 +78,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     {
       id: "beheer", icon: "⚙️", label: "Beheer",
       tabs: [
+        { href: "/dashboard/producten", icon: "📦", label: "Producten" },
+        { href: "/dashboard/emaillog", icon: "📧", label: "E-mail log" },
+        { href: "/dashboard/beschikbaar", icon: "📅", label: "Beschikbaar" },
         { href: "/dashboard/leveranciers", icon: "🚚", label: "Leveranciers" },
         { href: "/dashboard/audit", icon: "🔒", label: "Audit log" },
         { href: "/dashboard/settings", icon: "⚙️", label: "Instellingen" },
