@@ -36,6 +36,8 @@ export default function LeggerInstellingenPage() {
   const [pwSaving, setPwSaving] = useState(false);
 
   const [emailNotif, setEmailNotif] = useState(true);
+  const [klusNotif, setKlusNotif] = useState(true);
+  const [compact, setCompact] = useState(false);
 
   const handlePwChange = async () => {
     setPwErr(""); setPwOk("");
@@ -114,14 +116,31 @@ export default function LeggerInstellingenPage() {
           {/* VOORKEUREN */}
           {subTab === "voorkeuren" && (
             <div style={{ animation: "slideUp .2s ease" }}>
-              <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "22px 24px" }}>
+              <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "22px 24px", marginBottom: 12 }}>
                 <div style={{ fontSize: "0.5rem", letterSpacing: 3, color: C.gold, textTransform: "uppercase", marginBottom: 18 }}>Notificaties</div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 14 }}>
                   <div>
                     <div style={{ fontSize: "0.72rem", color: C.white, marginBottom: 2 }}>E-mail notificaties</div>
-                    <div style={{ fontSize: "0.6rem", color: C.dim }}>Ontvang updates over nieuwe klussen en status-wijzigingen</div>
+                    <div style={{ fontSize: "0.6rem", color: C.dim }}>Status updates en bevestigingen per e-mail</div>
                   </div>
                   <ToggleSwitch value={emailNotif} onChange={setEmailNotif} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: "0.72rem", color: C.white, marginBottom: 2 }}>Nieuwe klus meldingen</div>
+                    <div style={{ fontSize: "0.6rem", color: C.dim }}>Alert bij nieuwe beschikbare klus</div>
+                  </div>
+                  <ToggleSwitch value={klusNotif} onChange={setKlusNotif} />
+                </div>
+              </div>
+              <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "22px 24px" }}>
+                <div style={{ fontSize: "0.5rem", letterSpacing: 3, color: C.gold, textTransform: "uppercase", marginBottom: 18 }}>Weergave</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: "0.72rem", color: C.white, marginBottom: 2 }}>Compacte weergave</div>
+                    <div style={{ fontSize: "0.6rem", color: C.dim }}>Minder witruimte in overzichten</div>
+                  </div>
+                  <ToggleSwitch value={compact} onChange={setCompact} />
                 </div>
               </div>
             </div>
