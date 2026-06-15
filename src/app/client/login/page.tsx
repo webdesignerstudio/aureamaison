@@ -74,7 +74,7 @@ export default function ClientLoginPage() {
           <Link href="/client/registratie" style={{ color: C.gold, textDecoration: "none" }}>Registreren</Link>
         </div>
         <div style={{ marginTop: 10, textAlign: "center", fontSize: "0.58rem", color: C.dim }}>
-          <Link href="/login" style={{ color: C.dim, textDecoration: "none" }}>← Terug naar eigenaar login</Link>
+          <Link href="/portaal" style={{ color: C.dim, textDecoration: "none" }}>← Terug naar portaalkeuze</Link>
         </div>
       </div>
     </div>

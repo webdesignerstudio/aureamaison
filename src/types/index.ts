@@ -67,6 +67,8 @@ export interface Order {
   bedrijf: string | null;
   kvk: string | null;
   btw: string | null;
+  mollie_payment_id: string | null;
+  mollie_checkout_url: string | null;
   company_id: string;
   created_at: string;
   updated_at: string;

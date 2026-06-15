@@ -38,6 +38,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showFactuur, setShowFactuur] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const { data: settings } = useSettings(companyId);
   const { data: leggers } = useLeggers(companyId);
@@ -110,6 +111,14 @@ export default function OrderDetailPage() {
     } catch {
       toast.error("Legger toewijzen mislukt");
     }
+  };
+
+  const handleSavePaymentLink = async (paymentId: string, checkoutUrl: string) => {
+    if (!order) return;
+    const supabase = createClient();
+    await supabase.from("orders").update({ mollie_payment_id: paymentId, mollie_checkout_url: checkoutUrl }).eq("id", order.id);
+    setOrder((prev) => prev ? { ...prev, mollie_payment_id: paymentId, mollie_checkout_url: checkoutUrl } : null);
+    toast.success("Betaallink gekopieerd ✓ — stuur naar klant via WhatsApp of e-mail");
   };
 
   const handleBetaaldToggle = async () => {
@@ -230,6 +239,15 @@ export default function OrderDetailPage() {
             <div style={{ marginBottom: 8 }}><div style={label}>Prijs</div><div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.4rem", color: C.gold }}>{order.price ? `€ ${formatEuro(order.price)}` : "—"}</div></div>
             <div style={{ marginBottom: 8 }}><div style={label}>Budget klant</div><div style={val}>{order.budget ? `€ ${formatEuro(order.budget)}` : "—"}</div></div>
             <div style={{ marginBottom: 8 }}><div style={label}>Factuurnr.</div><div style={val}>{order.invoice_nr || "—"}</div></div>
+            {order.mollie_checkout_url && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={label}>Betaallink (iDEAL)</div>
+                <button onClick={() => { navigator.clipboard?.writeText(order.mollie_checkout_url!).catch(() => {}); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 3000); }}
+                  style={{ padding: "4px 12px", background: copiedLink ? "rgba(60,184,122,.1)" : "rgba(74,158,232,.08)", border: `1px solid ${copiedLink ? C.greenBdr : "rgba(74,158,232,.25)"}`, color: copiedLink ? C.green : C.blue, borderRadius: 6, fontSize: "0.58rem", fontWeight: 700, cursor: "pointer" }}>
+                  {copiedLink ? "✓ Gekopieerd!" : "📋 Kopieer betaallink"}
+                </button>
+              </div>
+            )}
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={label}>Betaald</div>
               <button onClick={handleBetaaldToggle} disabled={updateOrder.isPending}
@@ -275,7 +293,7 @@ export default function OrderDetailPage() {
         <AuditTimeline entityId={order.id} entityType="order" />
       </div>
 
-      <FactuurModal order={order} settings={settings} open={showFactuur} onClose={() => setShowFactuur(false)} />
+      <FactuurModal order={order} settings={settings} open={showFactuur} onClose={() => setShowFactuur(false)} onSavePaymentLink={handleSavePaymentLink} />
       <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );

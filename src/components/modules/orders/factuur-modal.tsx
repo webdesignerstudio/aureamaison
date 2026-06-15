@@ -9,6 +9,7 @@ interface FactuurModalProps {
   settings: Settings | null | undefined;
   open: boolean;
   onClose: () => void;
+  onSavePaymentLink?: (paymentId: string, checkoutUrl: string) => void;
 }
 
 function fmtEur(n: number | string | null | undefined) {
@@ -139,17 +140,60 @@ function printFactuurA4(order: Order, s: Partial<Settings>, betaalTermijn: numbe
   setTimeout(() => { w.focus(); w.print(); }, 600);
 }
 
-export function FactuurModal({ order, settings, open, onClose }: FactuurModalProps) {
+export function FactuurModal({ order, settings, open, onClose, onSavePaymentLink }: FactuurModalProps) {
   const [betaalTermijn, setBetaalTermijn] = useState(14);
   const [isMobile, setIsMobile] = useState(false);
   const [scale, setScale] = useState(1);
   const A4_W = 794;
+  const [betaalLink, setBetaalLink] = useState<string | null>(order.mollie_checkout_url || null);
+  const [betaalLoading, setBetaalLoading] = useState(false);
+  const [betaalErr, setBetaalErr] = useState<string | null>(null);
+  const [gekopieerd, setGekopieerd] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     const s = settings || {};
     setBetaalTermijn((s as Partial<Settings>).factuur_betaal_termijn || 14);
-  }, [open, settings]);
+    setBetaalLink(order.mollie_checkout_url || null);
+    setBetaalErr(null);
+    setGekopieerd(false);
+  }, [open, settings, order.mollie_checkout_url]);
+
+  const genereerBetaallink = async () => {
+    const inclBTW = parseFloat(String(order.price)) || 0;
+    if (!inclBTW) { setBetaalErr("Stel eerst een prijs in op de order."); return; }
+    setBetaalLoading(true);
+    setBetaalErr(null);
+    try {
+      const res = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: inclBTW,
+          description: order.invoice_nr || `FACT-${new Date().getFullYear()}-0001`,
+          metadata: { order_id: order.id, invoice_nr: order.invoice_nr || `FACT-${new Date().getFullYear()}-0001` },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.checkoutUrl) { setBetaalErr(data.error || "Kon betaallink niet aanmaken"); return; }
+      setBetaalLink(data.checkoutUrl);
+      navigator.clipboard?.writeText(data.checkoutUrl).catch(() => {});
+      setGekopieerd(true);
+      setTimeout(() => setGekopieerd(false), 3000);
+      onSavePaymentLink?.(data.paymentId, data.checkoutUrl);
+    } catch {
+      setBetaalErr("Netwerkfout — probeer opnieuw");
+    } finally {
+      setBetaalLoading(false);
+    }
+  };
+
+  const kopieerLink = () => {
+    if (!betaalLink) return;
+    navigator.clipboard?.writeText(betaalLink).catch(() => {});
+    setGekopieerd(true);
+    setTimeout(() => setGekopieerd(false), 3000);
+  };
 
   useEffect(() => {
     const calc = () => {
@@ -170,7 +214,8 @@ export function FactuurModal({ order, settings, open, onClose }: FactuurModalPro
   const exclBTW   = inclBTW / (1 + btwPct / 100);
   const btwBedrag = inclBTW - exclBTW;
   const omschrijving = [order.vloer_type, order.oppervlakte ? `${order.oppervlakte} m²` : null, order.opmerking || null].filter(Boolean).join(" · ");
-  const factuurNr  = order.invoice_nr || `FACT-${new Date().getFullYear()}-0001`;
+  const factuurNrRef  = order.invoice_nr || `FACT-${new Date().getFullYear()}-0001`;
+  const factuurNr = factuurNrRef;
   const verzendDatum = new Date().toLocaleDateString("nl-NL", { day: "2-digit", month: "2-digit", year: "numeric" });
   const bd = new Date(); bd.setDate(bd.getDate() + betaalTermijn);
   const betaalDatum = bd.toLocaleDateString("nl-NL", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -189,25 +234,47 @@ export function FactuurModal({ order, settings, open, onClose }: FactuurModalPro
   const handlePrint = () => printFactuurA4(order, s, betaalTermijn);
 
   const toolbar = (
-    <div style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(10,10,8,.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.bdr}`, padding: isMobile ? "12px 14px" : "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-      <div>
-        <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 2 }}>Factuur</div>
-        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: isMobile ? "1.1rem" : "1.5rem", fontWeight: 300, color: C.white }}>
-          {factuurNr}{!isMobile && <> — <em style={{ fontStyle: "italic", color: C.goldL }}>{order.client_name}</em></>}
+    <div style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(10,10,8,.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.bdr}`, padding: isMobile ? "12px 14px" : "16px 28px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 2 }}>Factuur</div>
+          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: isMobile ? "1.1rem" : "1.5rem", fontWeight: 300, color: C.white }}>
+            {factuurNr}{!isMobile && <> — <em style={{ fontStyle: "italic", color: C.goldL }}>{order.client_name}</em></>}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          {!isMobile && (
+            <select value={betaalTermijn} onChange={(e) => setBetaalTermijn(Number(e.target.value))}
+              style={{ background: "rgba(255,255,255,.06)", border: `1px solid ${C.bdr}`, color: C.white, padding: "8px 12px", borderRadius: 7, fontSize: 12, cursor: "pointer", outline: "none" }}>
+              {[7, 14, 21, 30].map((d) => <option key={d} value={d}>{d} dagen betaaltermijn</option>)}
+            </select>
+          )}
+          <button onClick={genereerBetaallink} disabled={betaalLoading || !!betaalLink}
+            style={{ padding: isMobile ? "9px 12px" : "10px 18px", background: betaalLink ? "rgba(60,184,122,.08)" : "rgba(74,158,232,.1)", border: `1px solid ${betaalLink ? C.greenBdr : "rgba(74,158,232,.35)"}`, color: betaalLink ? C.green : C.blue, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", cursor: betaalLoading || !!betaalLink ? "default" : "pointer", borderRadius: 8, whiteSpace: "nowrap", opacity: betaalLoading ? 0.6 : 1 }}>
+            {betaalLoading ? "Bezig…" : betaalLink ? "💳 Link actief ✓" : "💳 Betaallink (iDEAL)"}
+          </button>
+          <button onClick={handlePrint} style={{ padding: isMobile ? "9px 14px" : "10px 20px", background: "rgba(198,165,107,.12)", border: `1px solid ${C.bdrH}`, color: C.gold, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", borderRadius: 8, whiteSpace: "nowrap" }}>
+            🖨 {isMobile ? "PDF" : "Afdrukken / PDF"}
+          </button>
+          <button onClick={onClose} style={{ padding: isMobile ? "9px 12px" : "10px 16px", background: "none", border: "1px solid rgba(255,255,255,.12)", color: C.muted, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", borderRadius: 8 }}>✕{!isMobile && " Sluiten"}</button>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        {!isMobile && (
-          <select value={betaalTermijn} onChange={(e) => setBetaalTermijn(Number(e.target.value))}
-            style={{ background: "rgba(255,255,255,.06)", border: `1px solid ${C.bdr}`, color: C.white, padding: "8px 12px", borderRadius: 7, fontSize: 12, cursor: "pointer", outline: "none" }}>
-            {[7, 14, 21, 30].map((d) => <option key={d} value={d}>{d} dagen betaaltermijn</option>)}
-          </select>
-        )}
-        <button onClick={handlePrint} style={{ padding: isMobile ? "9px 14px" : "10px 20px", background: "rgba(198,165,107,.12)", border: `1px solid ${C.bdrH}`, color: C.gold, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", borderRadius: 8, whiteSpace: "nowrap" }}>
-          🖨 {isMobile ? "PDF" : "Afdrukken / PDF"}
-        </button>
-        <button onClick={onClose} style={{ padding: isMobile ? "9px 12px" : "10px 16px", background: "none", border: "1px solid rgba(255,255,255,.12)", color: C.muted, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", borderRadius: 8 }}>✕{!isMobile && " Sluiten"}</button>
-      </div>
+
+      {/* Betaallink result row */}
+      {(betaalLink || betaalErr) && (
+        <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, background: betaalErr ? "rgba(224,90,90,.06)" : "rgba(74,158,232,.06)", border: `1px solid ${betaalErr ? C.red + "44" : "rgba(74,158,232,.2)"}`, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          {betaalErr ? (
+            <span style={{ fontSize: "0.65rem", color: C.red }}>{betaalErr}</span>
+          ) : (
+            <>
+              <span style={{ fontSize: "0.6rem", color: C.blue, flex: 1, wordBreak: "break-all" }}>{betaalLink}</span>
+              <button onClick={kopieerLink} style={{ padding: "5px 12px", background: gekopieerd ? "rgba(60,184,122,.1)" : "rgba(74,158,232,.12)", border: `1px solid ${gekopieerd ? C.greenBdr : "rgba(74,158,232,.3)"}`, color: gekopieerd ? C.green : C.blue, borderRadius: 6, fontSize: "0.58rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                {gekopieerd ? "✓ Gekopieerd!" : "📋 Kopieer"}
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 
