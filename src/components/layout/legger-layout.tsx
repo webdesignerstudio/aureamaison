@@ -42,7 +42,10 @@ export function LeggerLayout({ children }: { children: React.ReactNode }) {
       tabs: [
         { href: "/legger", icon: "🔨", label: "Mijn Klussen" },
         { href: "/legger/agenda", icon: "📅", label: "Agenda" },
+        { href: "/legger/planning", icon: "🗓", label: "Planning" },
+        { href: "/legger/verdiensten", icon: "💶", label: "Verdiensten" },
         { href: "/legger/profiel", icon: "👤", label: "Profiel" },
+        { href: "/legger/instellingen", icon: "⚙️", label: "Instellingen" },
       ],
     },
   ];

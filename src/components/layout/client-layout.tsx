@@ -42,8 +42,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       tabs: [
         { href: "/client", icon: "📋", label: "Opdrachten" },
         { href: "/client/opdracht", icon: "➕", label: "Nieuwe Opdracht" },
+        { href: "/client/offertes", icon: "📄", label: "Offertes" },
         { href: "/client/facturen", icon: "🧾", label: "Facturen" },
         { href: "/client/profiel", icon: "👤", label: "Profiel" },
+        { href: "/client/instellingen", icon: "⚙️", label: "Instellingen" },
       ],
     },
   ];

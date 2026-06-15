@@ -8,25 +8,18 @@ import { formatDate, formatEuro } from "@/lib/utils";
 import { C } from "@/lib/landing/colors";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Order, Offerte } from "@/types";
+import type { Order } from "@/types";
 
 export default function ClientPortalPage() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [offertes, setOffertes] = useState<Offerte[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.email) return;
     const supabase = createClient();
-    Promise.all([
-      supabase.from("orders").select("*").eq("client_email", user.email).order("created_at", { ascending: false }),
-      supabase.from("offertes").select("*").eq("client_email", user.email).order("created_at", { ascending: false }),
-    ]).then(([ordersRes, offertesRes]) => {
-      setOrders((ordersRes.data as Order[]) || []);
-      setOffertes((offertesRes.data as Offerte[]) || []);
-      setLoading(false);
-    });
+    supabase.from("orders").select("*").eq("client_email", user.email).order("created_at", { ascending: false })
+      .then((res: { data: unknown }) => { setOrders((res.data as Order[]) || []); setLoading(false); });
   }, [user?.email]);
 
   const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
@@ -38,12 +31,31 @@ export default function ClientPortalPage() {
     </ClientLayout>
   );
 
+  const actief = orders.filter((o) => o.status !== "afgerond" && o.status !== "afgewezen");
+  const afgerond = orders.filter((o) => o.status === "afgerond");
+  const openFacturen = orders.filter((o) => o.invoice_nr && !o.invoice_paid);
+
+  const statCard = (label: string, value: string | number, color: string) => (
+    <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 10, padding: "16px 18px" }}>
+      <div style={{ fontSize: "0.48rem", letterSpacing: 2.5, color: C.muted, textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.8rem", fontWeight: 300, color }}>{value}</div>
+    </div>
+  );
+
   return (
     <ClientLayout>
       <div style={{ animation: "slideUp .3s ease" }}>
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Mijn Account</h1>
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Opdrachtgeversportaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Welkom, <em style={{ fontStyle: "italic", color: C.goldL }}>{user?.name?.split(" ")[0] || "klant"}</em></h1>
+        </div>
+
+        {/* Stat cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 24 }}>
+          {statCard("Actieve opdrachten", actief.length, C.gold)}
+          {statCard("Afgerond", afgerond.length, C.green)}
+          {statCard("Totaal ingediend", orders.length, C.muted)}
+          {statCard("Open facturen", openFacturen.length, openFacturen.length > 0 ? C.orange : C.muted)}
         </div>
 
         {/* Orders */}
@@ -83,32 +95,8 @@ export default function ClientPortalPage() {
           </div>
         </div>
 
-        {/* Offertes */}
-        <div>
-          <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>Mijn Offertes</div>
-          <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
-            {offertes.length === 0 ? (
-              <div style={{ padding: "32px", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Geen offertes gevonden.</div>
-            ) : (
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead><tr>
-                    <th style={th}>Status</th><th style={th}>Vloer</th><th style={th}>Budget</th><th style={th}>Datum</th>
-                  </tr></thead>
-                  <tbody>
-                    {offertes.map((offerte) => (
-                      <tr key={offerte.id}>
-                        <td style={td}><StatusBadge status={offerte.status} /></td>
-                        <td style={{ ...td, color: C.dim }}>{offerte.vloer_type || "—"}</td>
-                        <td style={{ ...td, color: C.dim }}>{offerte.budget ? `€ ${formatEuro(offerte.budget)}` : "—"}</td>
-                        <td style={{ ...td, color: C.dim }}>{formatDate(offerte.created_at)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        <div style={{ marginTop: 10, textAlign: "center" }}>
+          <Link href="/client/offertes" style={{ fontSize: "0.6rem", color: C.muted, textDecoration: "none" }}>Offertes bekijken →</Link>
         </div>
       </div>
       <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
