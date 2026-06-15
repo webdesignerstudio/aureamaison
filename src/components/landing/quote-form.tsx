@@ -4,8 +4,8 @@
 import { useState } from "react";
 import { C } from "@/lib/landing/colors";
 import { useMobile } from "@/hooks/use-mobile";
-import { simuleerEmail } from "@/lib/landing/utils";
 import { DIENST_PRODUCTS } from "@/lib/landing/data";
+import { sendEmail } from "@/lib/email";
 import { useCreateOrder } from "@/hooks/use-orders";
 
 // ── Buiten QuoteForm gedefinieerd zodat focus niet verloren gaat bij re-render ──

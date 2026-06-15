@@ -6,7 +6,8 @@ import { C } from "@/lib/landing/colors";
 import { useMobile } from "@/hooks/use-mobile";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { LLabel } from "./llabel";
-import { useProducten, simuleerEmail, toast, inp } from "@/lib/landing/utils";
+import { useProducten, toast, inp, saveShowroomAanvraag } from "@/lib/landing/utils";
+import { sendEmail } from "@/lib/email";
 import { DIENST_CALC, DIENST_REVIEWS, DIENST_FAQ, DIENST_PRODUCTS, DEFAULT_PRODUCTS, GALLERY_IMGS, COMPARE_DATA } from "@/lib/landing/data";
 
 /* ─── DATA ────────────────────────────────────────────────────── */
