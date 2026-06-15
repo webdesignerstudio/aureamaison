@@ -102,6 +102,39 @@ export async function POST(req: NextRequest) {
       <p>Naam: ${client_name}<br>Email: ${client_email}<br>Vloertype: ${vloer_type || "—"}<br>Oppervlakte: ${oppervlakte || "—"}m²<br>Budget: €${Number(budget || 0).toLocaleString("nl-NL")}<br>Timing: ${timing || "—"}<br>Postcode: ${postcode || "—"}</p>`
     ).catch((e: Error) => console.error("[Quote] Email error:", e.message));
 
+    // Send confirmation email to client
+    if (client_email && client_email.includes("@")) {
+      await sendEmailViaResend(
+        client_email,
+        "Uw offerte aanvraag is ontvangen — Aurea Maison Floors",
+        `<!DOCTYPE html>
+<html lang="nl">
+<head><meta charset="UTF-8">
+<style>body{font-family:Georgia,serif;background:#f5f5f5;padding:20px;margin:0}.container{max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden}.header{background:#050505;padding:32px;text-align:center}.header h1{color:#C6A56B;margin:0;font-size:26px;font-weight:300;letter-spacing:3px;text-transform:uppercase}.content{padding:32px;color:#333;font-size:15px;line-height:1.8}.highlight{background:rgba(198,165,107,.08);border-left:3px solid #C6A56B;padding:14px 18px;margin:18px 0}.footer{background:#f5f5f5;padding:24px;text-align:center;font-size:12px;color:#888}</style>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>Aurea Maison</h1></div>
+  <div class="content">
+    <p>Beste ${client_name},</p>
+    <p>Hartelijk dank voor uw offerte aanvraag. Wij hebben deze in goede orde ontvangen.</p>
+    <div class="highlight">
+      <strong>Vloertype:</strong> ${vloer_type || "Nader te bepalen"}<br>
+      <strong>Oppervlakte:</strong> ${oppervlakte || "—"} m²<br>
+      <strong>Budget:</strong> €${Number(budget || 0).toLocaleString("nl-NL")}
+    </div>
+    <p>Ons team neemt binnen <strong>24 uur</strong> contact met u op voor een persoonlijk gesprek.</p>
+    <p>Vragen? Mail ons op <a href="mailto:info@aureamaisonfloors.nl">info@aureamaisonfloors.nl</a> of bel <a href="tel:0628273570">06 28 27 35 70</a>.</p>
+  </div>
+  <div class="footer">
+    <strong>Aurea Maison Floors</strong><br>Zuidwijkstraat 28, 2729 KD Zoetermeer<br><em>Ultra Premium Flooring</em>
+  </div>
+</div>
+</body>
+</html>`
+      ).catch((e: Error) => console.error("[Quote] Client email error:", e.message));
+    }
+
     return NextResponse.json({
       success: true,
       order,
