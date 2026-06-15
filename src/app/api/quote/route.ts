@@ -16,28 +16,49 @@ async function sendEmailViaResend(to: string, subject: string, html: string) {
     return { skipped: true };
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "Aurea Maison Floors <noreply@aureamaisonfloors.nl>",
+  const sendWithFrom = async (from: string) => {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
+    const responseText = await response.text();
+    let data: any = {};
+    try { data = JSON.parse(responseText); } catch { /* ignore */ }
+    return { ok: response.ok, status: response.status, data, responseText };
+  };
+
+  // Try primary domain first
+  let result = await sendWithFrom("Aurea Maison Floors <noreply@aureamaisonfloors.nl>");
+  if (!result.ok) {
+    console.warn("[Quote] Primary domain failed:", {
+      status: result.status,
+      message: result.data?.message,
       to,
       subject,
-      html,
-    }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    console.error("[Quote] Email failed:", data.message || response.statusText);
-    throw new Error(data.message || "Failed to send email");
+    });
+    // Retry with fallback Resend test domain
+    result = await sendWithFrom("onboarding@resend.dev");
+    if (!result.ok) {
+      console.error("[Quote] Fallback domain also failed:", {
+        status: result.status,
+        message: result.data?.message,
+        raw: result.responseText,
+        to,
+        subject,
+      });
+      throw new Error(result.data?.message || result.responseText || `HTTP ${result.status}`);
+    } else {
+      console.log("[Quote] Email sent via fallback domain:", { id: result.data.id, to });
+      return { success: true, id: result.data.id, fallback: true };
+    }
   }
 
-  return { success: true, id: data.id };
+  console.log("[Quote] Email sent:", { id: result.data.id, to });
+  return { success: true, id: result.data.id };
 }
 
 export async function POST(req: NextRequest) {
