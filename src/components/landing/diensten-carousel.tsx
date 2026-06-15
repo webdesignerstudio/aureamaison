@@ -245,11 +245,9 @@ function ProdDetailView({ prod, dienstCalc, onBack, onKoop, onOfferte }) {
                 )}
                 <button onClick={async()=>{
                   if(!koopNaam.trim()||!koopEmail.trim()) return;
-                  await simuleerEmail({aan:"Aureamaisonfloors@gmail.com",
-                    onderwerp:`🛒 Bestelling — ${prod.name} — ${koopNaam}`,
-                    type:"status_update",orderId:null,
-                    data:{product:prod.name,naam:koopNaam,email:koopEmail,tel:koopTel,m2:koopM2||calcM2,
-                      prijs:prod.price>0?`€ ${((Number(koopM2)||calcM2)*prod.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}`:"Offerte gewenst"}});
+                  await sendEmail("info@aureamaisonfloors.nl",
+                    `🛒 Bestelling — ${prod.name} — ${koopNaam}`,
+                    `<p><strong>Nieuwe productbestelling</strong></p><p>Naam: ${koopNaam}<br>Email: ${koopEmail}<br>Tel: ${koopTel}<br>Product: ${prod.name}<br>Hoeveelheid: ${koopM2||calcM2}m²<br>Prijs: ${prod.price>0?`€ ${((Number(koopM2)||calcM2)*prod.price).toLocaleString("nl-NL",{minimumFractionDigits:2})}`:"Offerte gewenst"}</p>`);
                   setKoopDone(true);
                 }} style={{width:"100%",padding:"13px",background:C.gold,border:"none",color:"#050505",fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:9}}>
                   Aanvraag versturen →
@@ -865,12 +863,9 @@ function DienstDetail({ det, onClose, onOfferte, onShowroom, detailRef }) {
                       aangemeldAt:new Date().toISOString(), status:"Nieuw", bron:"dienst_detail",
                     };
                     await saveShowroomAanvraag(aanvraag);
-                    await simuleerEmail({aan:"Aureamaisonfloors@gmail.com",
-                      onderwerp:`🏠 Showroom aan huis — ${shNaam} — ${shAdres}`,
-                      type:"status_update",orderId:null,
-                      data:{naam:shNaam,email:shEmail,tel:shTel,adres:shAdres,
-                        datum,tijd,dienst,
-                        bericht:`Showroom aan huis aanvraag voor ${dienst}`}});
+                    await sendEmail("info@aureamaisonfloors.nl",
+                      `🏠 Showroom aan huis — ${shNaam} — ${shAdres}`,
+                      `<p><strong>Nieuwe showroom aan huis aanvraag</strong></p><p>Naam: ${shNaam}<br>Email: ${shEmail}<br>Tel: ${shTel}<br>Adres: ${shAdres}<br>Datum: ${datum}<br>Tijd: ${tijd}<br>Dienst: ${dienst}</p>`);
                     setShDone(true);
                   }} style={{width:"100%",padding:"13px",background:C.gold,border:"none",color:"#050505",fontSize:"0.65rem",fontWeight:700,letterSpacing:2,textTransform:"uppercase",cursor:"pointer",borderRadius:9}}>
                     🏠 Afspraak aanvragen →

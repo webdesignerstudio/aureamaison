@@ -131,22 +131,14 @@ function QuoteForm({ onClose, onDone }: { onClose: () => void; onDone?: (order: 
         company_id: "11111111-1111-1111-1111-111111111111",
       });
 
-      await simuleerEmail({
-        aan: "Aureamaisonfloors@gmail.com",
-        onderwerp: `Nieuwe offerte aanvraag — ${newOrder.clientName} — ${vloerTypes.join("/")}`,
-        type: "offerte_aanvraag_website",
-        orderId: newOrder.id,
-        data: {
-          naam: newOrder.clientName,
-          tel: qTel,
-          email: qEmail||"—",
-          vloerType: newOrder.vloerType,
-          oppervlakte: sqm+"m²",
-          budget: "€"+budget.toLocaleString("nl-NL"),
-          timing,
-          extras: extrasList.join(", ")||"Geen",
-        },
-      });
+      await sendEmail(
+        "info@aureamaisonfloors.nl",
+        `Nieuwe offerte aanvraag — ${newOrder.clientName} — ${vloerTypes.join("/")}`,
+        `<p><strong>Nieuwe offerte aanvraag</strong></p>
+        <p>Naam: ${newOrder.clientName}<br>Email: ${qEmail}<br>Tel: ${qTel}<br>Vloertype: ${vloerTypes.join(", ")}<br>Oppervlakte: ${sqm}m²<br>Budget: €${budget.toLocaleString("nl-NL")}<br>Timing: ${timing || "—"}<br>Extra's: ${extrasList.join(", ") || "Geen"}</p>`
+      );
+      
+      // Old simuleerEmail call removed
 
       setSubmitting(false);
       setSuccess(true);
@@ -167,7 +159,7 @@ function QuoteForm({ onClose, onDone }: { onClose: () => void; onDone?: (order: 
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2.8rem",fontWeight:300,marginBottom:14}}>Aanvraag <em style={{fontStyle:"italic",color:C.goldL}}>Ontvangen</em></h2>
         <p style={{fontSize:"0.76rem",color:C.muted,lineHeight:2,marginBottom:32}}>Bedankt voor uw aanvraag. Ons team neemt binnen 24 uur contact op voor een persoonlijk gesprek.</p>
         <div style={{display:"flex",gap:6,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
-          {[["📞 06 2827 3570","tel:0628273570"],["💬 WhatsApp","https://wa.me/31628273570"],["✉ E-mail","mailto:Aureamaisonfloors@gmail.com"]].map(([l,h])=>(
+          {[["📞 06 2827 3570","tel:0628273570"],["💬 WhatsApp","https://wa.me/31628273570"],["✉ E-mail","mailto:info@aureamaisonfloors.nl"]].map(([l,h])=>(
             <a key={l} href={h} target={h.startsWith("http")?"_blank":undefined} rel="noopener" style={{padding:"12px 18px",background:C.deep,border:`1px solid ${C.bdr}`,fontSize:"0.62rem",letterSpacing:"1.5px",textTransform:"uppercase",color:C.gold,textDecoration:"none",borderRadius:4}}>{l}</a>
           ))}
         </div>

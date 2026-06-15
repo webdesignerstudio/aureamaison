@@ -28,7 +28,7 @@ export function OrdersList({ companyId }: OrdersListProps) {
       bedrijf_postcode: s.bedrijf_postcode || "2729 KD",
       bedrijf_plaats: s.bedrijf_plaats || "Zoetermeer",
       bedrijf_tel: s.bedrijf_tel || "06 28 27 35 70",
-      bedrijf_email: s.bedrijf_email || "Aureamaisonfloors@gmail.com",
+      bedrijf_email: s.bedrijf_email || "info@aureamaisonfloors.nl",
       kvk: s.kvk || "42032896",
       btw: s.btw || "NL00544489B03",
       iban: s.iban || "NL66 KNAB 0800 1498 74",

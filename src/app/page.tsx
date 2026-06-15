@@ -346,7 +346,7 @@ export default function Home() {
             <LLabel>Contact</LLabel>
             <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: mobile ? "2.6rem" : "3.8rem", fontWeight: 300, lineHeight: 1, letterSpacing: -1, marginBottom: 18 }}>Neem <em style={{ fontStyle: "italic", color: C.goldL }}>Contact</em><br />Op</h2>
             <p style={{ fontSize: "0.79rem", color: C.muted, lineHeight: 2, marginBottom: 40 }}>Heeft u een vraag of wilt u direct een afspraak? Wij reageren binnen 24 uur.</p>
-            {[["Telefoon", "06 2827 3570"], ["E-mail", "Aureamaisonfloors@gmail.com"], ["Werkgebied", "Heel Nederland"], ["Openingstijden", "Ma–Vr 08:00–18:00 · Za 09:00–15:00"]].map(([l, v]) => (
+            {[["Telefoon", "06 2827 3570"], ["E-mail", "info@aureamaisonfloors.nl"], ["Werkgebied", "Heel Nederland"], ["Openingstijden", "Ma–Vr 08:00–18:00 · Za 09:00–15:00"]].map(([l, v]) => (
               <div key={l as string} style={{ padding: "18px 0", borderBottom: `1px solid ${C.bdr}` }}>
                 <div style={{ fontSize: "0.56rem", letterSpacing: 3, textTransform: "uppercase", color: C.gold, marginBottom: 6 }}>{l as string}</div>
                 <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.25rem", fontWeight: 300 }}>{v as string}</div>
@@ -401,7 +401,7 @@ export default function Home() {
                 {(items as string[]).map((item: string) => (
                   <li key={item}>
                     <button
-                      onClick={item === "Showroom aan Huis" ? () => setShowroomOpen(true) : item === "06 2827 3570" ? () => window.location.href = "tel:0628273570" : item === "E-mail sturen" ? () => window.location.href = "mailto:Aureamaisonfloors@gmail.com" : (action as (() => void) | null) || undefined}
+                      onClick={item === "Showroom aan Huis" ? () => setShowroomOpen(true) : item === "06 2827 3570" ? () => window.location.href = "tel:0628273570" : item === "E-mail sturen" ? () => window.location.href = "mailto:info@aureamaisonfloors.nl" : (action as (() => void) | null) || undefined}
                       style={{ fontSize: "0.72rem", color: item === "Showroom aan Huis" ? C.gold : C.muted, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}>
                       {item}
                     </button>

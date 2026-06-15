@@ -36,7 +36,7 @@ function printFactuurA4(order: Order, s: Partial<Settings>, betaalTermijn: numbe
   const bedrijfPc    = s.bedrijf_postcode|| "2729 KD";
   const bedrijfPlaats= s.bedrijf_plaats  || "Zoetermeer";
   const bedrijfTel   = s.bedrijf_tel     || "06 28 27 35 70";
-  const bedrijfEmail = s.bedrijf_email   || "Aureamaisonfloors@gmail.com";
+  const bedrijfEmail = s.bedrijf_email   || "info@aureamaisonfloors.nl";
   const kvk          = s.kvk             || "42032896";
   const btwNr        = s.btw             || "NL00544489B03";
   const iban         = s.iban            || "NL66 KNAB 0800 1498 74";

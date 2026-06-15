@@ -35,7 +35,7 @@ function ShowroomModal({ onClose, prefDienst="" }: { onClose: () => void; prefDi
 
     // Notify owner via email
     await sendEmail(
-      "Aureamaisonfloors@gmail.com",
+      "info@aureamaisonfloors.nl",
       `🏠 Showroom aan huis — ${naam} — ${adres}`,
       `<p><strong>Nieuwe showroom aanvraag</strong></p>
       <p>Naam: ${naam}<br>Email: ${email}<br>Tel: ${tel}<br>Adres: ${adres}<br>Datum: ${datum || "Niet opgegeven"}<br>Tijd: ${tijd}<br>Dienst: ${dienst}</p>`

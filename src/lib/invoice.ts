@@ -46,7 +46,7 @@ export function generateInvoiceHTML(order: Order, settings: InvoiceSettings): st
   const bedrijfPc = settings.bedrijf_postcode || "2729 KD";
   const bedrijfPlaats = settings.bedrijf_plaats || "Zoetermeer";
   const bedrijfTel = settings.bedrijf_tel || "06 28 27 35 70";
-  const bedrijfEmail = settings.bedrijf_email || "Aureamaisonfloors@gmail.com";
+  const bedrijfEmail = settings.bedrijf_email || "info@aureamaisonfloors.nl";
   const kvk = settings.kvk || "42032896";
   const btwNr = settings.btw || "NL00544489B03";
   const iban = settings.iban || "NL66 KNAB 0800 1498 74";

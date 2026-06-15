@@ -96,7 +96,7 @@ function baseTemplate(title: string, content: string): string {
     <div class="footer">
       <strong>Aurea Maison Floors</strong><br>
       Zuidwijkstraat 28, 2729 KD Zoetermeer<br>
-      <a href="mailto:Aureamaisonfloors@gmail.com">Aureamaisonfloors@gmail.com</a> · 06 28 27 35 70<br><br>
+      <a href="mailto:info@aureamaisonfloors.nl">info@aureamaisonfloors.nl</a> · 06 28 27 35 70<br><br>
       <em>Ultra Premium Flooring</em>
     </div>
   </div>
@@ -118,7 +118,7 @@ export function invoiceEmailTemplate(
       <div class="amount">€ ${amount.toFixed(2)}</div>
       ${paymentLink ? `<p><a href="${paymentLink}" class="button">Direct betalen via iDEAL</a></p>` : ""}
       <div class="divider"></div>
-      <p style="font-size: 13px; color: #666;">Bij vragen kunt u contact opnemen via <a href="mailto:Aureamaisonfloors@gmail.com">Aureamaisonfloors@gmail.com</a> of bel 06 28 27 35 70.</p>
+      <p style="font-size: 13px; color: #666;">Bij vragen kunt u contact opnemen via <a href="mailto:info@aureamaisonfloors.nl">info@aureamaisonfloors.nl</a> of bel 06 28 27 35 70.</p>
     `
   );
 }
@@ -236,7 +236,7 @@ export function showroomConfirmationEmailTemplate(
       </div>
       <p>We kijken er naar uit u te ontmoeten.</p>
       <div class="divider"></div>
-      <p style="font-size: 13px; color: #666;">Bij wijzigingen kunt u contact opnemen via <a href="mailto:Aureamaisonfloors@gmail.com">Aureamaisonfloors@gmail.com</a>.</p>
+      <p style="font-size: 13px; color: #666;">Bij wijzigingen kunt u contact opnemen via <a href="mailto:info@aureamaisonfloors.nl">info@aureamaisonfloors.nl</a>.</p>
     `
   );
 }
