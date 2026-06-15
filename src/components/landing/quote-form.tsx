@@ -5,8 +5,6 @@ import { useState } from "react";
 import { C } from "@/lib/landing/colors";
 import { useMobile } from "@/hooks/use-mobile";
 import { DIENST_PRODUCTS } from "@/lib/landing/data";
-import { sendEmail } from "@/lib/email";
-import { useCreateOrder } from "@/hooks/use-orders";
 
 // ── Buiten QuoteForm gedefinieerd zodat focus niet verloren gaat bij re-render ──
 function OCard({v, icon, lbl:l, desc, selected, onT, big, mobile}) {
@@ -51,7 +49,6 @@ function QuoteForm({ onClose, onDone }: { onClose: () => void; onDone?: (order: 
   const [qErr, setQErr]           = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess]     = useState(false);
-  const createOrder = useCreateOrder();
 
   const ranges = {pvc:[25,55],visgraat:[45,90],parket:[55,110],traprenovatie:[0,0],egaliseren:[8,18],advies:[0,0]};
   function est() {
@@ -116,29 +113,29 @@ function QuoteForm({ onClose, onDone }: { onClose: () => void; onDone?: (order: 
         type: "particulier",
       };
 
-      await createOrder.mutateAsync({
-        client_name: newOrder.clientName,
-        client_email: newOrder.clientEmail || "",
-        straat: "",
-        postcode: newOrder.postcode || "",
-        plaats: "",
-        vloer_type: newOrder.vloerType,
-        oppervlakte: Number(newOrder.oppervlakte) || 0,
-        budget: Number(budget) || 0,
-        timing: newOrder.timing || "",
-        status: "ingediend",
-        notes: newOrder.opmerking || "",
-        company_id: "11111111-1111-1111-1111-111111111111",
+      // Submit via public API route (no auth required)
+      const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_name: newOrder.clientName,
+          client_email: newOrder.clientEmail || "",
+          straat: "",
+          postcode: newOrder.postcode || "",
+          plaats: "",
+          vloer_type: newOrder.vloerType,
+          oppervlakte: Number(newOrder.oppervlakte) || 0,
+          budget: Number(budget) || 0,
+          timing: newOrder.timing || "",
+          notes: newOrder.opmerking || "",
+          company_id: "11111111-1111-1111-1111-111111111111",
+        }),
       });
 
-      await sendEmail(
-        "info@aureamaisonfloors.nl",
-        `Nieuwe offerte aanvraag — ${newOrder.clientName} — ${vloerTypes.join("/")}`,
-        `<p><strong>Nieuwe offerte aanvraag</strong></p>
-        <p>Naam: ${newOrder.clientName}<br>Email: ${qEmail}<br>Tel: ${qTel}<br>Vloertype: ${vloerTypes.join(", ")}<br>Oppervlakte: ${sqm}m²<br>Budget: €${budget.toLocaleString("nl-NL")}<br>Timing: ${timing || "—"}<br>Extra's: ${extrasList.join(", ") || "Geen"}</p>`
-      );
-      
-      // Old simuleerEmail call removed
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Server error" }));
+        throw new Error(data.error || `Server error: ${res.status}`);
+      }
 
       setSubmitting(false);
       setSuccess(true);
@@ -147,6 +144,7 @@ function QuoteForm({ onClose, onDone }: { onClose: () => void; onDone?: (order: 
     } catch(err) {
       setSubmitting(false);
       setQErr("⚠ Fout bij versturen. Probeer opnieuw.");
+      console.error("[QuoteForm] Submit error:", err);
     }
   };
 
