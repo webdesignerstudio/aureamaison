@@ -31,34 +31,19 @@ export default function LoginPage() {
     }
 
     const userId = signInData.user?.id;
-    const userEmail = signInData.user?.email;
-    if (userId && userEmail) {
+    if (userId) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role, company_id, name, email")
+        .select("role")
         .eq("id", userId)
         .maybeSingle();
 
-      if (!profile) {
-        console.warn("[Login] STEP 3a: No profile, attempting insert");
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: userId,
-          email: userEmail,
-          name: userEmail.split("@")[0],
-          role: "owner",
-          company_id: "11111111-1111-1111-1111-111111111111",
-        });
-        console.warn("[Login] STEP 3b: Insert result:", insertError ? "ERROR" : "OK", insertError);
-        if (insertError && !insertError.message?.includes("duplicate") && insertError.code !== "23505") {
-          console.error("[Login] STEP 3c: Fatal insert error:", insertError);
-          setError("Account activatie mislukt. Probeer opnieuw.");
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        }
-        console.warn("[Login] STEP 3d: Profile OK (created or exists)");
-      } else {
-        console.log("[Login] STEP 3: Profile found — role:", profile.role);
+      const allowedRoles = ["owner", "superadmin", "keyuser", "office"];
+      if (!profile || !allowedRoles.includes(profile.role)) {
+        setError("Geen toegang. Dit dashboard is alleen voor eigenaren.");
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
       }
     }
 
