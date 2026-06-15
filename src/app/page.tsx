@@ -44,7 +44,7 @@ export default function Home() {
     setMenuOpen(false);
   };
 
-  const goPortal = () => router.push("/login");
+  const goPortal = () => router.push("/portaal");
   const goLegger = () => router.push("/legger/login");
 
   const navLinks = ["diensten", "portaal", "showroom", "werkwijze", "reviews", "galerij", "faq", "contact"];
