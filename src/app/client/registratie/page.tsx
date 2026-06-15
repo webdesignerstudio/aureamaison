@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GoldButton } from "@/components/ui/gold-button";
+import { C } from "@/lib/landing/colors";
 
 export default function ClientRegistratiePage() {
   const [email, setEmail] = useState("");
@@ -60,56 +61,50 @@ export default function ClientRegistratiePage() {
     setLoading(false);
   };
 
+  const inp = { width: "100%", padding: "10px 14px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 8, color: C.white, fontSize: "0.78rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 600 };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">Registreren</h1>
-          <p className="mt-2 text-sm text-muted">Maak een klantaccount aan</p>
+    <div style={{ display: "flex", minHeight: "100vh", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.bg, padding: "0 20px" }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 6 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, color: C.white, margin: 0 }}>Registreren</h1>
+          <p style={{ marginTop: 6, fontSize: "0.68rem", color: C.dim }}>Maak een klantaccount aan</p>
         </div>
-        {error && <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Account type</label>
-            <div className="flex gap-3">
-              {(["particulier", "zakelijk"] as const).map((t) => (
-                <button key={t} type="button" onClick={() => setType(t)}
-                  className={`flex-1 rounded-lg border px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
-                    type === t ? "border-gold bg-gold/10 text-gold" : "border-gold/10 text-muted hover:text-foreground"
-                  }`}>
-                  {t === "particulier" ? "Particulier" : "Zakelijk"}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Naam</label>
-            <input value={naam} onChange={(e) => setNaam(e.target.value)} required
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Uw naam" />
-          </div>
-          {type === "zakelijk" && (
+        {error && <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>{error}</div>}
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 14, padding: "26px 24px" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Bedrijfsnaam</label>
-              <input value={bedrijf} onChange={(e) => setBedrijf(e.target.value)}
-                className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Bedrijfsnaam" />
+              <label style={lbl}>Account type</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {(["particulier", "zakelijk"] as const).map((t) => (
+                  <button key={t} type="button" onClick={() => setType(t)}
+                    style={{ flex: 1, padding: "8px", borderRadius: 7, fontSize: "0.58rem", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer", border: `1px solid ${type === t ? C.gold + "88" : C.bdr}`, background: type === t ? "rgba(198,165,107,.1)" : "transparent", color: type === t ? C.gold : C.muted }}>
+                    {t === "particulier" ? "Particulier" : "Zakelijk"}
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">E-mail</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="uw@email.nl" />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Wachtwoord</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Minimaal 6 tekens" />
-          </div>
-          <GoldButton type="submit" variant="primary" className="w-full" disabled={loading}>
-            {loading ? "Bezig..." : "Registreren"}
-          </GoldButton>
-        </form>
-        <div className="mt-6 text-center text-sm text-muted">
-          Al een account? <Link href="/client/login" className="text-gold hover:underline">Inloggen</Link>
+            <div><label style={lbl}>Naam</label>
+              <input value={naam} onChange={(e) => setNaam(e.target.value)} required placeholder="Uw naam" style={inp} /></div>
+            {type === "zakelijk" && (
+              <div><label style={lbl}>Bedrijfsnaam</label>
+                <input value={bedrijf} onChange={(e) => setBedrijf(e.target.value)} placeholder="Bedrijfsnaam" style={inp} /></div>
+            )}
+            <div><label style={lbl}>E-mail</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="uw@email.nl" style={inp} /></div>
+            <div><label style={lbl}>Wachtwoord</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Minimaal 6 tekens" style={inp} /></div>
+            <div style={{ marginTop: 4 }}>
+              <GoldButton type="submit" variant="primary" size="md" className="w-full" disabled={loading}>
+                {loading ? "Bezig…" : "Registreren"}
+              </GoldButton>
+            </div>
+          </form>
+        </div>
+        <div style={{ marginTop: 18, textAlign: "center", fontSize: "0.68rem", color: C.muted }}>
+          Al een account? <Link href="/client/login" style={{ color: C.gold, textDecoration: "none" }}>Inloggen</Link>
         </div>
       </div>
     </div>

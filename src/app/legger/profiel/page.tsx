@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUpdateLegger } from "@/hooks/use-leggers";
 import { useToastContext } from "@/components/toast-provider";
 import { GoldButton } from "@/components/ui/gold-button";
-import { Spinner } from "@/components/ui/spinner";
+import { C } from "@/lib/landing/colors";
 import { createClient } from "@/lib/supabase/client";
 import type { Legger } from "@/types";
 
@@ -77,33 +77,32 @@ export default function LeggerProfielPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <LeggerLayout>
-        <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
-      </LeggerLayout>
-    );
-  }
+  const inp = { width: "100%", padding: "8px 11px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 4, fontWeight: 600 };
+
+  if (loading) return (
+    <LeggerLayout>
+      <div style={{ padding: "60px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>
+    </LeggerLayout>
+  );
 
   return (
     <LeggerLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Mijn Profiel
-        </h1>
-        <p className="mt-2 text-muted">Beheer uw gegevens en tarieven.</p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Mijn Profiel</h1>
+        </div>
 
-        <div className="mt-6 rounded-xl border border-gold/10 bg-deep p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-gold">Persoonsgegevens</h2>
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "20px 22px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase" }}>Persoonsgegevens</div>
             {!editMode && (
-              <button onClick={() => setEditMode(true)} className="text-xs text-gold hover:underline">
-                Bewerken
-              </button>
+              <button onClick={() => setEditMode(true)} style={{ background: "none", border: "none", color: C.gold, fontSize: "0.6rem", cursor: "pointer", padding: 0 }}>Bewerken</button>
             )}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 12 }}>
             {[
               { label: "Naam", key: "naam" as const, type: "text" },
               { label: "Telefoon", key: "telefoon" as const, type: "text" },
@@ -115,31 +114,27 @@ export default function LeggerProfielPage() {
               { label: "Tarief per m² (€)", key: "tarief" as const, type: "number" },
             ].map((field) => (
               <div key={field.key}>
-                <label className="mb-1 block text-xs text-muted">{field.label}</label>
+                <label style={lbl}>{field.label}</label>
                 {editMode ? (
-                  <input
-                    type={field.type}
-                    value={form[field.key]}
-                    onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))}
-                    className="w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-                  />
+                  <input type={field.type} value={form[field.key]} onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))} style={inp} />
                 ) : (
-                  <div className="text-sm text-foreground">{form[field.key] || "—"}</div>
+                  <div style={{ fontSize: "0.72rem", color: form[field.key] ? C.white : C.dim }}>{form[field.key] || "—"}</div>
                 )}
               </div>
             ))}
           </div>
 
           {editMode && (
-            <div className="mt-6 flex gap-3">
+            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
               <GoldButton variant="outline" onClick={() => setEditMode(false)}>Annuleren</GoldButton>
               <GoldButton variant="primary" onClick={handleSave} disabled={updateLegger.isPending}>
-                {updateLegger.isPending ? "Bezig..." : "Opslaan"}
+                {updateLegger.isPending ? "Bezig…" : "Opslaan"}
               </GoldButton>
             </div>
           )}
         </div>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </LeggerLayout>
   );
 }

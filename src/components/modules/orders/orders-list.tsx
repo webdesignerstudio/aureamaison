@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useOrders } from "@/hooks/use-orders";
 import { useSettings } from "@/hooks/use-settings";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Spinner } from "@/components/ui/spinner";
 import { formatEuro, formatDate } from "@/lib/utils";
 import { printInvoice } from "@/lib/invoice";
+import { C } from "@/lib/landing/colors";
 import type { Order, Settings } from "@/types";
 
 interface OrdersListProps {
@@ -14,8 +15,9 @@ interface OrdersListProps {
 }
 
 export function OrdersList({ companyId }: OrdersListProps) {
-  const { data: orders, isLoading, error } = useOrders(companyId);
+  const { data: orders = [], isLoading, error } = useOrders(companyId);
   const { data: settings } = useSettings(companyId);
+  const [search, setSearch] = useState("");
 
   const handlePrintInvoice = (order: Order) => {
     if (!order.price) return;
@@ -36,96 +38,76 @@ export function OrdersList({ companyId }: OrdersListProps) {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const filtered = orders.filter((o) =>
+    !search ||
+    o.client_name.toLowerCase().includes(search.toLowerCase()) ||
+    (o.vloer_type || "").toLowerCase().includes(search.toLowerCase())
+  );
 
-  if (error) {
-    return (
-      <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-        Er is een fout opgetreden bij het laden van de orders.
-      </div>
-    );
-  }
+  const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
+  const td = { padding: "12px 14px", fontSize: "0.68rem", color: C.white, borderTop: `1px solid rgba(255,255,255,.04)` };
 
-  if (!orders || orders.length === 0) {
-    return (
-      <div className="rounded-lg border border-gold/10 bg-deep p-8 text-center">
-        <p className="text-muted">Nog geen orders gevonden.</p>
-      </div>
-    );
-  }
+  if (isLoading) return <div style={{ padding: "40px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>;
+
+  if (error) return (
+    <div style={{ padding: "12px 14px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>
+      Fout bij laden van orders.
+    </div>
+  );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-              <th className="px-4 py-3">Klant</th>
-              <th className="px-4 py-3">Vloer</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Prijs</th>
-              <th className="px-4 py-3">Datum</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gold/5">
-            {orders.map((order) => (
-              <tr
-                key={order.id}
-                className="cursor-pointer transition-colors hover:bg-gold/5"
-              >
-                <td className="px-4 py-3">
-                  <Link href={`/dashboard/orders/${order.id}`} className="block">
-                    <div className="font-medium text-foreground">
-                      {order.client_name}
-                    </div>
-                    <div className="text-xs text-muted">
-                      {order.straat}, {order.plaats}
-                    </div>
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-sm text-muted">
-                  {order.vloer_type || "—"}
-                  {order.oppervlakte && (
-                    <span className="ml-1 text-xs">
-                      ({order.oppervlakte} m²)
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={order.status} />
-                </td>
-                <td className="px-4 py-3 text-right text-sm font-medium text-foreground">
-                  {order.price ? `€ ${formatEuro(order.price)}` : "—"}
-                </td>
-                <td className="px-4 py-3 text-sm text-muted">
-                  {formatDate(order.created_at)}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {order.price && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handlePrintInvoice(order);
-                      }}
-                      className="rounded bg-gold/10 px-2 py-1 text-xs font-bold uppercase tracking-wider text-gold transition hover:bg-gold/20"
-                      title="Factuur printen"
-                    >
-                      🖨 Factuur
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div>
+      <div style={{ marginBottom: 12 }}>
+        <input placeholder="Zoek op naam of vloertype…" value={search} onChange={(e) => setSearch(e.target.value)}
+          style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box" }} />
+      </div>
+      <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
+        {filtered.length === 0 ? (
+          <div style={{ padding: "36px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Geen orders gevonden.</div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={th}>Klant</th>
+                  <th style={th}>Vloer</th>
+                  <th style={th}>Status</th>
+                  <th style={{ ...th, textAlign: "right" }}>Prijs</th>
+                  <th style={th}>Datum</th>
+                  <th style={th}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((order) => (
+                  <tr key={order.id}>
+                    <td style={td}>
+                      <Link href={`/dashboard/orders/${order.id}`} style={{ textDecoration: "none" }}>
+                        <div style={{ fontSize: "0.72rem", color: C.white, fontWeight: 600 }}>{order.client_name}</div>
+                        <div style={{ fontSize: "0.56rem", color: C.dim }}>{order.straat}, {order.plaats}</div>
+                      </Link>
+                    </td>
+                    <td style={{ ...td, color: C.dim }}>
+                      {order.vloer_type || "—"}{order.oppervlakte ? ` (${order.oppervlakte} m²)` : ""}
+                    </td>
+                    <td style={td}><StatusBadge status={order.status} /></td>
+                    <td style={{ ...td, textAlign: "right", color: C.gold, fontFamily: "'Cormorant Garamond',serif", fontSize: "0.9rem" }}>
+                      {order.price ? `€ ${formatEuro(order.price)}` : "—"}
+                    </td>
+                    <td style={{ ...td, color: C.dim }}>{formatDate(order.created_at)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>
+                      {order.price && (
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePrintInvoice(order); }}
+                          style={{ padding: "4px 10px", borderRadius: 6, background: C.goldD, border: `1px solid ${C.bdr}`, color: C.gold, fontSize: "0.56rem", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", cursor: "pointer" }}>
+                          🖨 Factuur
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

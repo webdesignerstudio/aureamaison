@@ -6,8 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { useUpdateOrder } from "@/hooks/use-orders";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Spinner } from "@/components/ui/spinner";
 import { formatDate, formatEuro } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 import { useToastContext } from "@/components/toast-provider";
 import { useState } from "react";
 
@@ -64,126 +64,97 @@ export default function LeggerPortalPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <LeggerLayout>
-        <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
-      </LeggerLayout>
-    );
-  }
+  const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
+  const td = { padding: "11px 14px", fontSize: "0.68rem", color: C.white, borderTop: `1px solid rgba(255,255,255,.04)` };
+
+  if (isLoading) return (
+    <LeggerLayout>
+      <div style={{ padding: "60px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>
+    </LeggerLayout>
+  );
 
   return (
     <LeggerLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Mijn Klussen
-        </h1>
-        <p className="mt-2 text-muted">Overzicht van uw toegewezen klussen.</p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Mijn Klussen</h1>
+        </div>
 
         {/* Tabs */}
-        <div className="mt-6 flex gap-2 border-b border-gold/10">
+        <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${C.bdr}`, marginBottom: 16 }}>
           {(["open", "aangenomen", "afgerond"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
-                activeTab === tab
-                  ? "border-b-2 border-gold text-gold"
-                  : "text-muted hover:text-foreground"
-              }`}
-            >
-              {tab === "open" ? `Openstaand (${openstaand.length})` :
-               tab === "aangenomen" ? `Aangenomen (${aangenomen.length})` :
-               `Afgerond (${afgerondList.length})`}
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              style={{ padding: "10px 14px", fontSize: "0.56rem", fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: activeTab === tab ? C.white : C.muted, background: "none", border: "none", cursor: "pointer", borderBottom: activeTab === tab ? `2px solid ${C.gold}` : "2px solid transparent", marginBottom: -1 }}>
+              {tab === "open" ? `Openstaand (${openstaand.length})` : tab === "aangenomen" ? `Aangenomen (${aangenomen.length})` : `Afgerond (${afgerondList.length})`}
             </button>
           ))}
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-gold/10 bg-deep">
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
           {tabOrders.length === 0 ? (
-            <div className="p-8 text-center text-muted">Geen klussen in deze categorie.</div>
+            <div style={{ padding: "32px", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Geen klussen in deze categorie.</div>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                  <th className="px-4 py-3">Klant</th>
-                  <th className="px-4 py-3">Adres</th>
-                  <th className="px-4 py-3">Vloer</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Prijs</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gold/5">
-                {tabOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gold/5">
-                    <td className="px-4 py-3">
-                      <Link href={`/legger/klus/${order.id}`} className="font-medium text-foreground hover:text-gold">
-                        {order.client_name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted">{order.straat}, {order.plaats}</td>
-                    <td className="px-4 py-3 text-sm text-muted">{order.vloer_type || "—"}</td>
-                    <td className="px-4 py-3"><StatusBadge status={order.status} /></td>
-                    <td className="px-4 py-3 text-sm text-muted">
-                      {order.legger_prijs ? `€ ${formatEuro(order.legger_prijs)}` : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {activeTab === "open" && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAccept(order.id)}
-                            disabled={updateOrder.isPending}
-                            className="rounded bg-green-500/10 px-3 py-1 text-xs font-bold text-green-400 hover:bg-green-500/20 disabled:opacity-50"
-                          >
-                            ✓ Accepteren
-                          </button>
-                          <button
-                            onClick={() => setRejectModal(order.id)}
-                            className="rounded bg-red-500/10 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/20"
-                          >
-                            ✕ Weigeren
-                          </button>
-                        </div>
-                      )}
-                      {activeTab === "aangenomen" && (
-                        <Link href={`/legger/klus/${order.id}`} className="text-xs text-gold hover:underline">
-                          Details →
-                        </Link>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr>
+                  <th style={th}>Klant</th><th style={th}>Adres</th><th style={th}>Vloer</th>
+                  <th style={th}>Status</th><th style={th}>Prijs</th><th style={th}></th>
+                </tr></thead>
+                <tbody>
+                  {tabOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td style={td}><Link href={`/legger/klus/${order.id}`} style={{ color: C.white, textDecoration: "none" }}>{order.client_name}</Link></td>
+                      <td style={{ ...td, color: C.dim }}>{order.straat}, {order.plaats}</td>
+                      <td style={{ ...td, color: C.dim }}>{order.vloer_type || "—"}</td>
+                      <td style={td}><StatusBadge status={order.status} /></td>
+                      <td style={{ ...td, color: C.dim }}>{order.legger_prijs ? `€ ${formatEuro(order.legger_prijs)}` : "—"}</td>
+                      <td style={td}>
+                        {activeTab === "open" && (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button onClick={() => handleAccept(order.id)} disabled={updateOrder.isPending}
+                              style={{ padding: "4px 10px", background: C.greenDim, border: `1px solid ${C.greenBdr}`, color: C.green, borderRadius: 6, fontSize: "0.58rem", cursor: "pointer" }}>
+                              ✓ Accepteren
+                            </button>
+                            <button onClick={() => setRejectModal(order.id)}
+                              style={{ padding: "4px 10px", background: "rgba(224,90,90,.08)", border: "1px solid rgba(224,90,90,.2)", color: C.red, borderRadius: 6, fontSize: "0.58rem", cursor: "pointer" }}>
+                              ✕ Weigeren
+                            </button>
+                          </div>
+                        )}
+                        {activeTab === "aangenomen" && (
+                          <Link href={`/legger/klus/${order.id}`} style={{ fontSize: "0.6rem", color: C.gold, textDecoration: "none" }}>Details →</Link>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
 
       {/* Weiger modal */}
       {rejectModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-red-500/20 bg-deep p-6">
-            <h3 className="font-[family-name:var(--font-cormorant)] text-xl text-red-400">Klus weigeren</h3>
-            <p className="mt-2 text-sm text-muted">Weet u zeker dat u deze klus wilt weigeren?</p>
-            <textarea
-              value={rejectReden}
-              onChange={(e) => setRejectReden(e.target.value)}
-              placeholder="Reden (optioneel)..."
-              rows={3}
-              className="mt-4 w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-            />
-            <div className="mt-4 flex gap-3">
-              <button onClick={() => setRejectModal(null)} className="flex-1 rounded-lg border border-gold/10 px-4 py-2 text-xs font-bold uppercase text-muted hover:text-foreground">
-                Annuleren
-              </button>
-              <button onClick={handleReject} disabled={updateOrder.isPending} className="flex-1 rounded-lg bg-red-500/10 px-4 py-2 text-xs font-bold uppercase text-red-400 hover:bg-red-500/20">
-                {updateOrder.isPending ? "Bezig..." : "Weigeren"}
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,.8)", padding: 20 }}
+          onClick={() => setRejectModal(null)}>
+          <div style={{ background: C.deep, border: `1px solid ${C.red}44`, borderRadius: 14, padding: 24, maxWidth: 440, width: "100%" }}
+            onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.2rem", color: C.red, margin: "0 0 10px" }}>Klus weigeren</h3>
+            <p style={{ fontSize: "0.68rem", color: C.muted, marginBottom: 14 }}>Weet u zeker dat u deze klus wilt weigeren?</p>
+            <textarea value={rejectReden} onChange={(e) => setRejectReden(e.target.value)} placeholder="Reden (optioneel)…" rows={3}
+              style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", boxSizing: "border-box", resize: "vertical" }} />
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+              <button onClick={() => setRejectModal(null)} style={{ flex: 1, padding: "10px", background: "none", border: `1px solid ${C.bdr}`, color: C.muted, borderRadius: 8, fontSize: "0.6rem", cursor: "pointer" }}>Annuleren</button>
+              <button onClick={handleReject} disabled={updateOrder.isPending} style={{ flex: 1, padding: "10px", background: "rgba(224,90,90,.1)", border: "1px solid rgba(224,90,90,.25)", color: C.red, borderRadius: 8, fontSize: "0.6rem", cursor: "pointer" }}>
+                {updateOrder.isPending ? "Bezig…" : "Weigeren"}
               </button>
             </div>
           </div>
         </div>
       )}
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </LeggerLayout>
   );
 }

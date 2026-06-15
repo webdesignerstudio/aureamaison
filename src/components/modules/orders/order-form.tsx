@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useCreateOrder } from "@/hooks/use-orders";
 import { GoldButton } from "@/components/ui/gold-button";
-import { Spinner } from "@/components/ui/spinner";
 import { generateUAID } from "@/lib/utils";
 import { useToastContext } from "@/components/toast-provider";
 import { sendOrderConfirmation } from "@/lib/email";
+import { C } from "@/lib/landing/colors";
 
 interface OrderFormProps {
   onSuccess?: () => void;
@@ -90,62 +90,54 @@ export function OrderForm({ onSuccess, companyId }: OrderFormProps) {
     { label: "Gewenste timing", field: "timing" },
   ];
 
+  const inp: React.CSSProperties = {
+    width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)",
+    border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white,
+    fontSize: "0.72rem", outline: "none", boxSizing: "border-box",
+  };
+  const lbl: React.CSSProperties = {
+    display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.gold,
+    textTransform: "uppercase", marginBottom: 5, fontWeight: 600,
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* Vloer type dropdown */}
-        <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
-            Vloertype
-          </label>
-          <select
-            value={form.vloer_type}
-            onChange={(e) => handleChange("vloer_type", e.target.value)}
-            className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-          >
-            <option value="">Selecteer vloertype...</option>
-            {VLOER_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 12 }}>
+        {/* Vloer type dropdown — spans full width */}
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={lbl}>Vloertype</label>
+          <select value={form.vloer_type} onChange={(e) => handleChange("vloer_type", e.target.value)} style={inp}>
+            <option value="">Selecteer vloertype…</option>
+            {VLOER_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
         {fields.map(({ label, field, type = "text", required }) => (
           <div key={field}>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
-              {label}
-              {required && <span className="text-red-400"> *</span>}
+            <label style={lbl}>
+              {label}{required && <span style={{ color: C.red }}> *</span>}
             </label>
             <input
               type={type}
               value={form[field as keyof typeof form]}
               onChange={(e) => handleChange(field, e.target.value)}
               required={required}
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
+              style={inp}
             />
           </div>
         ))}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
-          Opmerking
-        </label>
-        <textarea
-          value={form.opmerking}
-          onChange={(e) => handleChange("opmerking", e.target.value)}
-          rows={3}
-          className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-        />
+        <label style={lbl}>Opmerking</label>
+        <textarea value={form.opmerking} onChange={(e) => handleChange("opmerking", e.target.value)}
+          rows={3} style={{ ...inp, resize: "vertical" }} />
       </div>
 
-      <GoldButton
-        type="submit"
-        variant="primary"
-        size="lg"
-        disabled={createOrder.isPending}
-      >
-        {createOrder.isPending ? <Spinner size="sm" /> : "Order aanmaken"}
-      </GoldButton>
+      <div>
+        <GoldButton type="submit" variant="primary" size="md" disabled={createOrder.isPending}>
+          {createOrder.isPending ? "Bezig…" : "Order aanmaken"}
+        </GoldButton>
+      </div>
     </form>
   );
 }

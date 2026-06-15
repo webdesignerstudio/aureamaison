@@ -4,9 +4,9 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { useLeggers } from "@/hooks/use-leggers";
-import { Spinner } from "@/components/ui/spinner";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatEuro } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 
@@ -76,149 +76,106 @@ export default function PlanningPage() {
 
   const statuses = ["Alles", "gepland", "bezig", "ter goedkeuring", "afgerond"];
 
+  const sel = { padding: "8px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.68rem", outline: "none" };
+  const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
+  const td = { padding: "11px 14px", fontSize: "0.68rem", color: C.white, borderTop: `1px solid rgba(255,255,255,.04)` };
+
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0", color: C.muted, fontSize: "0.8rem" }}>Laden…</div>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Planning
-        </h1>
-        <p className="mt-2 text-muted">
-          Overzicht van geplande klussen per maand.
-        </p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Overzicht</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Planning</h1>
+        </div>
 
         {/* Filters */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          {/* Zoeken */}
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Zoek op klant of adres..."
-            className="rounded-lg border border-gold/10 bg-background px-4 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-          />
-
-          {/* Status filter */}
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-          >
-            {statuses.map((s) => (
-              <option key={s} value={s}>{s === "Alles" ? "Alle statussen" : s}</option>
-            ))}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Zoek op klant of adres…"
+            style={{ ...sel, flex: "1 1 200px" }} />
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={sel}>
+            {statuses.map((s) => <option key={s} value={s}>{s === "Alles" ? "Alle statussen" : s}</option>)}
           </select>
-
-          {/* Legger filter */}
-          <select
-            value={filterLegger}
-            onChange={(e) => setFilterLegger(e.target.value)}
-            className="rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-          >
+          <select value={filterLegger} onChange={(e) => setFilterLegger(e.target.value)} style={sel}>
             <option value="Alles">Alle leggers</option>
-            {leggers?.map((l) => (
-              <option key={l.id} value={l.id}>{l.naam}</option>
-            ))}
+            {leggers?.map((l) => <option key={l.id} value={l.id}>{l.naam}</option>)}
           </select>
         </div>
 
         {/* Stats */}
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-gold/10 bg-deep p-4">
-            <div className="text-xs text-muted uppercase tracking-wider">Gepland</div>
-            <div className="mt-1 text-xl font-semibold text-gold">
-              {planOrders.filter((o) => o.status === "gepland").length}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginBottom: 22 }}>
+          {[
+            { label: "Gepland", val: planOrders.filter((o) => o.status === "gepland").length, color: C.gold },
+            { label: "Bezig", val: planOrders.filter((o) => o.status === "bezig").length, color: C.blue },
+            { label: "Afgerond", val: planOrders.filter((o) => o.status === "afgerond").length, color: C.green },
+          ].map((k) => (
+            <div key={k.label} style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "14px 16px" }}>
+              <div style={{ fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" }}>{k.label}</div>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.7rem", color: k.color, lineHeight: 1.1, marginTop: 6 }}>{k.val}</div>
             </div>
-          </div>
-          <div className="rounded-xl border border-gold/10 bg-deep p-4">
-            <div className="text-xs text-muted uppercase tracking-wider">Bezig</div>
-            <div className="mt-1 text-xl font-semibold text-blue-400">
-              {planOrders.filter((o) => o.status === "bezig").length}
-            </div>
-          </div>
-          <div className="rounded-xl border border-gold/10 bg-deep p-4">
-            <div className="text-xs text-muted uppercase tracking-wider">Afgerond</div>
-            <div className="mt-1 text-xl font-semibold text-green-400">
-              {planOrders.filter((o) => o.status === "afgerond").length}
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Planning per maand */}
-        <div className="mt-8 space-y-8">
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           {Array.from(filteredGrouped.entries()).map(([month, items]) => (
             <div key={month}>
-              <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-gold">
-                {month}
-              </h2>
-              <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                      <th className="px-4 py-3">Datum</th>
-                      <th className="px-4 py-3">Klant</th>
-                      <th className="px-4 py-3">Adres</th>
-                      <th className="px-4 py-3">Vloer</th>
-                      <th className="px-4 py-3">Legger</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3 text-right">Prijs</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gold/5">
-                    {items.map((order) => (
-                      <tr key={order.id} className="hover:bg-gold/5">
-                        <td className="px-4 py-3 text-sm text-muted">
-                          {order.datum ? formatDate(order.datum) : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-medium text-foreground">
-                          <Link href={`/dashboard/orders/${order.id}`} className="hover:text-gold">
-                            {order.client_name}
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-muted">
-                          {order.straat}, {order.plaats}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-muted">
-                          {order.vloer_type || "—"}
-                          {order.oppervlakte && (
-                            <span className="ml-1 text-xs">({order.oppervlakte} m²)</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-muted">
-                          {order.legger_naam || (
-                            <span className="text-red-400/70 text-xs">Niet toegewezen</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <StatusBadge status={order.status} />
-                        </td>
-                        <td className="px-4 py-3 text-right text-sm text-muted">
-                          {order.price ? `€ ${formatEuro(order.price)}` : "—"}
-                        </td>
+              <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>{month}</div>
+              <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr>
+                        <th style={th}>Datum</th>
+                        <th style={th}>Klant</th>
+                        <th style={th}>Adres</th>
+                        <th style={th}>Vloer</th>
+                        <th style={th}>Legger</th>
+                        <th style={th}>Status</th>
+                        <th style={{ ...th, textAlign: "right" }}>Prijs</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {items.map((order) => (
+                        <tr key={order.id}>
+                          <td style={{ ...td, color: C.dim }}>{order.datum ? formatDate(order.datum) : "—"}</td>
+                          <td style={td}>
+                            <Link href={`/dashboard/orders/${order.id}`} style={{ color: C.white, textDecoration: "none" }}>{order.client_name}</Link>
+                          </td>
+                          <td style={{ ...td, color: C.dim }}>{order.straat}, {order.plaats}</td>
+                          <td style={{ ...td, color: C.dim }}>{order.vloer_type || "—"}{order.oppervlakte ? ` (${order.oppervlakte} m²)` : ""}</td>
+                          <td style={td}>
+                            {order.legger_naam || <span style={{ color: C.red, fontSize: "0.58rem", opacity: 0.7 }}>Niet toegewezen</span>}
+                          </td>
+                          <td style={td}><StatusBadge status={order.status} /></td>
+                          <td style={{ ...td, textAlign: "right", color: C.gold, fontFamily: "'Cormorant Garamond',serif", fontSize: "0.88rem" }}>
+                            {order.price ? `€ ${formatEuro(order.price)}` : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           ))}
 
           {filteredOrders.length === 0 && (
-            <div className="rounded-xl border border-gold/10 bg-deep p-8 text-center text-muted">
+            <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "36px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>
               Geen geplande klussen gevonden.
             </div>
           )}
         </div>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );
 }

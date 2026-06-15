@@ -4,40 +4,10 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { useOffertes } from "@/hooks/use-offertes";
-import { Spinner } from "@/components/ui/spinner";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuro, formatDate } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 import Link from "next/link";
-
-function KPICard({
-  title,
-  value,
-  sub,
-  color = "gold",
-}: {
-  title: string;
-  value: string;
-  sub?: string;
-  color?: "gold" | "green" | "red" | "blue";
-}) {
-  const colorClasses = {
-    gold: "text-gold",
-    green: "text-green-400",
-    red: "text-red-400",
-    blue: "text-blue-400",
-  };
-  return (
-    <div className="rounded-xl border border-gold/10 bg-deep p-5">
-      <div className="text-xs font-medium uppercase tracking-wider text-muted">
-        {title}
-      </div>
-      <div className={`mt-2 text-2xl font-semibold ${colorClasses[color]}`}>
-        {value}
-      </div>
-      {sub && <div className="mt-1 text-xs text-muted">{sub}</div>}
-    </div>
-  );
-}
 
 export default function FinancieelPage() {
   const { user } = useAuth();
@@ -76,197 +46,130 @@ export default function FinancieelPage() {
   const pendingOffertes = (offertes || []).filter((o) => o.status === "ingediend");
   const totaalOfferteBudget = pendingOffertes.reduce((s, o) => s + (o.budget || 0), 0);
 
+  const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
+  const td = { padding: "11px 14px", fontSize: "0.68rem", color: C.white, borderTop: `1px solid rgba(255,255,255,.04)` };
+
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0", color: C.muted, fontSize: "0.8rem" }}>Laden…</div>
       </DashboardLayout>
     );
   }
 
+  const TableSection = ({ title, rows }: { title: string; rows: React.ReactNode }) => (
+    <div style={{ marginTop: 22 }}>
+      <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>{title}</div>
+      <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>{rows}</div>
+      </div>
+    </div>
+  );
+
   return (
     <DashboardLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Financieel
-        </h1>
-        <p className="mt-2 text-muted">
-          Overzicht van omzet, betalingen en prognoses.
-        </p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Overzicht</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Financieel</h1>
+        </div>
 
         {/* KPI Cards */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <KPICard
-            title="Totale omzet"
-            value={`€ ${formatEuro(totaleOmzet)}`}
-            sub={`${omzetOrders.length} orders`}
-            color="gold"
-          />
-          <KPICard
-            title="Betaald"
-            value={`€ ${formatEuro(totaalBetaald)}`}
-            sub={`${betaaldOrders.length} facturen`}
-            color="green"
-          />
-          <KPICard
-            title="Openstaand"
-            value={`€ ${formatEuro(totaalOpen)}`}
-            sub={`${openOrders.length} facturen`}
-            color="red"
-          />
-          <KPICard
-            title="Prognose"
-            value={`€ ${formatEuro(totaalPrognose)}`}
-            sub={`${prognoseOrders.length} in pipeline`}
-            color="blue"
-          />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 12, marginBottom: 16 }}>
+          {[
+            { label: "Totale omzet", value: `€ ${formatEuro(totaleOmzet)}`, sub: `${omzetOrders.length} orders`, color: C.gold },
+            { label: "Betaald", value: `€ ${formatEuro(totaalBetaald)}`, sub: `${betaaldOrders.length} facturen`, color: C.green },
+            { label: "Openstaand", value: `€ ${formatEuro(totaalOpen)}`, sub: `${openOrders.length} facturen`, color: C.red },
+            { label: "Prognose", value: `€ ${formatEuro(totaalPrognose)}`, sub: `${prognoseOrders.length} in pipeline`, color: C.blue },
+          ].map((k) => (
+            <div key={k.label} style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "14px 16px" }}>
+              <div style={{ fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" }}>{k.label}</div>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.5rem", color: k.color, lineHeight: 1.1, marginTop: 6 }}>{k.value}</div>
+              {k.sub && <div style={{ fontSize: "0.52rem", color: C.dim, marginTop: 3 }}>{k.sub}</div>}
+            </div>
+          ))}
         </div>
 
-        {/* Offertes overzicht */}
-        <div className="mt-6 rounded-xl border border-gold/10 bg-deep p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wider text-muted">
-                Open offertes
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-gold">
-                {pendingOffertes.length}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-muted">Totaal budget</div>
-              <div className="text-lg font-semibold text-foreground">
-                € {formatEuro(totaalOfferteBudget)}
-              </div>
-            </div>
+        {/* Offertes */}
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" }}>Open offertes</div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.5rem", color: C.gold, lineHeight: 1.1, marginTop: 4 }}>{pendingOffertes.length}</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: "0.52rem", color: C.muted }}>Totaal budget</div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.1rem", color: C.white, marginTop: 2 }}>€ {formatEuro(totaalOfferteBudget)}</div>
           </div>
         </div>
 
-        {/* Openstaande facturen tabel */}
+        {/* Openstaande facturen */}
         {openOrders.length > 0 && (
-          <div className="mt-8">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Openstaande facturen
-            </h2>
-            <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                    <th className="px-4 py-3">Factuurnr</th>
-                    <th className="px-4 py-3">Klant</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Bedrag</th>
-                    <th className="px-4 py-3">Datum</th>
+          <TableSection title="Openstaande facturen" rows={
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead><tr>
+                <th style={th}>Factuurnr</th><th style={th}>Klant</th><th style={th}>Status</th>
+                <th style={{ ...th, textAlign: "right" }}>Bedrag</th><th style={th}>Datum</th>
+              </tr></thead>
+              <tbody>
+                {openOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td style={td}><Link href={`/dashboard/orders/${order.id}`} style={{ color: C.white, textDecoration: "none" }}>{order.invoice_nr}</Link></td>
+                    <td style={{ ...td, color: C.dim }}>{order.client_name}</td>
+                    <td style={td}><StatusBadge status={order.status} /></td>
+                    <td style={{ ...td, textAlign: "right", color: C.red }}>€ {formatEuro(order.price || 0)}</td>
+                    <td style={{ ...td, color: C.dim }}>{formatDate(order.invoice_date)}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gold/5">
-                  {openOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gold/5">
-                      <td className="px-4 py-3 text-sm font-medium text-foreground">
-                        <Link href={`/dashboard/orders/${order.id}`} className="hover:text-gold">
-                          {order.invoice_nr}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">{order.client_name}</td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={order.status} />
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium text-red-400">
-                        € {formatEuro(order.price || 0)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">
-                        {formatDate(order.invoice_date)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                ))}
+              </tbody>
+            </table>
+          } />
         )}
 
-        {/* Betaalde facturen tabel */}
+        {/* Betaalde facturen */}
         {betaaldOrders.length > 0 && (
-          <div className="mt-8">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Betaalde facturen
-            </h2>
-            <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                    <th className="px-4 py-3">Factuurnr</th>
-                    <th className="px-4 py-3">Klant</th>
-                    <th className="px-4 py-3 text-right">Bedrag</th>
-                    <th className="px-4 py-3">Betaald op</th>
+          <TableSection title="Betaalde facturen" rows={
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead><tr>
+                <th style={th}>Factuurnr</th><th style={th}>Klant</th>
+                <th style={{ ...th, textAlign: "right" }}>Bedrag</th><th style={th}>Betaald op</th>
+              </tr></thead>
+              <tbody>
+                {betaaldOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td style={td}><Link href={`/dashboard/orders/${order.id}`} style={{ color: C.white, textDecoration: "none" }}>{order.invoice_nr}</Link></td>
+                    <td style={{ ...td, color: C.dim }}>{order.client_name}</td>
+                    <td style={{ ...td, textAlign: "right", color: C.green }}>€ {formatEuro(order.price || 0)}</td>
+                    <td style={{ ...td, color: C.dim }}>{formatDate(order.invoice_paid_at)}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gold/5">
-                  {betaaldOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gold/5">
-                      <td className="px-4 py-3 text-sm font-medium text-foreground">
-                        <Link href={`/dashboard/orders/${order.id}`} className="hover:text-gold">
-                          {order.invoice_nr}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">{order.client_name}</td>
-                      <td className="px-4 py-3 text-right text-sm font-medium text-green-400">
-                        € {formatEuro(order.price || 0)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">
-                        {formatDate(order.invoice_paid_at)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                ))}
+              </tbody>
+            </table>
+          } />
         )}
 
-        {/* Pipeline / Prognose */}
+        {/* Pipeline */}
         {prognoseOrders.length > 0 && (
-          <div className="mt-8">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Pipeline (prognose)
-            </h2>
-            <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                    <th className="px-4 py-3">Klant</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Verwachte omzet</th>
-                    <th className="px-4 py-3">Vloer</th>
+          <TableSection title="Pipeline (prognose)" rows={
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead><tr>
+                <th style={th}>Klant</th><th style={th}>Status</th>
+                <th style={{ ...th, textAlign: "right" }}>Verwachte omzet</th><th style={th}>Vloer</th>
+              </tr></thead>
+              <tbody>
+                {prognoseOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td style={td}><Link href={`/dashboard/orders/${order.id}`} style={{ color: C.white, textDecoration: "none" }}>{order.client_name}</Link></td>
+                    <td style={td}><StatusBadge status={order.status} /></td>
+                    <td style={{ ...td, textAlign: "right", color: C.blue }}>€ {formatEuro(order.price || 0)}</td>
+                    <td style={{ ...td, color: C.dim }}>{order.vloer_type || "—"}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gold/5">
-                  {prognoseOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gold/5">
-                      <td className="px-4 py-3 text-sm font-medium text-foreground">
-                        <Link href={`/dashboard/orders/${order.id}`} className="hover:text-gold">
-                          {order.client_name}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={order.status} />
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium text-blue-400">
-                        € {formatEuro(order.price || 0)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">
-                        {order.vloer_type || "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                ))}
+              </tbody>
+            </table>
+          } />
         )}
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );
 }

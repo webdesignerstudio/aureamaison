@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GoldButton } from "@/components/ui/gold-button";
-import { Spinner } from "@/components/ui/spinner";
+import { C } from "@/lib/landing/colors";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -66,72 +66,30 @@ export default function LoginPage() {
     router.push("/dashboard");
   };
 
+  const inp = { width: "100%", padding: "10px 14px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 8, color: C.white, fontSize: "0.78rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 600 };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1
-            className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold"
-          >
-            Aurea Maison Floors
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            Log in om toegang te krijgen tot het platform
-          </p>
+    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", background: C.bg, padding: "0 20px" }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 5, color: C.gold, textTransform: "uppercase", marginBottom: 8 }}>Dashboard Toegang</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2.4rem", fontWeight: 300, letterSpacing: -1, color: C.white, margin: 0 }}>Aurea Maison</h1>
+          <p style={{ marginTop: 8, fontSize: "0.68rem", color: C.dim }}>Log in om toegang te krijgen tot het platform</p>
         </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-xl border border-gold/10 bg-deep p-6 shadow-lg"
-        >
-          {error && (
-            <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
-
-          <div className="mb-4">
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-muted">
-              E-mailadres
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-              placeholder="eigenaar@aurea.nl"
-            />
+        <form onSubmit={handleSubmit} style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 14, padding: "28px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
+          {error && <div style={{ padding: "10px 14px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>{error}</div>}
+          <div><label htmlFor="email" style={lbl}>E-mailadres</label>
+            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="eigenaar@aurea.nl" style={inp} /></div>
+          <div><label htmlFor="password" style={lbl}>Wachtwoord</label>
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" style={inp} /></div>
+          <div style={{ marginTop: 4 }}>
+            <GoldButton type="submit" variant="primary" size="lg" className="w-full" disabled={loading}>
+              {loading ? "Bezig…" : "Inloggen"}
+            </GoldButton>
           </div>
-
-          <div className="mb-6">
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-muted">
-              Wachtwoord
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <GoldButton
-            type="submit"
-            variant="primary"
-            size="lg"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? <Spinner size="sm" /> : "Inloggen"}
-          </GoldButton>
         </form>
-
-        <p className="mt-6 text-center text-xs text-muted/60">
+        <p style={{ marginTop: 20, textAlign: "center", fontSize: "0.58rem", color: C.dim }}>
           Problemen met inloggen? Neem contact op met de beheerder.
         </p>
       </div>

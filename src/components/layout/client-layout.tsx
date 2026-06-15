@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { C } from "@/lib/landing/colors";
 import { SidebarShell, type NavCat } from "./sidebar-shell";
 import { SettingsGear } from "@/components/modules/settings-gear";
 
@@ -20,23 +20,17 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     }
   }, [user, loading, router]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", background: C.bg, color: C.muted, fontSize: "0.72rem" }}>Laden…</div>
+  );
 
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="w-full max-w-md rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-          <p className="text-sm text-red-400">Er is een fout opgetreden bij het laden van uw sessie.</p>
-        </div>
+  if (error) return (
+    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", background: C.bg, padding: "0 20px" }}>
+      <div style={{ width: "100%", maxWidth: 420, padding: "24px", borderRadius: 12, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, textAlign: "center", fontSize: "0.72rem", color: C.red }}>
+        Er is een fout opgetreden bij het laden van uw sessie.
       </div>
-    );
-  }
+    </div>
+  );
 
   if (!user || user.role !== "client") {
     return null;

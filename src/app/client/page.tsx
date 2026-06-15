@@ -4,8 +4,8 @@ import Link from "next/link";
 import { ClientLayout } from "@/components/layout/client-layout";
 import { useAuth } from "@/hooks/use-auth";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Spinner } from "@/components/ui/spinner";
 import { formatDate, formatEuro } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Order, Offerte } from "@/types";
@@ -29,95 +29,89 @@ export default function ClientPortalPage() {
     });
   }, [user?.email]);
 
-  if (loading) {
-    return (
-      <ClientLayout>
-        <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
-      </ClientLayout>
-    );
-  }
+  const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
+  const td = { padding: "11px 14px", fontSize: "0.68rem", color: C.white, borderTop: `1px solid rgba(255,255,255,.04)` };
+
+  if (loading) return (
+    <ClientLayout>
+      <div style={{ padding: "60px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>
+    </ClientLayout>
+  );
 
   return (
     <ClientLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Mijn Account
-        </h1>
-        <p className="mt-2 text-muted">Overzicht van uw orders en offertes.</p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Mijn Account</h1>
+        </div>
 
-        <div className="mt-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-gold">Mijn Orders</h2>
-            <Link href="/client/opdracht" className="text-xs text-gold hover:underline">+ Nieuwe opdracht</Link>
+        {/* Orders */}
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase" }}>Mijn Orders</div>
+            <Link href="/client/opdracht" style={{ fontSize: "0.6rem", color: C.gold, textDecoration: "none" }}>+ Nieuwe opdracht</Link>
           </div>
-          <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
+          <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
             {orders.length === 0 ? (
-              <div className="p-8 text-center text-muted">Geen orders gevonden.</div>
+              <div style={{ padding: "32px", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Geen orders gevonden.</div>
             ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Vloer</th>
-                    <th className="px-4 py-3">Prijs</th>
-                    <th className="px-4 py-3">Factuur</th>
-                    <th className="px-4 py-3">Datum</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gold/5">
-                  {orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gold/5">
-                      <td className="px-4 py-3"><StatusBadge status={order.status} /></td>
-                      <td className="px-4 py-3 text-sm text-muted">{order.vloer_type || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-muted">{order.price ? `€ ${formatEuro(order.price)}` : "—"}</td>
-                      <td className="px-4 py-3 text-sm">
-                        {order.invoice_paid ? (
-                          <span className="text-green-400">Betaald ✓</span>
-                        ) : order.invoice_nr ? (
-                          <span className="text-gold">Open</span>
-                        ) : (
-                          <span className="text-muted">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">{formatDate(order.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead><tr>
+                    <th style={th}>Status</th><th style={th}>Vloer</th><th style={th}>Prijs</th>
+                    <th style={th}>Factuur</th><th style={th}>Datum</th>
+                  </tr></thead>
+                  <tbody>
+                    {orders.map((order) => (
+                      <tr key={order.id}>
+                        <td style={td}><StatusBadge status={order.status} /></td>
+                        <td style={{ ...td, color: C.dim }}>{order.vloer_type || "—"}</td>
+                        <td style={{ ...td, color: C.dim }}>{order.price ? `€ ${formatEuro(order.price)}` : "—"}</td>
+                        <td style={td}>
+                          {order.invoice_paid ? <span style={{ color: C.green }}>Betaald ✓</span>
+                            : order.invoice_nr ? <span style={{ color: C.gold }}>Open</span>
+                            : <span style={{ color: C.dim }}>—</span>}
+                        </td>
+                        <td style={{ ...td, color: C.dim }}>{formatDate(order.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
 
-        <div className="mt-8">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">Mijn Offertes</h2>
-          <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
+        {/* Offertes */}
+        <div>
+          <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>Mijn Offertes</div>
+          <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
             {offertes.length === 0 ? (
-              <div className="p-8 text-center text-muted">Geen offertes gevonden.</div>
+              <div style={{ padding: "32px", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Geen offertes gevonden.</div>
             ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Vloer</th>
-                    <th className="px-4 py-3">Budget</th>
-                    <th className="px-4 py-3">Datum</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gold/5">
-                  {offertes.map((offerte) => (
-                    <tr key={offerte.id} className="hover:bg-gold/5">
-                      <td className="px-4 py-3"><StatusBadge status={offerte.status} /></td>
-                      <td className="px-4 py-3 text-sm text-muted">{offerte.vloer_type || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-muted">{offerte.budget ? `€ ${formatEuro(offerte.budget)}` : "—"}</td>
-                      <td className="px-4 py-3 text-sm text-muted">{formatDate(offerte.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead><tr>
+                    <th style={th}>Status</th><th style={th}>Vloer</th><th style={th}>Budget</th><th style={th}>Datum</th>
+                  </tr></thead>
+                  <tbody>
+                    {offertes.map((offerte) => (
+                      <tr key={offerte.id}>
+                        <td style={td}><StatusBadge status={offerte.status} /></td>
+                        <td style={{ ...td, color: C.dim }}>{offerte.vloer_type || "—"}</td>
+                        <td style={{ ...td, color: C.dim }}>{offerte.budget ? `€ ${formatEuro(offerte.budget)}` : "—"}</td>
+                        <td style={{ ...td, color: C.dim }}>{formatDate(offerte.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </ClientLayout>
   );
 }

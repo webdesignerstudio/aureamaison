@@ -2,123 +2,339 @@
 
 import { useState, useEffect } from "react";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
-import { GoldButton } from "@/components/ui/gold-button";
-import { Spinner } from "@/components/ui/spinner";
 import { useToastContext } from "@/components/toast-provider";
+import { createClient } from "@/lib/supabase/client";
+import { C } from "@/lib/landing/colors";
 import type { Settings } from "@/types";
 
 interface SettingsFormProps {
   companyId: string;
+  user?: { id: string; email: string; name?: string | null; role?: string };
 }
 
-export function SettingsForm({ companyId }: SettingsFormProps) {
+function SInp({ value, onChange, type = "text", placeholder, rows }: { value: string | number; onChange: (v: string) => void; type?: string; placeholder?: string; rows?: number }) {
+  const inp: React.CSSProperties = { width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
+  if (rows) return <textarea rows={rows} value={String(value || "")} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ ...inp, resize: "vertical" }} />;
+  return <input type={type} value={String(value || "")} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={inp} />;
+}
+
+function SSelect({ value, onChange, options }: { value: string | number; onChange: (v: string) => void; options: [string | number, string][] }) {
+  return (
+    <select value={String(value)} onChange={(e) => onChange(e.target.value)}
+      style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", cursor: "pointer" }}>
+      {options.map(([v, l]) => <option key={v} value={String(v)}>{l}</option>)}
+    </select>
+  );
+}
+
+function SettingSection({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, paddingBottom: 10, borderBottom: `1px solid rgba(255,255,255,.06)` }}>
+        <span style={{ fontSize: "1rem" }}>{icon}</span>
+        <div style={{ fontSize: "0.6rem", letterSpacing: 2, color: C.white, textTransform: "uppercase", fontWeight: 600 }}>{title}</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>{children}</div>
+    </div>
+  );
+}
+
+function SettingRow({ label, sub, children }: { label: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, padding: "10px 0", borderBottom: `1px solid rgba(255,255,255,.04)`, flexWrap: "wrap" }}>
+      <div style={{ flex: 1, minWidth: 140 }}>
+        <div style={{ fontSize: "0.68rem", color: C.white }}>{label}</div>
+        {sub && <div style={{ fontSize: "0.56rem", color: C.dim, marginTop: 2 }}>{sub}</div>}
+      </div>
+      <div style={{ flex: 1, minWidth: 200, maxWidth: 340 }}>{children}</div>
+    </div>
+  );
+}
+
+function pwStrength(pw: string): number {
+  if (!pw) return 0;
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (pw.length >= 12) s++;
+  if (/[A-Z]/.test(pw)) s++;
+  if (/[0-9]/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return s;
+}
+const pwLabel = (s: number) => ["", "Zwak", "Matig", "Redelijk", "Sterk", "Zeer sterk"][s] || "";
+const pwColor = (s: number) => ["", C.red, C.orange, C.gold, C.green, "#22c55e"][s] || C.dim;
+
+const SUBTABS = [
+  { id: "bedrijf", icon: "🏢", label: "Bedrijfsgegevens" },
+  { id: "factuur", icon: "🧾", label: "Factuur & Offerte" },
+  { id: "notif",   icon: "📧", label: "Notificaties" },
+  { id: "account", icon: "👤", label: "Account" },
+  { id: "systeem", icon: "⚙️", label: "Systeem" },
+];
+
+export function SettingsForm({ companyId, user }: SettingsFormProps) {
   const { data: settings, isLoading } = useSettings(companyId);
   const updateSettings = useUpdateSettings();
-  const [form, setForm] = useState<Partial<Settings>>({});
-
-  useEffect(() => {
-    if (settings) {
-      setForm(settings);
-    }
-  }, [settings]);
-
-  const handleChange = (field: keyof Settings, value: string | number) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
   const { success, error } = useToastContext();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!settings?.id) return;
-    try {
-      await updateSettings.mutateAsync({
-        id: settings.id,
-        ...form,
-      });
-      success("Instellingen succesvol opgeslagen!");
-    } catch (err) {
-      error("Er is een fout opgetreden bij het opslaan van de instellingen.");
-    }
+  const [subTab, setSubTab] = useState("bedrijf");
+  const [form, setForm] = useState<Partial<Settings>>({});
+  const [saved, setSaved] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [pwOud, setPwOud] = useState("");
+  const [pwNieuw, setPwNieuw] = useState("");
+  const [pwBevestig, setPwBevestig] = useState("");
+  const [pwErr, setPwErr] = useState("");
+  const [pwOk, setPwOk] = useState("");
+  const [pwSaving, setPwSaving] = useState(false);
+
+  useEffect(() => {
+    if (settings) { setForm(settings); setSaved(true); }
+  }, [settings]);
+
+  const upd = (field: keyof Settings, value: string | number) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setSaved(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const handleSave = async () => {
+    if (!settings?.id) return;
+    setSaving(true);
+    try {
+      await updateSettings.mutateAsync({ id: settings.id, ...form });
+      setSaved(true);
+      success("Instellingen opgeslagen ✓");
+    } catch {
+      error("Opslaan mislukt.");
+    }
+    setSaving(false);
+  };
 
-  const fields = [
-    { label: "Bedrijfsnaam", field: "bedrijf_naam" as const, type: "text" },
-    { label: "E-mail", field: "bedrijf_email" as const, type: "email" },
-    { label: "Telefoon", field: "bedrijf_tel" as const, type: "text" },
-    { label: "Adres", field: "bedrijf_adres" as const, type: "text" },
-    { label: "Postcode", field: "bedrijf_postcode" as const, type: "text" },
-    { label: "Plaats", field: "bedrijf_plaats" as const, type: "text" },
-    { label: "KvK", field: "kvk" as const, type: "text" },
-    { label: "BTW-nummer", field: "btw" as const, type: "text" },
-    { label: "IBAN", field: "iban" as const, type: "text" },
-  ];
+  const handlePwChange = async () => {
+    setPwErr(""); setPwOk("");
+    if (!pwNieuw || !pwBevestig) { setPwErr("Vul alle velden in"); return; }
+    if (pwNieuw !== pwBevestig) { setPwErr("Wachtwoorden komen niet overeen"); return; }
+    if (pwNieuw.length < 8) { setPwErr("Minimaal 8 tekens vereist"); return; }
+    setPwSaving(true);
+    try {
+      const supabase = createClient();
+      const { error: authErr } = await supabase.auth.updateUser({ password: pwNieuw });
+      if (authErr) { setPwErr(authErr.message); } else {
+        setPwNieuw(""); setPwBevestig(""); setPwOud("");
+        setPwOk("Wachtwoord succesvol gewijzigd ✓");
+        success("Wachtwoord gewijzigd ✓");
+      }
+    } catch { setPwErr("Onbekende fout."); }
+    setPwSaving(false);
+  };
 
-  const numericFields = [
-    { label: "BTW percentage", field: "factuur_btw_pct" as const },
-    { label: "Betaaltermijn (dagen)", field: "factuur_betaal_termijn" as const },
-    { label: "Offerte geldigheid (dagen)", field: "offerte_geldigheid" as const },
-  ];
+  const inp: React.CSSProperties = { width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
+
+  if (isLoading) return <div style={{ padding: "40px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>;
+
+  const s = form;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {fields.map(({ label, field, type }) => (
-          <div key={field}>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
-              {label}
-            </label>
-            <input
-              type={type}
-              value={(form[field] as string) || ""}
-              onChange={(e) => handleChange(field, e.target.value)}
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-            />
-          </div>
-        ))}
-        {numericFields.map(({ label, field }) => (
-          <div key={field}>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
-              {label}
-            </label>
-            <input
-              type="number"
-              value={(form[field] as number) || ""}
-              onChange={(e) => handleChange(field, parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-            />
-          </div>
+    <div style={{ animation: "slideUp .3s ease" }}>
+      {/* Save bar */}
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: 18, minHeight: 36 }}>
+        {!saved ? (
+          <button onClick={handleSave} disabled={saving}
+            style={{ padding: "9px 22px", background: "rgba(198,165,107,.12)", border: `1px solid ${C.gold}`, color: C.gold, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: saving ? "not-allowed" : "pointer", borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
+            {saving ? "Opslaan…" : "💾 Wijzigingen opslaan"}
+          </button>
+        ) : (
+          <div style={{ fontSize: "0.62rem", color: C.green }}>✓ Alles opgeslagen</div>
+        )}
+      </div>
+
+      {/* Sub-tabs */}
+      <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${C.bdr}`, marginBottom: 28, overflowX: "auto" }}>
+        {SUBTABS.map((t) => (
+          <button key={t.id} onClick={() => setSubTab(t.id)}
+            style={{ padding: "10px 18px", background: "none", border: "none", borderBottom: subTab === t.id ? `2px solid ${C.gold}` : "2px solid transparent", color: subTab === t.id ? C.gold : C.muted, cursor: "pointer", fontSize: "0.64rem", fontWeight: subTab === t.id ? 700 : 400, whiteSpace: "nowrap", letterSpacing: 1, transition: "color .2s", display: "flex", alignItems: "center", gap: 6 }}>
+            <span>{t.icon}</span>{t.label}
+          </button>
         ))}
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gold">
-          Factuur voetnoot
-        </label>
-        <textarea
-          value={(form.factuur_voetnoot as string) || ""}
-          onChange={(e) => handleChange("factuur_voetnoot", e.target.value)}
-          rows={3}
-          className="w-full rounded-lg border border-gold/10 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/40 focus:border-gold/30 focus:outline-none focus:ring-1 focus:ring-gold/20"
-        />
-      </div>
+      <div style={{ maxWidth: 700 }}>
 
-      <GoldButton
-        type="submit"
-        variant="primary"
-        size="lg"
-        disabled={updateSettings.isPending}
-      >
-        {updateSettings.isPending ? <Spinner size="sm" /> : "Instellingen opslaan"}
-      </GoldButton>
-    </form>
+        {/* ══ BEDRIJFSGEGEVENS ══ */}
+        {subTab === "bedrijf" && (
+          <div style={{ animation: "slideUp .2s ease" }}>
+            <SettingSection title="Bedrijfsprofiel" icon="🏢">
+              <SettingRow label="Bedrijfsnaam" sub="Staat op alle facturen en offertes">
+                <SInp value={s.bedrijf_naam || ""} onChange={(v) => upd("bedrijf_naam", v)} placeholder="Aurea Maison Floors" />
+              </SettingRow>
+              <SettingRow label="E-mailadres" sub="Contactadres voor klanten">
+                <SInp value={s.bedrijf_email || ""} onChange={(v) => upd("bedrijf_email", v)} type="email" placeholder="info@bedrijf.nl" />
+              </SettingRow>
+              <SettingRow label="Telefoonnummer">
+                <SInp value={s.bedrijf_tel || ""} onChange={(v) => upd("bedrijf_tel", v)} type="tel" placeholder="06 00 00 00 00" />
+              </SettingRow>
+              <SettingRow label="Straat + huisnummer">
+                <SInp value={s.bedrijf_adres || ""} onChange={(v) => upd("bedrijf_adres", v)} placeholder="Zuidwijkstraat 28" />
+              </SettingRow>
+              <SettingRow label="Postcode">
+                <SInp value={s.bedrijf_postcode || ""} onChange={(v) => upd("bedrijf_postcode", v)} placeholder="2729 KD" />
+              </SettingRow>
+              <SettingRow label="Stad">
+                <SInp value={s.bedrijf_plaats || ""} onChange={(v) => upd("bedrijf_plaats", v)} placeholder="Zoetermeer" />
+              </SettingRow>
+            </SettingSection>
+
+            <SettingSection title="Juridische gegevens" icon="📋">
+              <SettingRow label="KvK-nummer">
+                <SInp value={s.kvk || ""} onChange={(v) => upd("kvk", v)} placeholder="12345678" />
+              </SettingRow>
+              <SettingRow label="BTW-nummer">
+                <SInp value={s.btw || ""} onChange={(v) => upd("btw", v)} placeholder="NL000000000B01" />
+              </SettingRow>
+              <SettingRow label="IBAN" sub="Verschijnt op elke factuur als betaalrekening">
+                <SInp value={s.iban || ""} onChange={(v) => upd("iban", v)} placeholder="NL00 BANK 0000 0000 00" />
+              </SettingRow>
+            </SettingSection>
+
+            <div style={{ background: "rgba(255,255,255,.02)", border: `1px solid ${C.bdr}`, borderRadius: 12, padding: 18 }}>
+              <div style={{ fontSize: "0.54rem", letterSpacing: 2, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>📄 Live preview — factuurkop</div>
+              <div style={{ fontFamily: "Arial,sans-serif", background: "#fff", color: "#1a1a1a", padding: "20px 24px", borderRadius: 8, fontSize: 12, lineHeight: 1.8 }}>
+                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>{s.bedrijf_naam || "—"}</div>
+                <div style={{ color: "#444" }}>{s.bedrijf_adres} · {s.bedrijf_postcode} {s.bedrijf_plaats}</div>
+                <div style={{ color: "#444" }}>Tel: {s.bedrijf_tel} · {s.bedrijf_email}</div>
+                <div style={{ color: "#666", marginTop: 4, fontSize: 11 }}>KvK: {s.kvk} · BTW: {s.btw} · IBAN: {s.iban}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ FACTUUR & OFFERTE ══ */}
+        {subTab === "factuur" && (
+          <div style={{ animation: "slideUp .2s ease" }}>
+            <SettingSection title="Factuurinstellingen" icon="🧾">
+              <SettingRow label="Standaard betaaltermijn" sub="Aantal dagen na factuurdatum">
+                <SSelect value={s.factuur_betaal_termijn ?? 14} onChange={(v) => upd("factuur_betaal_termijn", parseInt(v))}
+                  options={[[7,"7 dagen"],[14,"14 dagen"],[21,"21 dagen"],[30,"30 dagen"],[45,"45 dagen"],[60,"60 dagen"]]} />
+              </SettingRow>
+              <SettingRow label="BTW-percentage" sub="Toegepast op alle facturen">
+                <SSelect value={s.factuur_btw_pct ?? 21} onChange={(v) => upd("factuur_btw_pct", parseFloat(v))}
+                  options={[[0,"0% — Vrijgesteld"],[9,"9% — Laag tarief"],[21,"21% — Standaard tarief"]]} />
+              </SettingRow>
+              <SettingRow label="Voettekst factuur" sub="Extra tekst onderaan elke factuur">
+                <SInp value={s.factuur_voetnoot || ""} onChange={(v) => upd("factuur_voetnoot", v)} rows={3}
+                  placeholder="Bijv: Bij vragen, neem contact op via info@bedrijf.nl" />
+              </SettingRow>
+            </SettingSection>
+
+            <SettingSection title="Offerte-instellingen" icon="📄">
+              <SettingRow label="Standaard geldigheid offerte" sub="Aantal dagen geldig na aanmaken">
+                <SSelect value={s.offerte_geldigheid ?? 14} onChange={(v) => upd("offerte_geldigheid", parseInt(v))}
+                  options={[[7,"7 dagen"],[14,"14 dagen"],[21,"21 dagen"],[30,"30 dagen"]]} />
+              </SettingRow>
+            </SettingSection>
+
+            <div style={{ padding: "12px 16px", background: "rgba(198,165,107,.04)", border: `1px solid ${C.bdr}`, borderRadius: 8, fontSize: "0.68rem", color: C.muted, lineHeight: 1.8 }}>
+              💡 Wijzigingen gelden direct voor <strong style={{ color: C.white }}>nieuwe</strong> facturen en offertes. Bestaande documenten worden niet aangepast.
+            </div>
+          </div>
+        )}
+
+        {/* ══ NOTIFICATIES ══ */}
+        {subTab === "notif" && (
+          <div style={{ animation: "slideUp .2s ease" }}>
+            <div style={{ padding: "12px 16px", background: "rgba(74,158,232,.05)", border: "1px solid rgba(74,158,232,.18)", borderRadius: 8, marginBottom: 24, fontSize: "0.68rem", color: C.muted, lineHeight: 1.8 }}>
+              📬 E-mails worden automatisch verzonden via de geconfigureerde e-mailprovider.<br />
+              Afzender: <strong style={{ color: C.white }}>{s.bedrijf_naam || "—"}</strong> · <strong style={{ color: C.white }}>{s.bedrijf_email || "—"}</strong>
+            </div>
+            <SettingSection title="Geconfigureerde e-mails" icon="✉️">
+              {[
+                ["Nieuwe opdracht", "Bij elke nieuwe klantopdracht"],
+                ["Status update klant", "Bij elke statuswijziging van een opdracht"],
+                ["Offerte reactie", "Als klant een offerte accepteert of afwijst"],
+                ["Legger toegewezen", "Als een legger wordt toegewezen"],
+                ["Betaalbevestiging", "Na markeren als betaald"],
+              ].map(([label, sub]) => (
+                <SettingRow key={label} label={label} sub={sub}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.65rem" }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.green, display: "inline-block" }} />
+                    <span style={{ color: C.green }}>Actief</span>
+                  </div>
+                </SettingRow>
+              ))}
+            </SettingSection>
+          </div>
+        )}
+
+        {/* ══ ACCOUNT ══ */}
+        {subTab === "account" && (
+          <div style={{ animation: "slideUp .2s ease" }}>
+            <SettingSection title="Accountgegevens" icon="👤">
+              <SettingRow label="E-mailadres" sub="Inlogadres — wijzig via Supabase Auth">
+                <div style={{ padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, fontSize: "0.72rem", color: C.muted, display: "flex", alignItems: "center", gap: 8 }}>
+                  🔒 {user?.email || "—"}
+                </div>
+              </SettingRow>
+              <SettingRow label="Rol">
+                <div style={{ padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, fontSize: "0.72rem", color: C.muted }}>
+                  {user?.role || "owner"}
+                </div>
+              </SettingRow>
+            </SettingSection>
+
+            <SettingSection title="Wachtwoord wijzigen" icon="🔐">
+              <SettingRow label="Nieuw wachtwoord" sub="Minimaal 8 tekens">
+                <div>
+                  <input type="password" value={pwNieuw} onChange={(e) => setPwNieuw(e.target.value)} placeholder="••••••••" style={inp} />
+                  {pwNieuw && (
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ height: 4, background: "rgba(255,255,255,.06)", borderRadius: 99, marginBottom: 5, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${Math.min(100, pwStrength(pwNieuw) / 5 * 100)}%`, background: pwColor(pwStrength(pwNieuw)), borderRadius: 99, transition: "width .3s" }} />
+                      </div>
+                      <span style={{ fontSize: "0.62rem", color: pwColor(pwStrength(pwNieuw)) }}>{pwLabel(pwStrength(pwNieuw))}</span>
+                    </div>
+                  )}
+                </div>
+              </SettingRow>
+              <SettingRow label="Bevestig nieuw wachtwoord">
+                <input type="password" value={pwBevestig} onChange={(e) => setPwBevestig(e.target.value)} placeholder="••••••••" style={inp} />
+              </SettingRow>
+              {pwErr && <div style={{ padding: "10px 14px", background: "rgba(224,90,90,.08)", border: "1px solid rgba(224,90,90,.25)", borderRadius: 7, fontSize: "0.68rem", color: C.red, margin: "8px 0" }}>⚠ {pwErr}</div>}
+              {pwOk && <div style={{ padding: "10px 14px", background: "rgba(60,184,122,.08)", border: "1px solid rgba(60,184,122,.25)", borderRadius: 7, fontSize: "0.68rem", color: C.green, margin: "8px 0" }}>✓ {pwOk}</div>}
+              <div style={{ paddingTop: 14 }}>
+                <button onClick={handlePwChange} disabled={!pwNieuw || !pwBevestig || pwSaving}
+                  style={{ padding: "10px 22px", background: (!pwNieuw || !pwBevestig) ? "rgba(255,255,255,.04)" : "rgba(198,165,107,.12)", border: `1px solid ${(!pwNieuw || !pwBevestig) ? C.bdr : C.gold}`, color: (!pwNieuw || !pwBevestig) ? C.dim : C.gold, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: (!pwNieuw || !pwBevestig || pwSaving) ? "not-allowed" : "pointer", borderRadius: 8, opacity: (!pwNieuw || !pwBevestig) ? 0.5 : 1 }}>
+                  {pwSaving ? "Opslaan…" : "🔐 Wachtwoord wijzigen"}
+                </button>
+              </div>
+            </SettingSection>
+          </div>
+        )}
+
+        {/* ══ SYSTEEM ══ */}
+        {subTab === "systeem" && (
+          <div style={{ animation: "slideUp .2s ease" }}>
+            <SettingSection title="Systeem informatie" icon="🖥">
+              <SettingRow label="Platform">
+                <div style={{ fontSize: "0.72rem", color: C.muted }}>Aurea Maison Floors — Eigenaar Dashboard</div>
+              </SettingRow>
+              <SettingRow label="Valuta">
+                <div style={{ fontSize: "0.72rem", color: C.muted }}>€ Euro (EUR)</div>
+              </SettingRow>
+              <SettingRow label="Taal">
+                <div style={{ fontSize: "0.72rem", color: C.muted }}>🇳🇱 Nederlands</div>
+              </SettingRow>
+              <SettingRow label="Datumnotatie">
+                <div style={{ fontSize: "0.72rem", color: C.muted }}>dd-mm-yyyy</div>
+              </SettingRow>
+            </SettingSection>
+            <div style={{ padding: "12px 16px", background: "rgba(60,184,122,.04)", border: `1px solid rgba(60,184,122,.18)`, borderRadius: 8, fontSize: "0.68rem", color: C.muted, lineHeight: 1.8 }}>
+              ✓ Systeem functioneert normaal. Alle gegevens worden opgeslagen in Supabase.
+            </div>
+          </div>
+        )}
+      </div>
+      <style>{`@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`}</style>
+    </div>
   );
 }

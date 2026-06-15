@@ -1,84 +1,73 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useLeggers } from "@/hooks/use-leggers";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Spinner } from "@/components/ui/spinner";
+import { C } from "@/lib/landing/colors";
 
 interface LeggersListProps {
   companyId?: string | null;
 }
 
 export function LeggersList({ companyId }: LeggersListProps) {
-  const { data: leggers, isLoading, error } = useLeggers(companyId);
+  const { data: leggers = [], isLoading, error } = useLeggers(companyId);
+  const [search, setSearch] = useState("");
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const filtered = leggers.filter((l) =>
+    !search || l.naam.toLowerCase().includes(search.toLowerCase()) || l.email.toLowerCase().includes(search.toLowerCase())
+  );
 
-  if (error) {
-    return (
-      <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-        Er is een fout opgetreden bij het laden van de leggers.
-      </div>
-    );
-  }
+  const th = { padding: "10px 14px", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, fontWeight: 600, textAlign: "left" as const };
+  const td = { padding: "12px 14px", fontSize: "0.68rem", color: C.white, borderTop: `1px solid rgba(255,255,255,.04)` };
 
-  if (!leggers || leggers.length === 0) {
-    return (
-      <div className="rounded-lg border border-gold/10 bg-deep p-8 text-center">
-        <p className="text-muted">Nog geen leggers gevonden.</p>
-      </div>
-    );
-  }
+  if (isLoading) return <div style={{ padding: "40px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>;
+  if (error) return <div style={{ padding: "12px 14px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>Fout bij laden van leggers.</div>;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gold/10 bg-deep">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gold/10 text-left text-xs uppercase tracking-wider text-muted">
-              <th className="px-4 py-3">Naam</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Tier</th>
-              <th className="px-4 py-3 text-right">Tarief</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gold/5">
-            {leggers.map((legger) => (
-              <tr
-                key={legger.id}
-                className="transition-colors hover:bg-gold/5"
-              >
-                <td className="px-4 py-3">
-                  <Link href={`/dashboard/leggers/${legger.id}`} className="font-medium text-foreground hover:text-gold">
-                    {legger.naam}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-sm text-muted">
-                  <div>{legger.email}</div>
-                  {legger.telefoon && (
-                    <div className="text-xs">{legger.telefoon}</div>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={legger.status} />
-                </td>
-                <td className="px-4 py-3 text-sm text-muted">
-                  {legger.tier}
-                </td>
-                <td className="px-4 py-3 text-right text-sm font-medium text-foreground">
-                  {legger.tarief ? `€ ${legger.tarief.toLocaleString("nl-NL")}/m²` : "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div>
+      <div style={{ marginBottom: 12 }}>
+        <input placeholder="Zoek op naam of email…" value={search} onChange={(e) => setSearch(e.target.value)}
+          style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box" }} />
+      </div>
+      <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, overflow: "hidden" }}>
+        {filtered.length === 0 ? (
+          <div style={{ padding: "36px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Geen leggers gevonden.</div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={th}>Naam</th>
+                  <th style={th}>Contact</th>
+                  <th style={th}>Status</th>
+                  <th style={th}>Tier</th>
+                  <th style={{ ...th, textAlign: "right" }}>Tarief</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((legger) => (
+                  <tr key={legger.id}>
+                    <td style={td}>
+                      <Link href={`/dashboard/leggers/${legger.id}`} style={{ textDecoration: "none" }}>
+                        <div style={{ fontSize: "0.72rem", color: C.white, fontWeight: 600 }}>{legger.naam}</div>
+                      </Link>
+                    </td>
+                    <td style={{ ...td, color: C.dim }}>
+                      <div>{legger.email}</div>
+                      {legger.telefoon && <div style={{ fontSize: "0.56rem" }}>{legger.telefoon}</div>}
+                    </td>
+                    <td style={td}><StatusBadge status={legger.status} /></td>
+                    <td style={{ ...td, color: C.dim }}>{legger.tier}</td>
+                    <td style={{ ...td, textAlign: "right", color: C.gold, fontFamily: "'Cormorant Garamond',serif", fontSize: "0.9rem" }}>
+                      {legger.tarief ? `€ ${legger.tarief.toLocaleString("nl-NL")}/m²` : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

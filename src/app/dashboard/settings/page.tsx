@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
 import { SettingsForm } from "@/components/modules/settings/settings-form";
+import { C } from "@/lib/landing/colors";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -10,17 +11,16 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Instellingen
-        </h1>
-        <p className="mt-2 text-muted">
-          Bedrijfsgegevens en factuurinstellingen beheren.
-        </p>
-        <div className="mt-6 rounded-xl border border-gold/10 bg-deep p-6">
-          <SettingsForm companyId={companyId || ""} />
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Beheer</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Instellingen</h1>
+        </div>
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "22px 24px" }}>
+          <SettingsForm companyId={companyId || ""} user={user || undefined} />
         </div>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );
 }

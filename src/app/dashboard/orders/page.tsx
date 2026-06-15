@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { OrdersList } from "@/components/modules/orders/orders-list";
 import { OrderForm } from "@/components/modules/orders/order-form";
 import { GoldButton } from "@/components/ui/gold-button";
+import { C } from "@/lib/landing/colors";
 
 export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);
@@ -14,43 +15,29 @@ export default function OrdersPage() {
 
   return (
     <DashboardLayout>
-      <div>
-        <div className="mb-6 flex items-center justify-between">
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22, gap: 12 }}>
           <div>
-            <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-              Orders
-            </h1>
-            <p className="mt-2 text-muted">
-              Overzicht van alle orders.
-            </p>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Overzicht</div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Opdrachten</h1>
           </div>
-          <GoldButton onClick={() => setShowForm(true)}>
-            + Nieuwe order
-          </GoldButton>
+          <GoldButton onClick={() => setShowForm(true)} size="sm">+ Nieuw</GoldButton>
         </div>
 
         {showForm && (
-          <div className="mb-8 rounded-xl border border-gold/10 bg-deep p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-medium uppercase tracking-wider text-gold">
-                Nieuwe order aanmaken
-              </h2>
-              <button
-                onClick={() => setShowForm(false)}
-                className="text-xs text-muted hover:text-foreground"
-              >
-                Annuleren
-              </button>
+          <div style={{ marginBottom: 22, background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "20px 22px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase" }}>Nieuwe order</div>
+              <button onClick={() => setShowForm(false)}
+                style={{ fontSize: "0.6rem", color: C.muted, background: "none", border: "none", cursor: "pointer" }}>✕ Annuleren</button>
             </div>
-            <OrderForm
-              companyId={companyId || ""}
-              onSuccess={() => setShowForm(false)}
-            />
+            <OrderForm companyId={companyId || ""} onSuccess={() => setShowForm(false)} />
           </div>
         )}
 
         <OrdersList companyId={companyId} />
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );
 }

@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useState } from "react";
 import { formatEuro } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 
 const VLOER_TARIEVEN: Record<string, { prijs: number; label: string }> = {
   laminaat: { prijs: 28, label: "Laminaat" },
@@ -55,57 +56,36 @@ export default function CalculatorPage() {
   const btw = totaal * 0.21;
   const totaalIncl = totaal + btw;
 
+  const inp = { width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 5 };
+  const row = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", fontSize: "0.68rem" };
+  const card = { background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "20px 22px" };
+
   return (
     <DashboardLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Calculator
-        </h1>
-        <p className="mt-2 text-muted">
-          Schat de kosten van uw vloerproject.
-        </p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Tool</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Calculator</h1>
+        </div>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 16 }}>
           {/* Inputs */}
-          <div className="space-y-4 rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-gold">
-              Projectgegevens
-            </h2>
+          <div style={{ ...card, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase" }}>Projectgegevens</div>
 
-            {/* Vloertype */}
-            <div>
-              <label className="mb-1 block text-xs text-muted">Vloertype</label>
-              <select
-                value={vloerType}
-                onChange={(e) => setVloerType(e.target.value)}
-                className="w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-              >
-                {Object.entries(VLOER_TARIEVEN).map(([key, { label }]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
+            <div><label style={lbl}>Vloertype</label>
+              <select value={vloerType} onChange={(e) => setVloerType(e.target.value)} style={inp}>
+                {Object.entries(VLOER_TARIEVEN).map(([key, { label }]) => <option key={key} value={key}>{label}</option>)}
               </select>
             </div>
 
-            {/* Oppervlakte */}
-            <div>
-              <label className="mb-1 block text-xs text-muted">Oppervlakte (m²)</label>
-              <input
-                type="number"
-                value={oppervlakte}
-                onChange={(e) => setOppervlakte(e.target.value)}
-                placeholder="Bijv. 45"
-                className="w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-              />
+            <div><label style={lbl}>Oppervlakte (m²)</label>
+              <input type="number" value={oppervlakte} onChange={(e) => setOppervlakte(e.target.value)} placeholder="Bijv. 45" style={inp} />
             </div>
 
-            {/* Ondergrond */}
-            <div>
-              <label className="mb-1 block text-xs text-muted">Ondergrond</label>
-              <select
-                value={ondergrond}
-                onChange={(e) => setOndergrond(e.target.value)}
-                className="w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-              >
+            <div><label style={lbl}>Ondergrond</label>
+              <select value={ondergrond} onChange={(e) => setOndergrond(e.target.value)} style={inp}>
                 <option value="beton">Beton (+€0/m²)</option>
                 <option value="hout">Houten ondergrond (+€0/m²)</option>
                 <option value="tegels">Tegels (+€8/m²)</option>
@@ -113,111 +93,57 @@ export default function CalculatorPage() {
               </select>
             </div>
 
-            {/* Checkboxes */}
-            <div className="space-y-2 pt-2">
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={egalisatie}
-                  onChange={(e) => setEgalisatie(e.target.checked)}
-                  className="rounded border-gold/30"
-                />
-                Egalisatie noodzakelijk (+€12/m²)
-              </label>
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={plinten}
-                  onChange={(e) => setPlinten(e.target.checked)}
-                  className="rounded border-gold/30"
-                />
-                Plinten inclusief (+€4,50/m²)
-              </label>
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={trap}
-                  onChange={(e) => setTrap(e.target.checked)}
-                  className="rounded border-gold/30"
-                />
-                Traprenovatie
-              </label>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 4 }}>
+              {[
+                { label: "Egalisatie noodzakelijk (+€12/m²)", checked: egalisatie, set: setEgalisatie },
+                { label: "Plinten inclusief (+€4,50/m²)", checked: plinten, set: setPlinten },
+                { label: "Traprenovatie", checked: trap, set: setTrap },
+              ].map(({ label, checked, set }) => (
+                <label key={label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.68rem", color: C.white, cursor: "pointer" }}>
+                  <input type="checkbox" checked={checked} onChange={(e) => set(e.target.checked)}
+                    style={{ accentColor: C.gold, width: 14, height: 14 }} />
+                  {label}
+                </label>
+              ))}
             </div>
 
-            {/* Aantal treden (alleen als trap checked) */}
             {trap && (
-              <div>
-                <label className="mb-1 block text-xs text-muted">Aantal treden</label>
-                <input
-                  type="number"
-                  value={aantalTreden}
-                  onChange={(e) => setAantalTreden(e.target.value)}
-                  placeholder="Bijv. 14"
-                  className="w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-                />
+              <div><label style={lbl}>Aantal treden</label>
+                <input type="number" value={aantalTreden} onChange={(e) => setAantalTreden(e.target.value)} placeholder="Bijv. 14" style={inp} />
               </div>
             )}
           </div>
 
           {/* Resultaat */}
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-gold">
-              Berekening
-            </h2>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Berekening</div>
 
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted">Vloer ({VLOER_TARIEVEN[vloerType].label})</span>
-                <span>€ {formatEuro(basisPrijs)}</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              <div style={row}><span style={{ color: C.dim }}>Vloer ({VLOER_TARIEVEN[vloerType].label})</span><span style={{ color: C.white }}>€ {formatEuro(basisPrijs)}</span></div>
+              {ondergrondToeslag > 0 && <div style={row}><span style={{ color: C.dim }}>Ondergrond toeslag</span><span style={{ color: C.white }}>€ {formatEuro(ondergrondPrijs)}</span></div>}
+              {egalisatie && <div style={row}><span style={{ color: C.dim }}>Egalisatie</span><span style={{ color: C.white }}>€ {formatEuro(egalisatiePrijs)}</span></div>}
+              {plinten && <div style={row}><span style={{ color: C.dim }}>Plinten</span><span style={{ color: C.white }}>€ {formatEuro(plintenPrijs)}</span></div>}
+              {trap && <div style={row}><span style={{ color: C.dim }}>Traprenovatie</span><span style={{ color: C.white }}>€ {formatEuro(trapPrijs)}</span></div>}
+
+              <div style={{ borderTop: `1px solid ${C.bdr}`, marginTop: 8, paddingTop: 10 }}>
+                <div style={row}><span style={{ color: C.dim }}>Subtotaal excl. BTW</span><span style={{ color: C.white }}>€ {formatEuro(totaal)}</span></div>
+                <div style={row}><span style={{ color: C.dim }}>BTW (21%)</span><span style={{ color: C.white }}>€ {formatEuro(btw)}</span></div>
               </div>
-              {ondergrondToeslag > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted">Ondergrond toeslag</span>
-                  <span>€ {formatEuro(ondergrondPrijs)}</span>
-                </div>
-              )}
-              {egalisatie && (
-                <div className="flex justify-between">
-                  <span className="text-muted">Egalisatie</span>
-                  <span>€ {formatEuro(egalisatiePrijs)}</span>
-                </div>
-              )}
-              {plinten && (
-                <div className="flex justify-between">
-                  <span className="text-muted">Plinten</span>
-                  <span>€ {formatEuro(plintenPrijs)}</span>
-                </div>
-              )}
-              {trap && (
-                <div className="flex justify-between">
-                  <span className="text-muted">Traprenovatie</span>
-                  <span>€ {formatEuro(trapPrijs)}</span>
-                </div>
-              )}
-              <div className="border-t border-gold/10 pt-2">
-                <div className="flex justify-between">
-                  <span className="text-muted">Subtotaal excl. BTW</span>
-                  <span className="font-medium">€ {formatEuro(totaal)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">BTW (21%)</span>
-                  <span>€ {formatEuro(btw)}</span>
-                </div>
-              </div>
-              <div className="border-t border-gold/10 pt-2">
-                <div className="flex justify-between text-lg font-semibold">
-                  <span className="text-gold">Totaal incl. BTW</span>
-                  <span className="text-gold">€ {formatEuro(totaalIncl)}</span>
+              <div style={{ borderTop: `1px solid ${C.bdr}`, marginTop: 8, paddingTop: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.6rem", letterSpacing: 1.5, color: C.gold, textTransform: "uppercase" }}>Totaal incl. BTW</span>
+                  <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.6rem", color: C.gold }}>€ {formatEuro(totaalIncl)}</span>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-muted/60">
+            <p style={{ marginTop: 16, fontSize: "0.56rem", color: C.dim }}>
               Dit is een indicatie. Neem contact op voor een exacte offerte op maat.
             </p>
           </div>
         </div>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );
 }

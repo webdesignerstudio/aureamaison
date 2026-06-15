@@ -3,8 +3,8 @@
 import { LeggerLayout } from "@/components/layout/legger-layout";
 import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
-import { Spinner } from "@/components/ui/spinner";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { C } from "@/lib/landing/colors";
 import Link from "next/link";
 
 export default function LeggerAgendaPage() {
@@ -23,40 +23,34 @@ export default function LeggerAgendaPage() {
     byMonth.set(key, existing);
   });
 
-  if (isLoading) {
-    return (
-      <LeggerLayout>
-        <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
-      </LeggerLayout>
-    );
-  }
+  if (isLoading) return (
+    <LeggerLayout>
+      <div style={{ padding: "60px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>
+    </LeggerLayout>
+  );
 
   return (
     <LeggerLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Agenda
-        </h1>
-        <p className="mt-2 text-muted">Overzicht van uw aangenomen klussen per maand.</p>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Agenda</h1>
+        </div>
 
-        <div className="mt-6 space-y-6">
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {Array.from(byMonth.entries()).map(([month, items]) => (
-            <div key={month} className="rounded-xl border border-gold/10 bg-deep p-6">
-              <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">{month}</h2>
-              <div className="space-y-3">
+            <div key={month} style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "18px 20px" }}>
+              <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>{month}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {items.map((o) => (
-                  <div key={o.id} className="flex items-center justify-between rounded-lg border border-gold/5 bg-background/50 p-4">
+                  <div key={o.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 8, background: "rgba(255,255,255,.02)", border: `1px solid rgba(255,255,255,.04)` }}>
                     <div>
-                      <Link href={`/legger/klus/${o.id}`} className="font-medium text-foreground hover:text-gold">
-                        {o.client_name}
-                      </Link>
-                      <div className="text-xs text-muted">{o.straat}, {o.plaats} · {o.vloer_type || "—"}</div>
+                      <Link href={`/legger/klus/${o.id}`} style={{ fontSize: "0.74rem", color: C.white, textDecoration: "none" }}>{o.client_name}</Link>
+                      <div style={{ fontSize: "0.6rem", color: C.muted, marginTop: 2 }}>{o.straat}, {o.plaats} · {o.vloer_type || "—"}</div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <StatusBadge status={o.status} />
-                      <span className="text-xs text-muted">
-                        {o.datum ? new Date(o.datum).toLocaleDateString("nl-NL", { day: "2-digit" }) : ""}
-                      </span>
+                      <span style={{ fontSize: "0.58rem", color: C.dim }}>{o.datum ? new Date(o.datum).toLocaleDateString("nl-NL", { day: "2-digit" }) : ""}</span>
                     </div>
                   </div>
                 ))}
@@ -65,12 +59,13 @@ export default function LeggerAgendaPage() {
           ))}
 
           {byMonth.size === 0 && (
-            <div className="rounded-xl border border-gold/10 bg-deep p-8 text-center text-muted">
+            <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "36px", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>
               Geen aangenomen klussen gevonden.
             </div>
           )}
         </div>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </LeggerLayout>
   );
 }

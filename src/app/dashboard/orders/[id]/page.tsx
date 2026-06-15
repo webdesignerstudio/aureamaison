@@ -4,8 +4,8 @@ import { useParams } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GoldButton } from "@/components/ui/gold-button";
-import { Spinner } from "@/components/ui/spinner";
 import { formatEuro, formatDate } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 import { FactuurModal } from "@/components/modules/orders/factuur-modal";
 import { AuditTimeline } from "@/components/modules/audit-timeline";
 import { useSettings } from "@/hooks/use-settings";
@@ -139,9 +139,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0", color: C.muted, fontSize: "0.8rem" }}>Laden…</div>
       </DashboardLayout>
     );
   }
@@ -149,7 +147,7 @@ export default function OrderDetailPage() {
   if (error || !order) {
     return (
       <DashboardLayout>
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+        <div style={{ padding: "14px 16px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>
           {error || "Order niet gevonden."}
         </div>
       </DashboardLayout>
@@ -158,153 +156,127 @@ export default function OrderDetailPage() {
 
   const nextStatuses = STATUS_FLOW[order.status] || [];
   const COMMISSIE_PCT_LEGGER = 0.12;
-  const nettoLegger = order.legger_prijs
-    ? Math.round(order.legger_prijs * (1 - COMMISSIE_PCT_LEGGER) * 100) / 100
-    : null;
+  const nettoLegger = order.legger_prijs ? Math.round(order.legger_prijs * (1 - COMMISSIE_PCT_LEGGER) * 100) / 100 : null;
+  const card = { background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "18px 20px" };
+  const label = { fontSize: "0.58rem", color: C.dim, marginBottom: 2 };
+  const val = { fontSize: "0.72rem", color: C.white };
+  const sel = { width: "100%", padding: "8px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.7rem", outline: "none" };
 
   return (
     <DashboardLayout>
-      <div>
+      <div style={{ animation: "slideUp .3s ease" }}>
         {/* Header */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20, gap: 12 }}>
           <div>
-            <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-              Order {order.uaid || order.id.slice(0, 8)}
+            <div style={{ fontSize: "0.54rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Order</div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>
+              {order.uaid || order.id.slice(0, 8)}
             </h1>
-            <div className="mt-2">
-              <StatusBadge status={order.status} />
-            </div>
+            <div style={{ marginTop: 8 }}><StatusBadge status={order.status} /></div>
           </div>
-          <GoldButton variant="outline" onClick={() => setShowFactuur(true)}>
-            Factuur bekijken
-          </GoldButton>
+          <GoldButton variant="outline" size="sm" onClick={() => setShowFactuur(true)}>🖨 Factuur</GoldButton>
         </div>
 
         {/* Status workflow */}
         {nextStatuses.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
             {nextStatuses.map((s) => (
-              <button
-                key={s}
-                onClick={() => handleStatusUpdate(s)}
-                disabled={updateOrder.isPending}
-                className="rounded-lg bg-gold/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gold transition hover:bg-gold/20 disabled:opacity-50"
-              >
+              <button key={s} onClick={() => handleStatusUpdate(s)} disabled={updateOrder.isPending}
+                style={{ padding: "7px 14px", borderRadius: 7, background: C.goldD, border: `1px solid ${C.bdr}`, color: C.gold, fontSize: "0.6rem", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer", opacity: updateOrder.isPending ? 0.5 : 1 }}>
                 → {s}
               </button>
             ))}
           </div>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14 }}>
           {/* Klantgegevens */}
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Klantgegevens
-            </h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted">Naam:</span> <span className="text-foreground">{order.client_name}</span></div>
-              <div><span className="text-muted">E-mail:</span> <span className="text-foreground">{order.client_email}</span></div>
-              <div><span className="text-muted">Adres:</span> <span className="text-foreground">{order.straat}, {order.postcode} {order.plaats}</span></div>
-              {order.bedrijf && <div><span className="text-muted">Bedrijf:</span> <span className="text-foreground">{order.bedrijf}</span></div>}
-              {order.kvk && <div><span className="text-muted">KvK:</span> <span className="text-foreground">{order.kvk}</span></div>}
-            </div>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 14 }}>Klantgegevens</div>
+            {[
+              ["Naam", order.client_name],
+              ["E-mail", order.client_email],
+              ["Adres", `${order.straat || "—"}, ${order.postcode || ""} ${order.plaats || ""}`.trim()],
+              order.bedrijf ? ["Bedrijf", order.bedrijf] : null,
+              order.kvk ? ["KvK", order.kvk] : null,
+            ].filter((x): x is string[] => x !== null).map(([k, v]) => (
+              <div key={k} style={{ marginBottom: 8 }}>
+                <div style={label}>{k}</div>
+                <div style={val}>{v}</div>
+              </div>
+            ))}
           </div>
 
           {/* Projectdetails */}
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Projectdetails
-            </h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted">Vloertype:</span> <span className="text-foreground">{order.vloer_type || "—"}</span></div>
-              <div><span className="text-muted">Oppervlakte:</span> <span className="text-foreground">{order.oppervlakte ? `${order.oppervlakte} m²` : "—"}</span></div>
-              <div><span className="text-muted">Ondergrond:</span> <span className="text-foreground">{order.ondergrond || "—"}</span></div>
-              <div><span className="text-muted">Timing:</span> <span className="text-foreground">{order.timing || "—"}</span></div>
-              {order.datum && <div><span className="text-muted">Datum:</span> <span className="text-foreground">{formatDate(order.datum)}</span></div>}
-            </div>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 14 }}>Project</div>
+            {[
+              ["Vloertype", order.vloer_type || "—"],
+              ["Oppervlakte", order.oppervlakte ? `${order.oppervlakte} m²` : "—"],
+              ["Ondergrond", order.ondergrond || "—"],
+              ["Timing", order.timing || "—"],
+              order.datum ? ["Datum", formatDate(order.datum)] : null,
+            ].filter((x): x is string[] => x !== null).map(([k, v]) => (
+              <div key={k} style={{ marginBottom: 8 }}>
+                <div style={label}>{k}</div>
+                <div style={val}>{v}</div>
+              </div>
+            ))}
           </div>
 
           {/* Financieel */}
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Financieel
-            </h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted">Prijs:</span> <span className="text-foreground">{order.price ? `€ ${formatEuro(order.price)}` : "—"}</span></div>
-              <div><span className="text-muted">Budget:</span> <span className="text-foreground">{order.budget ? `€ ${formatEuro(order.budget)}` : "—"}</span></div>
-              <div><span className="text-muted">Factuurnr:</span> <span className="text-foreground">{order.invoice_nr || "—"}</span></div>
-              <div className="flex items-center gap-2">
-                <span className="text-muted">Betaald:</span>
-                <button
-                  onClick={handleBetaaldToggle}
-                  disabled={updateOrder.isPending}
-                  className={`rounded px-2 py-0.5 text-xs font-bold uppercase transition ${
-                    order.invoice_paid
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {order.invoice_paid ? "Ja ✓" : "Nee"}
-                </button>
-              </div>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 14 }}>Financieel</div>
+            <div style={{ marginBottom: 8 }}><div style={label}>Prijs</div><div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.4rem", color: C.gold }}>{order.price ? `€ ${formatEuro(order.price)}` : "—"}</div></div>
+            <div style={{ marginBottom: 8 }}><div style={label}>Budget klant</div><div style={val}>{order.budget ? `€ ${formatEuro(order.budget)}` : "—"}</div></div>
+            <div style={{ marginBottom: 8 }}><div style={label}>Factuurnr.</div><div style={val}>{order.invoice_nr || "—"}</div></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={label}>Betaald</div>
+              <button onClick={handleBetaaldToggle} disabled={updateOrder.isPending}
+                style={{ padding: "3px 10px", borderRadius: 99, fontSize: "0.56rem", fontWeight: 700, textTransform: "uppercase", cursor: "pointer", background: order.invoice_paid ? C.greenDim : "rgba(224,90,90,.12)", color: order.invoice_paid ? C.green : C.red, border: `1px solid ${order.invoice_paid ? C.greenBdr : C.red + "44"}` }}>
+                {order.invoice_paid ? "Betaald ✓" : "Openstaand"}
+              </button>
             </div>
           </div>
 
           {/* Legger */}
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">
-              Legger
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div>
-                <label className="mb-1 block text-xs text-muted">Toewijzen</label>
-                <select
-                  value={order.legger_id || ""}
-                  onChange={(e) => e.target.value && handleLeggerAssign(e.target.value)}
-                  disabled={updateOrder.isPending || !leggers?.length}
-                  className="w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-                >
-                  <option value="">— Kies legger —</option>
-                  {leggers?.map((l) => (
-                    <option key={l.id} value={l.id}>{l.naam} (€{l.tarief}/m²)</option>
-                  ))}
-                </select>
-              </div>
-              {order.legger_naam && (
-                <>
-                  <div><span className="text-muted">Naam:</span> <span className="text-foreground">{order.legger_naam}</span></div>
-                  <div><span className="text-muted">Prijs:</span> <span className="text-foreground">{order.legger_prijs ? `€ ${formatEuro(order.legger_prijs)}` : "—"}</span></div>
-                  {nettoLegger !== null && (
-                    <div><span className="text-muted">Netto uitbetaling:</span> <span className="text-green-400">€ {formatEuro(nettoLegger)}</span></div>
-                  )}
-                  <div><span className="text-muted">Geaccepteerd:</span> <span className="text-foreground">{order.legger_geaccepteerd ? "Ja" : "Nee"}</span></div>
-                </>
-              )}
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 14 }}>Legger</div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={label}>Toewijzen</div>
+              <select value={order.legger_id || ""} onChange={(e) => e.target.value && handleLeggerAssign(e.target.value)}
+                disabled={updateOrder.isPending || !leggers?.length} style={sel}>
+                <option value="">— Kies legger —</option>
+                {leggers?.map((l) => <option key={l.id} value={l.id}>{l.naam} (€{l.tarief}/m²)</option>)}
+              </select>
             </div>
+            {order.legger_naam && (
+              <>
+                <div style={{ marginBottom: 8 }}><div style={label}>Naam</div><div style={val}>{order.legger_naam}</div></div>
+                <div style={{ marginBottom: 8 }}><div style={label}>Prijs</div><div style={val}>{order.legger_prijs ? `€ ${formatEuro(order.legger_prijs)}` : "—"}</div></div>
+                {nettoLegger !== null && <div style={{ marginBottom: 8 }}><div style={label}>Netto uitbetaling</div><div style={{ fontSize: "0.72rem", color: C.green }}>€ {formatEuro(nettoLegger)}</div></div>}
+                <div><div style={label}>Geaccepteerd</div><div style={val}>{order.legger_geaccepteerd ? "Ja" : "Nee"}</div></div>
+              </>
+            )}
           </div>
         </div>
 
         {order.opmerking && (
-          <div className="mt-6 rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">Opmerking</h2>
-            <p className="text-sm text-muted">{order.opmerking}</p>
+          <div style={{ ...card, marginTop: 14 }}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>Opmerking</div>
+            <p style={{ fontSize: "0.72rem", color: C.dim, lineHeight: 1.6 }}>{order.opmerking}</p>
           </div>
         )}
 
-        <div className="mt-6 text-xs text-muted/50">
-          Aangemaakt: {formatDate(order.created_at)} | Laatst bijgewerkt: {formatDate(order.updated_at)}
+        <div style={{ marginTop: 14, fontSize: "0.56rem", color: C.dim }}>
+          Aangemaakt: {formatDate(order.created_at)} · Bijgewerkt: {formatDate(order.updated_at)}
         </div>
 
         <AuditTimeline entityId={order.id} entityType="order" />
       </div>
 
-      <FactuurModal
-        order={order}
-        settings={settings}
-        open={showFactuur}
-        onClose={() => setShowFactuur(false)}
-      />
+      <FactuurModal order={order} settings={settings} open={showFactuur} onClose={() => setShowFactuur(false)} />
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </DashboardLayout>
   );
 }

@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCreateOrder } from "@/hooks/use-orders";
 import { useToastContext } from "@/components/toast-provider";
 import { GoldButton } from "@/components/ui/gold-button";
+import { C } from "@/lib/landing/colors";
 
 export default function ClientOpdrachtPage() {
   const { user } = useAuth();
@@ -59,48 +60,37 @@ export default function ClientOpdrachtPage() {
     { label: "Gewenste timing", key: "timing", type: "text" },
   ];
 
+  const inp = { width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 5, fontWeight: 600 };
+
   return (
     <ClientLayout>
-      <div>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-          Nieuwe Opdracht
-        </h1>
-        <p className="mt-2 text-muted">Geef de details van uw project op.</p>
-
-        <form onSubmit={handleSubmit} className="mt-6 max-w-2xl space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Nieuwe Opdracht</h1>
+        </div>
+        <form onSubmit={handleSubmit} style={{ maxWidth: 640, display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 12 }}>
             {fields.map((f) => (
               <div key={f.key}>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">
-                  {f.label}{f.required && <span className="text-red-400"> *</span>}
-                </label>
-                <input
-                  type={f.type}
-                  value={form[f.key as keyof typeof form]}
-                  onChange={(e) => handleChange(f.key, e.target.value)}
-                  required={f.required}
-                  className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none"
-                />
+                <label style={lbl}>{f.label}{f.required && <span style={{ color: C.red }}> *</span>}</label>
+                <input type={f.type} value={form[f.key as keyof typeof form]} onChange={(e) => handleChange(f.key, e.target.value)} required={f.required} style={inp} />
               </div>
             ))}
           </div>
-
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Opmerking</label>
-            <textarea
-              value={form.opmerking}
-              onChange={(e) => handleChange("opmerking", e.target.value)}
-              rows={3}
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none"
-              placeholder="Eventuele bijzonderheden..."
-            />
+            <label style={lbl}>Opmerking</label>
+            <textarea value={form.opmerking} onChange={(e) => handleChange("opmerking", e.target.value)} rows={3} placeholder="Eventuele bijzonderheden…" style={{ ...inp, resize: "vertical" }} />
           </div>
-
-          <GoldButton type="submit" variant="primary" disabled={createOrder.isPending}>
-            {createOrder.isPending ? "Bezig..." : "Opdracht indienen"}
-          </GoldButton>
+          <div>
+            <GoldButton type="submit" variant="primary" disabled={createOrder.isPending}>
+              {createOrder.isPending ? "Bezig…" : "Opdracht indienen"}
+            </GoldButton>
+          </div>
         </form>
       </div>
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </ClientLayout>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { C } from "@/lib/landing/colors";
 
 export default function ErrorBoundary({
   error,
@@ -15,28 +16,18 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md text-center">
-        <h1 className="font-[family-name:var(--font-cormorant)] text-4xl font-semibold text-gold">
-          Oeps!
-        </h1>
-        <p className="mt-4 text-muted">
-          Er is iets misgegaan. Probeer de pagina te vernieuwen of ga terug naar het dashboard.
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <button
-            onClick={reset}
-            className="rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-opacity hover:opacity-90"
-          >
-            Opnieuw proberen
-          </button>
-          <Link
-            href="/dashboard"
-            className="rounded-lg border border-gold/20 px-5 py-2.5 text-sm font-medium text-gold transition-colors hover:border-gold/50"
-          >
-            Dashboard
-          </Link>
-        </div>
+    <div style={{ display: "flex", minHeight: "100vh", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.bg, padding: "0 20px", textAlign: "center" }}>
+      <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2.5rem", fontWeight: 300, color: C.gold, marginBottom: 12 }}>Oeps!</div>
+      <p style={{ fontSize: "0.72rem", color: C.muted, marginBottom: 28, maxWidth: 360, lineHeight: 1.7 }}>
+        Er is iets misgegaan. Probeer de pagina te vernieuwen of ga terug naar het dashboard.
+      </p>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button onClick={reset} style={{ padding: "9px 20px", borderRadius: 8, background: C.gold, color: "#0a0a08", fontSize: "0.72rem", fontWeight: 700, border: "none", cursor: "pointer" }}>
+          Opnieuw proberen
+        </button>
+        <Link href="/dashboard" style={{ display: "inline-block", padding: "9px 20px", borderRadius: 8, border: `1px solid ${C.bdr}`, color: C.gold, fontSize: "0.72rem", textDecoration: "none" }}>
+          Dashboard
+        </Link>
       </div>
     </div>
   );

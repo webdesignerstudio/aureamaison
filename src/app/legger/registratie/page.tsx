@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GoldButton } from "@/components/ui/gold-button";
+import { C } from "@/lib/landing/colors";
 
 export default function LeggerRegistratiePage() {
   const [step, setStep] = useState(1);
@@ -72,115 +73,75 @@ export default function LeggerRegistratiePage() {
     setLoading(false);
   };
 
-  if (done) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-        <div className="w-full max-w-sm text-center">
-          <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-            Aanvraag ingediend
-          </h1>
-          <p className="mt-4 text-sm text-muted leading-relaxed">
-            Bedankt voor uw aanmelding. Uw account is in afwachting van goedkeuring door de eigenaar.
-            U ontvangt een e-mail zodra u toegang heeft.
-          </p>
-          <div className="mt-6">
-            <Link href="/legger/login" className="text-sm text-gold hover:underline">
-              ← Terug naar login
-            </Link>
-          </div>
-        </div>
+  const inp = { width: "100%", padding: "10px 14px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 8, color: C.white, fontSize: "0.78rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 600 };
+  const wrap = { display: "flex", minHeight: "100vh", flexDirection: "column" as const, alignItems: "center" as const, justifyContent: "center" as const, background: C.bg, padding: "0 20px" };
+
+  if (done) return (
+    <div style={wrap}>
+      <div style={{ width: "100%", maxWidth: 380, textAlign: "center" }}>
+        <div style={{ fontSize: "2rem", marginBottom: 16 }}>✓</div>
+        <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.8rem", fontWeight: 300, color: C.gold, margin: "0 0 14px" }}>Aanvraag ingediend</h1>
+        <p style={{ fontSize: "0.72rem", color: C.muted, lineHeight: 1.7, marginBottom: 24 }}>
+          Bedankt voor uw aanmelding. Uw account is in afwachting van goedkeuring door de eigenaar.
+          U ontvangt een e-mail zodra u toegang heeft.
+        </p>
+        <Link href="/legger/login" style={{ fontSize: "0.68rem", color: C.gold, textDecoration: "none" }}>← Terug naar login</Link>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-            Aanmelden als Legger
-          </h1>
-          <p className="mt-2 text-sm text-muted">Stap {step} van 3</p>
+    <div style={wrap}>
+      <div style={{ width: "100%", maxWidth: 430 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 6 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, color: C.white, margin: 0 }}>Aanmelden als Legger</h1>
+          <div style={{ marginTop: 8, display: "flex", justifyContent: "center", gap: 6 }}>
+            {[1,2,3].map((s) => (
+              <div key={s} style={{ width: 28, height: 3, borderRadius: 99, background: s <= step ? C.gold : "rgba(255,255,255,.1)", transition: "background .3s" }} />
+            ))}
+          </div>
+          <p style={{ marginTop: 6, fontSize: "0.62rem", color: C.dim }}>Stap {step} van 3</p>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-            {error}
-          </div>
-        )}
+        {error && <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {step === 1 && (
-            <>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Naam</label>
-                <input value={naam} onChange={(e) => setNaam(e.target.value)} required className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Uw naam" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">E-mail</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="uw@email.nl" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Wachtwoord</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Minimaal 6 tekens" />
-              </div>
-              <GoldButton type="button" variant="primary" className="w-full" onClick={() => setStep(2)}>
-                Volgende
-              </GoldButton>
-            </>
-          )}
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 14, padding: "26px 24px" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {step === 1 && (<>
+              <div><label style={lbl}>Naam</label><input value={naam} onChange={(e) => setNaam(e.target.value)} required placeholder="Uw naam" style={inp} /></div>
+              <div><label style={lbl}>E-mail</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="uw@email.nl" style={inp} /></div>
+              <div><label style={lbl}>Wachtwoord</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Minimaal 6 tekens" style={inp} /></div>
+              <div style={{ marginTop: 4 }}><GoldButton type="button" variant="primary" size="md" className="w-full" onClick={() => setStep(2)}>Volgende →</GoldButton></div>
+            </>)}
 
-          {step === 2 && (
-            <>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Adres</label>
-                <input value={adres} onChange={(e) => setAdres(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Straat + huisnummer" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Stad</label>
-                <input value={stad} onChange={(e) => setStad(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="Plaats" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Telefoon</label>
-                <input value={telefoon} onChange={(e) => setTelefoon(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="06 12345678" />
-              </div>
-              <div className="flex gap-3">
+            {step === 2 && (<>
+              <div><label style={lbl}>Adres</label><input value={adres} onChange={(e) => setAdres(e.target.value)} placeholder="Straat + huisnummer" style={inp} /></div>
+              <div><label style={lbl}>Stad</label><input value={stad} onChange={(e) => setStad(e.target.value)} placeholder="Plaats" style={inp} /></div>
+              <div><label style={lbl}>Telefoon</label><input value={telefoon} onChange={(e) => setTelefoon(e.target.value)} placeholder="06 12345678" style={inp} /></div>
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                 <GoldButton type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>← Terug</GoldButton>
                 <GoldButton type="button" variant="primary" className="flex-1" onClick={() => setStep(3)}>Volgende →</GoldButton>
               </div>
-            </>
-          )}
+            </>)}
 
-          {step === 3 && (
-            <>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">KvK-nummer</label>
-                <input value={kvk} onChange={(e) => setKvk(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="12345678" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">BTW-nummer</label>
-                <input value={btw} onChange={(e) => setBtw(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="NL123456789B01" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">IBAN</label>
-                <input value={iban} onChange={(e) => setIban(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="NL00 BANK 0000 0000 00" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">Tarief per m² (€)</label>
-                <input type="number" value={tarief} onChange={(e) => setTarief(e.target.value)} className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground focus:border-gold focus:outline-none" placeholder="25.00" />
-              </div>
-              <div className="flex gap-3">
+            {step === 3 && (<>
+              <div><label style={lbl}>KvK-nummer</label><input value={kvk} onChange={(e) => setKvk(e.target.value)} placeholder="12345678" style={inp} /></div>
+              <div><label style={lbl}>BTW-nummer</label><input value={btw} onChange={(e) => setBtw(e.target.value)} placeholder="NL123456789B01" style={inp} /></div>
+              <div><label style={lbl}>IBAN</label><input value={iban} onChange={(e) => setIban(e.target.value)} placeholder="NL00 BANK 0000 0000 00" style={inp} /></div>
+              <div><label style={lbl}>Tarief per m² (€)</label><input type="number" value={tarief} onChange={(e) => setTarief(e.target.value)} placeholder="25.00" style={inp} /></div>
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                 <GoldButton type="button" variant="outline" className="flex-1" onClick={() => setStep(2)}>← Terug</GoldButton>
                 <GoldButton type="submit" variant="primary" className="flex-1" disabled={loading}>
-                  {loading ? "Bezig..." : "Aanmelding indienen"}
+                  {loading ? "Bezig…" : "Aanmelding indienen"}
                 </GoldButton>
               </div>
-            </>
-          )}
-        </form>
-
-        <div className="mt-6 text-center text-sm text-muted">
-          <Link href="/legger/login" className="text-gold hover:underline">← Terug naar login</Link>
+            </>)}
+          </form>
+        </div>
+        <div style={{ marginTop: 18, textAlign: "center", fontSize: "0.68rem", color: C.muted }}>
+          <Link href="/legger/login" style={{ color: C.gold, textDecoration: "none" }}>← Terug naar login</Link>
         </div>
       </div>
     </div>

@@ -3,8 +3,8 @@
 import { useParams, useRouter } from "next/navigation";
 import { LeggerLayout } from "@/components/layout/legger-layout";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
+import { C } from "@/lib/landing/colors";
 import { useUpdateOrder } from "@/hooks/use-orders";
 import { useToastContext } from "@/components/toast-provider";
 import { useState, useEffect } from "react";
@@ -70,109 +70,102 @@ export default function LeggerKlusPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <LeggerLayout>
-        <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
-      </LeggerLayout>
-    );
-  }
+  const card = { background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 12, padding: "18px 20px" };
+  const rowStyle = { display: "flex", gap: 10, padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,.04)`, fontSize: "0.7rem" };
 
-  if (!order) {
-    return (
-      <LeggerLayout>
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">Klus niet gevonden.</div>
-      </LeggerLayout>
-    );
-  }
+  if (loading) return (
+    <LeggerLayout>
+      <div style={{ padding: "60px 0", textAlign: "center", color: C.muted, fontSize: "0.72rem" }}>Laden…</div>
+    </LeggerLayout>
+  );
+
+  if (!order) return (
+    <LeggerLayout>
+      <div style={{ padding: "12px 16px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>Klus niet gevonden.</div>
+    </LeggerLayout>
+  );
 
   return (
     <LeggerLayout>
-      <div>
-        <button onClick={() => router.push("/legger")} className="mb-4 text-xs text-muted hover:text-gold">← Terug naar overzicht</button>
+      <div style={{ animation: "slideUp .3s ease" }}>
+        <button onClick={() => router.push("/legger")}
+          style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: "0.62rem", marginBottom: 16, padding: 0 }}>
+          ← Terug naar overzicht
+        </button>
 
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 20 }}>
           <div>
-            <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-              Klus {order.uaid || order.id.slice(0, 8)}
+            <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Klus</div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: "0 0 8px" }}>
+              {order.uaid || order.id.slice(0, 8)}
             </h1>
-            <div className="mt-2"><StatusBadge status={order.status} /></div>
+            <StatusBadge status={order.status} />
           </div>
-
-          {order.status === "gepland" && (
-            <button onClick={handleStart} disabled={updateOrder.isPending}
-              className="rounded-lg bg-blue-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-blue-400 hover:bg-blue-500/20 disabled:opacity-50">
-              ▶ Starten
-            </button>
-          )}
-          {order.status === "bezig" && (
-            <button onClick={() => setShowOplever(true)} disabled={updateOrder.isPending}
-              className="rounded-lg bg-green-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-green-400 hover:bg-green-500/20 disabled:opacity-50">
-              ✓ Afronden
-            </button>
-          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            {order.status === "gepland" && (
+              <button onClick={handleStart} disabled={updateOrder.isPending}
+                style={{ padding: "8px 16px", background: "rgba(74,158,232,.1)", border: "1px solid rgba(74,158,232,.25)", color: C.blue, borderRadius: 8, fontSize: "0.6rem", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer" }}>
+                ▶ Starten
+              </button>
+            )}
+            {order.status === "bezig" && (
+              <button onClick={() => setShowOplever(true)} disabled={updateOrder.isPending}
+                style={{ padding: "8px 16px", background: "rgba(60,184,122,.1)", border: "1px solid rgba(60,184,122,.25)", color: C.green, borderRadius: 8, fontSize: "0.6rem", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer" }}>
+                ✓ Afronden
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">Klant</h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted">Naam:</span> <span className="text-foreground">{order.client_name}</span></div>
-              <div><span className="text-muted">Email:</span> <span className="text-foreground">{order.client_email}</span></div>
-              <div><span className="text-muted">Adres:</span> <span className="text-foreground">{order.straat}, {order.postcode} {order.plaats}</span></div>
-            </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 12 }}>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Klant</div>
+            <div style={rowStyle}><span style={{ color: C.muted, minWidth: 70 }}>Naam</span><span>{order.client_name}</span></div>
+            <div style={rowStyle}><span style={{ color: C.muted, minWidth: 70 }}>Email</span><span style={{ color: C.dim }}>{order.client_email}</span></div>
+            <div style={{ ...rowStyle, borderBottom: "none" }}><span style={{ color: C.muted, minWidth: 70 }}>Adres</span><span style={{ color: C.dim }}>{order.straat}, {order.postcode} {order.plaats}</span></div>
           </div>
 
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">Project</h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted">Vloertype:</span> <span className="text-foreground">{order.vloer_type || "—"}</span></div>
-              <div><span className="text-muted">Oppervlakte:</span> <span className="text-foreground">{order.oppervlakte ? `${order.oppervlakte} m²` : "—"}</span></div>
-              <div><span className="text-muted">Ondergrond:</span> <span className="text-foreground">{order.ondergrond || "—"}</span></div>
-              {order.datum && <div><span className="text-muted">Datum:</span> <span className="text-foreground">{formatDate(order.datum)}</span></div>}
-            </div>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Project</div>
+            <div style={rowStyle}><span style={{ color: C.muted, minWidth: 90 }}>Vloertype</span><span style={{ color: C.dim }}>{order.vloer_type || "—"}</span></div>
+            <div style={rowStyle}><span style={{ color: C.muted, minWidth: 90 }}>Oppervlakte</span><span style={{ color: C.dim }}>{order.oppervlakte ? `${order.oppervlakte} m²` : "—"}</span></div>
+            <div style={{ ...rowStyle, borderBottom: order.datum ? undefined : "none" }}><span style={{ color: C.muted, minWidth: 90 }}>Ondergrond</span><span style={{ color: C.dim }}>{order.ondergrond || "—"}</span></div>
+            {order.datum && <div style={{ ...rowStyle, borderBottom: "none" }}><span style={{ color: C.muted, minWidth: 90 }}>Datum</span><span style={{ color: C.dim }}>{formatDate(order.datum)}</span></div>}
           </div>
 
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">Financieel</h2>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted">Uw prijs:</span> <span className="text-foreground">{order.legger_prijs ? `€ ${order.legger_prijs}` : "—"}</span></div>
-              <div><span className="text-muted">Gestart:</span> <span className="text-foreground">{order.legger_gestart_at ? formatDate(order.legger_gestart_at) : "—"}</span></div>
-              <div><span className="text-muted">Afgerond:</span> <span className="text-foreground">{order.legger_afgerond_at ? formatDate(order.legger_afgerond_at) : "—"}</span></div>
-            </div>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Financieel</div>
+            <div style={rowStyle}><span style={{ color: C.muted, minWidth: 80 }}>Uw prijs</span><span style={{ color: C.gold }}>{order.legger_prijs ? `€ ${order.legger_prijs}` : "—"}</span></div>
+            <div style={rowStyle}><span style={{ color: C.muted, minWidth: 80 }}>Gestart</span><span style={{ color: C.dim }}>{order.legger_gestart_at ? formatDate(order.legger_gestart_at) : "—"}</span></div>
+            <div style={{ ...rowStyle, borderBottom: "none" }}><span style={{ color: C.muted, minWidth: 80 }}>Afgerond</span><span style={{ color: C.dim }}>{order.legger_afgerond_at ? formatDate(order.legger_afgerond_at) : "—"}</span></div>
           </div>
 
-          <div className="rounded-xl border border-gold/10 bg-deep p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-gold">Opmerking eigenaar</h2>
-            <p className="text-sm text-muted">{order.opmerking || "Geen opmerkingen."}</p>
+          <div style={card}>
+            <div style={{ fontSize: "0.54rem", letterSpacing: 2.5, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Opmerking</div>
+            <p style={{ fontSize: "0.7rem", color: C.dim, margin: 0, lineHeight: 1.6 }}>{order.opmerking || "Geen opmerkingen."}</p>
           </div>
         </div>
       </div>
 
-      {/* Oplever modal */}
       {showOplever && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-green-500/20 bg-deep p-6">
-            <h3 className="font-[family-name:var(--font-cormorant)] text-xl text-green-400">Klus afronden</h3>
-            <p className="mt-2 text-sm text-muted">Bevestig dat de klus volledig is afgerond.</p>
-            <textarea
-              value={opleverOpmerking}
-              onChange={(e) => setOpleverOpmerking(e.target.value)}
-              placeholder="Opmerkingen over de klus..."
-              rows={3}
-              className="mt-4 w-full rounded-lg border border-gold/10 bg-background px-3 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
-            />
-            <div className="mt-4 flex gap-3">
-              <button onClick={() => setShowOplever(false)} className="flex-1 rounded-lg border border-gold/10 px-4 py-2 text-xs font-bold uppercase text-muted hover:text-foreground">
-                Annuleren
-              </button>
-              <button onClick={handleFinish} disabled={updateOrder.isPending} className="flex-1 rounded-lg bg-green-500/10 px-4 py-2 text-xs font-bold uppercase text-green-400 hover:bg-green-500/20">
-                {updateOrder.isPending ? "Bezig..." : "Bevestig afronding"}
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,.8)", padding: 20 }}
+          onClick={() => setShowOplever(false)}>
+          <div style={{ background: C.deep, border: `1px solid ${C.green}44`, borderRadius: 14, padding: 24, maxWidth: 440, width: "100%" }}
+            onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.2rem", color: C.green, margin: "0 0 10px" }}>Klus afronden</h3>
+            <p style={{ fontSize: "0.68rem", color: C.muted, marginBottom: 14 }}>Bevestig dat de klus volledig is afgerond.</p>
+            <textarea value={opleverOpmerking} onChange={(e) => setOpleverOpmerking(e.target.value)} placeholder="Opmerkingen over de klus…" rows={3}
+              style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, color: C.white, fontSize: "0.72rem", boxSizing: "border-box", resize: "vertical" }} />
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+              <button onClick={() => setShowOplever(false)} style={{ flex: 1, padding: "10px", background: "none", border: `1px solid ${C.bdr}`, color: C.muted, borderRadius: 8, fontSize: "0.6rem", cursor: "pointer" }}>Annuleren</button>
+              <button onClick={handleFinish} disabled={updateOrder.isPending} style={{ flex: 1, padding: "10px", background: "rgba(60,184,122,.1)", border: "1px solid rgba(60,184,122,.25)", color: C.green, borderRadius: 8, fontSize: "0.6rem", cursor: "pointer" }}>
+                {updateOrder.isPending ? "Bezig…" : "Bevestig afronding"}
               </button>
             </div>
           </div>
         </div>
       )}
+      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </LeggerLayout>
   );
 }

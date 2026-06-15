@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GoldButton } from "@/components/ui/gold-button";
+import { C } from "@/lib/landing/colors";
 
 export default function LeggerLoginPage() {
   const [email, setEmail] = useState("");
@@ -53,65 +54,37 @@ export default function LeggerLoginPage() {
     router.push("/legger");
   };
 
+  const inp = { width: "100%", padding: "10px 14px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 8, color: C.white, fontSize: "0.78rem", outline: "none", boxSizing: "border-box" as const };
+  const lbl = { display: "block", fontSize: "0.5rem", letterSpacing: 2, color: C.muted, textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 600 };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
-            Legger Portaal
-          </h1>
-          <p className="mt-2 text-sm text-muted">Inloggen voor vloerenleggers</p>
+    <div style={{ display: "flex", minHeight: "100vh", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.bg, padding: "0 20px" }}>
+      <div style={{ width: "100%", maxWidth: 360 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 6 }}>Portaal</div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, color: C.white, margin: 0 }}>Legger Portaal</h1>
+          <p style={{ marginTop: 6, fontSize: "0.68rem", color: C.dim }}>Inloggen voor vloerenleggers</p>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-              {error}
+        <div style={{ background: C.deep, border: `1px solid ${C.bdr}`, borderRadius: 14, padding: "28px 26px" }}>
+          {error && <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: "rgba(224,90,90,.08)", border: `1px solid ${C.red}44`, color: C.red, fontSize: "0.72rem" }}>{error}</div>}
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div><label style={lbl}>E-mail</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="uw@email.nl" style={inp} /></div>
+            <div><label style={lbl}>Wachtwoord</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" style={inp} /></div>
+            <div style={{ marginTop: 4 }}>
+              <GoldButton type="submit" variant="primary" size="md" className="w-full" disabled={loading}>
+                {loading ? "Bezig…" : "Inloggen"}
+              </GoldButton>
             </div>
-          )}
-
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">
-              E-mail
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted/50 focus:border-gold focus:outline-none"
-              placeholder="uw@email.nl"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted">
-              Wachtwoord
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gold/10 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted/50 focus:border-gold focus:outline-none"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <GoldButton type="submit" variant="primary" className="w-full" disabled={loading}>
-            {loading ? "Bezig..." : "Inloggen"}
-          </GoldButton>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-muted">
-          Nog geen account?{" "}
-          <Link href="/legger/registratie" className="text-gold hover:underline">
-            Aanmelden als legger
-          </Link>
+          </form>
         </div>
-
-        <div className="mt-4 text-center text-xs text-muted/50">
-          <Link href="/login" className="hover:text-muted">← Terug naar eigenaar login</Link>
+        <div style={{ marginTop: 18, textAlign: "center", fontSize: "0.68rem", color: C.muted }}>
+          Nog geen account?{" "}
+          <Link href="/legger/registratie" style={{ color: C.gold, textDecoration: "none" }}>Aanmelden als legger</Link>
+        </div>
+        <div style={{ marginTop: 10, textAlign: "center", fontSize: "0.58rem", color: C.dim }}>
+          <Link href="/login" style={{ color: C.dim, textDecoration: "none" }}>← Terug naar eigenaar login</Link>
         </div>
       </div>
     </div>
