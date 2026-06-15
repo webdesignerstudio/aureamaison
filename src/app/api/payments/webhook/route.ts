@@ -31,15 +31,14 @@ export async function POST(req: NextRequest) {
     const id = body.get("id") as string;
 
     if (!id) {
-      return NextResponse.json({ error: "Missing payment ID" }, { status: 400 });
+      console.warn("[Webhook] Missing payment ID");
+      return NextResponse.json({ received: true });
     }
 
     const apiKey = process.env.MOLLIE_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "Mollie API key not configured" },
-        { status: 500 }
-      );
+      console.error("[Webhook] MOLLIE_API_KEY not configured");
+      return NextResponse.json({ received: true });
     }
 
     // Verify payment status with Mollie
@@ -50,10 +49,8 @@ export async function POST(req: NextRequest) {
     const payment = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: payment.detail || "Failed to verify payment" },
-        { status: response.status }
-      );
+      console.warn("[Webhook] Could not verify payment:", id, payment.detail);
+      return NextResponse.json({ received: true });
     }
 
     // Update order in database based on payment status
