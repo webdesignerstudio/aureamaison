@@ -69,6 +69,30 @@ export default function LeggerRegistratiePage() {
       console.error("Legger insert error:", leggerError);
     }
 
+    // Automatisch trial-abonnement aanmaken (30 dagen Tier 3)
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() + 30);
+    const trialEndStr = trialEndDate.toISOString().split("T")[0];
+
+    const { error: aboError } = await supabase.from("abonnementen").insert({
+      type: "legger",
+      entity_id: userId,
+      naam,
+      email,
+      tier: 3,
+      gekozen_tier: 3,
+      plan: "tier-3",
+      status: "proefperiode",
+      betaal_methode: "handmatig",
+      volgende_factuur: trialEndStr,
+      company_id: "11111111-1111-1111-1111-111111111111",
+      notities: "Automatisch aangemaakt bij aanmelding — 30 dagen proefperiode",
+    });
+
+    if (aboError) {
+      console.error("Abonnement insert error:", aboError);
+    }
+
     setDone(true);
     setLoading(false);
   };

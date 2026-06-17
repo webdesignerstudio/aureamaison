@@ -9,7 +9,10 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatEuro } from "@/lib/utils";
 import { C } from "@/lib/landing/colors";
 import { useToastContext } from "@/components/toast-provider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
+import { LEGGER_TIERS, effectiefLeggerTier } from "@/lib/tiers";
 
 export default function LeggerPortalPage() {
   const { user } = useAuth();
@@ -19,7 +22,35 @@ export default function LeggerPortalPage() {
   const [rejectModal, setRejectModal] = useState<string | null>(null);
   const [rejectReden, setRejectReden] = useState("");
 
+  const supabase = createClient();
+  const [companyId, setCompanyId] = useState("");
+
+  useEffect(() => {
+    if (user?.company_id) {
+      setCompanyId(user.company_id);
+    }
+  }, [user?.company_id]);
+
   const { data: orders, isLoading } = useOrders(user?.company_id);
+
+  // Fetch abonnement voor tier-badge
+  const { data: abonnement } = useQuery({
+    queryKey: ["abonnement", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("abonnementen")
+        .select("*")
+        .eq("entity_id", user.id)
+        .eq("type", "legger")
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const effectiveTier = effectiefLeggerTier(abonnement);
+  const tierInfo = LEGGER_TIERS[effectiveTier];
 
   const myOrders = orders?.filter((o) => o.legger_id === user?.id) || [];
 
@@ -78,7 +109,27 @@ export default function LeggerPortalPage() {
       <div style={{ animation: "slideUp .3s ease" }}>
         <div style={{ marginBottom: 22 }}>
           <div style={{ fontSize: "0.5rem", letterSpacing: 4, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Portaal</div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Mijn Klussen</h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+            <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2rem", fontWeight: 300, letterSpacing: -1, margin: 0 }}>Mijn Klussen</h1>
+            {tierInfo && (
+              <div
+                style={{
+                  padding: "8px 14px",
+                  background: `${tierInfo.kleur}20`,
+                  border: `1px solid ${tierInfo.kleur}`,
+                  borderRadius: 6,
+                  fontSize: "0.62rem",
+                  fontWeight: 600,
+                  color: tierInfo.kleur,
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                }}
+              >
+                {tierInfo.naam}
+                {abonnement?.status === "proefperiode" && " (Proef)"}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Tabs */}
