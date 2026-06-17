@@ -4,7 +4,32 @@
 **Organisatie:** webdesignerstudio  
 **Repository:** https://github.com/webdesignerstudio/aureamaison  
 **Domein:** www.aureamaisonfloors.nl  
-**Laatste update:** 11 juni 2026 — Alle 6 fases voltooid, deployed naar productie
+**Laatste update:** 17 juni 2026 — Enterprise uitbouw gestart (v1.1.0)
+
+---
+
+## Enterprise Roadmap (v1.1–v1.7) — IN UITVOERING
+
+| Fase | Feature | Status | Release |
+|---|---|---|---|
+| Fase 0 | Re-audit + fundament + tracking | ✅ Klaar | v1.1.0 |
+| Fase 1 | Tier-systeem + Abonnementen (MRR) | 🔲 Todo | v1.2.0 |
+| Fase 2 | Marketplace / Aanbiedingen | 🔲 Todo | v1.3.0 |
+| Fase 3 | Admin Control Center | 🔲 Todo | v1.4.0 |
+| Fase 4 | Goedkeuringen + RBAC + Audit-rollback | 🔲 Todo | v1.5.0 |
+| Fase 5 | TRM + Command Search (Cmd+K) | 🔲 Todo | v1.6.0 |
+| Fase 6 | Optimalisatie & Hardening | 🔲 Todo | v1.7.0 |
+
+**Gedetailleerd plan:** `/home/ubuntu/.windsurf/plans/enterprise-uitbouw-76f779.md`
+
+---
+
+## Open acties voor klant/dev
+- [ ] **Resend 401 fix:** `RESEND_API_KEY` verifiëren in Vercel env vars (env-issue, geen code)
+- [ ] **Supabase:** migratie `0006_enterprise_foundation.sql` uitvoeren in SQL Editor
+- [ ] **Supabase:** broken profiles fixen: `UPDATE profiles SET role='legger' WHERE email LIKE 'legger%@aurea.nl';`
+
+---
 
 ---
 

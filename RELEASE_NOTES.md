@@ -1,3 +1,23 @@
+# Release Notes — Aurea Maison Floors v1.1.0
+
+**Releasedatum:** 17 juni 2026
+**Omgeving:** Productie (`https://www.aureamaisonfloors.nl`)
+**Branch:** `main`
+
+## Samenvatting
+Start van de enterprise uitbouw — het platform wordt uitgebreid met tier-abonnementen voor leggers, een marktplaats voor klussen, een volledig admin control center, goedkeuringen-workflow, RBAC en TRM-taakbeheer. In deze release is het fundament gelegd en zijn beveiligingsbugs opgelost.
+
+## Wat is nieuw
+- Beveiligingsfix owner login: alleen eigenaar/admin-rollen kunnen nu het dashboard bereiken
+- Database voorbereid voor tier-systeem (kolommen toegevoegd aan `leggers` en `settings`)
+- Enterprise roadmap gedocumenteerd in `PROGRESS.md` en `CHANGELOG.md`
+
+## Actie vereist (voor beheerder)
+1. Voer migratie `0006_enterprise_foundation.sql` uit in Supabase SQL Editor
+2. Verifieer `RESEND_API_KEY` in Vercel environment variables
+
+---
+
 # Release Notes — Aurea Maison Floors v1.0.0
 
 **Releasedatum:** 11 juni 2026  

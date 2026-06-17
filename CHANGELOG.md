@@ -7,6 +7,23 @@ en dit project houdt zich aan [Semantic Versioning](https://semver.org/lang/nl/)
 
 ---
 
+## [1.1.0] — 2026-06-17
+
+### Toegevoegd
+- Enterprise uitbouw gestart: plan, SQL-schemas en tracking voor Fasen 1–6
+- Migratie `0006_enterprise_foundation.sql`: kolommen `tier`, `gekozen_tier`, `commissie_pct` op `leggers`; kolommen `commissie_pct_klant`, `commissie_pct_legger` op `settings`
+- `PROGRESS.md` bijgewerkt met enterprise roadmap en fase-status
+
+### Opgelost
+- Beveiligingsbug: owner login controleerde geen rol — legger/klant-accounts konden dashboard bereiken
+- Owner login maakte geen auto-owner profiel meer aan voor accounts zonder profiel
+- Legger-accounts die door de bug als `owner` waren geregistreerd: SQL-fix gedocumenteerd
+
+### Gewijzigd
+- `src/app/login/page.tsx`: rolcontrole toegevoegd (alleen owner/superadmin/keyuser/office)
+
+---
+
 ## [1.0.0] — 2026-06-11
 
 ### Toegevoegd
