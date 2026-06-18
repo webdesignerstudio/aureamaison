@@ -41,10 +41,13 @@ const TYPEN = ["alle", "ORDER", "OFFERTE", "LEGGER", "LOGIN", "DELETE", "UPDATE"
 
 export default function AuditPage() {
   const { user } = useAuth();
+  const supabase = createClient();
   const { data: logs = [], isLoading } = useAuditLogs(user?.company_id);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("alle");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [rollbackId, setRollbackId] = useState<string | null>(null);
+  const [rollbackReason, setRollbackReason] = useState("");
 
   const gefilterd = logs.filter((l) => {
     if (typeFilter !== "alle" && !(l.actie || "").toUpperCase().includes(typeFilter)) return false;
@@ -54,6 +57,19 @@ export default function AuditPage() {
     }
     return true;
   });
+
+  const handleRollback = async () => {
+    if (!rollbackId || !rollbackReason) return;
+    const { error } = await supabase
+      .from("audit_logs")
+      .update({ rollback_reason: rollbackReason, rolled_back_at: new Date().toISOString(), rolled_back_by: user?.id })
+      .eq("id", rollbackId);
+    if (!error) {
+      setRollbackId(null);
+      setRollbackReason("");
+      window.location.reload();
+    }
+  };
 
   const exportCSV = () => {
     const rows = [
@@ -184,6 +200,91 @@ export default function AuditPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Rollback Modal */}
+        {rollbackId && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,.65)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 100,
+            }}
+            onClick={() => setRollbackId(null)}
+          >
+            <div
+              style={{
+                background: C.deep,
+                border: `1px solid ${C.bdr}`,
+                borderRadius: 12,
+                padding: 24,
+                maxWidth: 400,
+                width: "90%",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 style={{ fontSize: "1.1rem", fontWeight: 600, color: C.white, margin: "0 0 16px" }}>
+                Rollback reden
+              </h2>
+              <textarea
+                value={rollbackReason}
+                onChange={(e) => setRollbackReason(e.target.value)}
+                placeholder="Waarom wordt dit teruggedraaid?"
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  background: "rgba(255,255,255,.04)",
+                  border: `1px solid ${C.bdr}`,
+                  borderRadius: 6,
+                  color: C.white,
+                  fontSize: "0.72rem",
+                  minHeight: 80,
+                  fontFamily: "inherit",
+                  marginBottom: 12,
+                  boxSizing: "border-box",
+                }}
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => setRollbackId(null)}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    background: "transparent",
+                    border: `1px solid ${C.bdr}`,
+                    color: C.muted,
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={handleRollback}
+                  disabled={!rollbackReason}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    background: rollbackReason ? "rgba(224,90,90,.2)" : "rgba(224,90,90,.05)",
+                    border: `1px solid ${rollbackReason ? "rgba(224,90,90,.3)" : "rgba(224,90,90,.1)"}`,
+                    color: rollbackReason ? "#E05A5A" : "#94a3b8",
+                    borderRadius: 6,
+                    cursor: rollbackReason ? "pointer" : "not-allowed",
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  Rollback
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
