@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { C } from "@/lib/landing/colors";
 
 interface Taak {
@@ -147,6 +148,7 @@ export default function TakenPage() {
   };
 
   return (
+    <DashboardLayout>
     <div style={styles.wrap}>
       <div style={styles.header}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 16 }}>
@@ -430,5 +432,6 @@ export default function TakenPage() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }

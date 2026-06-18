@@ -96,16 +96,3 @@ export function tierMaxKlussen(tier: number): number {
   const t = LEGGER_TIERS[tier as 1 | 2 | 3];
   return t?.maxKlussen || 3;
 }
-
-/**
- * Bereken MRR (Monthly Recurring Revenue) van actieve abonnementen
- */
-export function calcMRR(abonnementen: Abonnement[]): number {
-  return abonnementen
-    .filter((a) => a.status === "actief")
-    .reduce((sum, a) => {
-      const tier = a.tier || 1;
-      const tierInfo = LEGGER_TIERS[tier as 1 | 2 | 3];
-      return sum + (tierInfo?.prijs || 0);
-    }, 0);
-}

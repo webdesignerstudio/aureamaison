@@ -21,7 +21,7 @@ const ADMIN_NAV = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [active, setActive] = useState("overview");
   const [mobile, setMobile] = useState(false);
@@ -90,8 +90,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div style={{ padding: "0 16px", marginTop: 24, borderTop: "1px solid #0f172a", paddingTop: 16 }}>
             <button
-              onClick={() => {
-                // Logout logic
+              onClick={async () => {
+                await signOut();
                 window.location.href = "/login";
               }}
               style={{
@@ -158,8 +158,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             ))}
             <button
-              onClick={() => {
+              onClick={async () => {
                 setMenuOpen(false);
+                await signOut();
                 window.location.href = "/login";
               }}
               style={{

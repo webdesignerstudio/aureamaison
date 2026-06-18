@@ -42,7 +42,7 @@ export default function AdminOrdersPage() {
               {orders.map((o: any) => (
                 <tr key={o.id} style={{ borderBottom: "1px solid #0f172a" }}>
                   <td style={{ padding: "12px", fontSize: "0.65rem", color: "#f1f5f9" }}>
-                    {o.clientName}
+                    {o.client_name}
                   </td>
                   <td style={{ padding: "12px", fontSize: "0.65rem", color: "#94a3b8" }}>
                     {o.status}

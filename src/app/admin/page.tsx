@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AdminLayout } from "@/components/layout/admin-layout";
 import { Spinner } from "@/components/ui/spinner";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatEuro } from "@/lib/utils";
@@ -39,15 +38,12 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
-      </AdminLayout>
+      <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>
     );
   }
 
   return (
-    <AdminLayout>
-      <div>
+    <div>
         <h1 className="font-[family-name:var(--font-cormorant)] text-3xl font-semibold text-gold">
           Superadmin
         </h1>
@@ -197,6 +193,5 @@ export default function AdminPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

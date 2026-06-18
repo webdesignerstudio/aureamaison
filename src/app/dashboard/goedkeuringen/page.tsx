@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { C } from "@/lib/landing/colors";
 
 interface Goedkeuring {
@@ -95,6 +96,7 @@ export default function GoedkeuringenPage() {
   };
 
   return (
+    <DashboardLayout>
     <div style={styles.wrap}>
       <div style={styles.header}>
         <h1 style={styles.title}>Goedkeuringen</h1>
@@ -241,5 +243,6 @@ export default function GoedkeuringenPage() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }

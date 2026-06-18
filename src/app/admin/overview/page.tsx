@@ -51,7 +51,8 @@ export default function AdminOverviewPage() {
   const mrr = calcMRR(abonnementen);
   const openFacturen = calcOpenFacturen(orders);
   const activeLeggers = leggers.filter((l: any) => l.status === "actief").length;
-  const lopendOrders = orders.filter((o: any) => o.status === "Lopend").length;
+  const lopendStatuses = ["in behandeling", "gepland", "bezig", "ter goedkeuring"];
+  const lopendOrders = orders.filter((o: any) => lopendStatuses.includes((o.status || "").toLowerCase())).length;
 
   const styles = {
     wrap: { maxWidth: 1400, margin: "0 auto" },

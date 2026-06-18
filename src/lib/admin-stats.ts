@@ -4,9 +4,8 @@ export interface Order {
   id: string;
   status: string;
   price?: number;
-  totaalInclBTW?: number;
-  invoiceNr?: string;
-  invoicePaid?: boolean;
+  invoice_nr?: string | null;
+  invoice_paid?: boolean;
 }
 
 export interface Abonnement {
@@ -51,7 +50,7 @@ export function calcMRR(abonnementen: Abonnement[]): number {
  */
 export function calcTotalOmzet(orders: Order[]): number {
   return orders
-    .filter((o) => o.status === "Afgerond")
+    .filter((o) => o.status === "afgerond")
     .reduce((sum, o) => sum + (parseFloat(String(o.price || 0)) || 0), 0);
 }
 
@@ -59,9 +58,9 @@ export function calcTotalOmzet(orders: Order[]): number {
  * Bereken open facturen
  */
 export function calcOpenFacturen(orders: Order[]): { count: number; total: number } {
-  const open = orders.filter((o) => o.invoiceNr && !o.invoicePaid);
+  const open = orders.filter((o) => o.invoice_nr && !o.invoice_paid);
   return {
     count: open.length,
-    total: open.reduce((sum, o) => sum + (parseFloat(String(o.totaalInclBTW || 0)) || 0), 0),
+    total: open.reduce((sum, o) => sum + (parseFloat(String(o.price || 0)) || 0), 0),
   };
 }

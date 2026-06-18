@@ -185,12 +185,19 @@ export interface Leverancier {
 
 export interface Abonnement {
   id: string;
-  company_id: string | null;
-  type: "bedrijf" | "legger";
-  plan: "starter" | "professional" | "business";
-  tier: number | null;
-  status: "proefperiode" | "actief" | "verlopen" | "bevroren" | "openstaand";
-  start_datum: string | null;
-  maanden: number | null;
-  created_at: string;
+  type: "legger" | "bedrijf";
+  entity_id: string;
+  naam: string;
+  email?: string | null;
+  tier?: number | null;
+  gekozen_tier?: number | null;
+  plan?: string | null;
+  status: "proefperiode" | "actief" | "gepauzeerd" | "openstaand" | "verlopen";
+  betaal_methode?: string;
+  start_datum?: string | null;
+  volgende_factuur?: string | null;
+  notities?: string | null;
+  company_id: string;
+  aangemaakt_at?: string;
+  updated_at?: string;
 }

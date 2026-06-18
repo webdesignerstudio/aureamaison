@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
-import { LEGGER_TIERS, calcMRR, Abonnement } from "@/lib/tiers";
+import { LEGGER_TIERS, Abonnement } from "@/lib/tiers";
+import { calcMRR } from "@/lib/admin-stats";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { C } from "@/lib/landing/colors";
 
 export default function AbonnementenPage() {
@@ -111,6 +113,7 @@ export default function AbonnementenPage() {
   };
 
   return (
+    <DashboardLayout>
     <div style={styles.wrap}>
       <div style={styles.header}>
         <h1 style={styles.title}>Abonnementen</h1>
@@ -283,5 +286,6 @@ export default function AbonnementenPage() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }

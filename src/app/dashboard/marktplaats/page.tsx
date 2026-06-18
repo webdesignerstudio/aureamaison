@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { C } from "@/lib/landing/colors";
 import { formatEuro } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ interface Reactie {
 
 interface Order {
   id: string;
-  clientName: string;
+  client_name: string;
   price?: number;
   status: string;
   legger_id?: string;
@@ -169,6 +170,7 @@ export default function MarktplaatsPage() {
   };
 
   return (
+    <DashboardLayout>
     <div style={styles.wrap}>
       <div style={styles.header}>
         <h1 style={styles.title}>Marktplaats</h1>
@@ -201,7 +203,7 @@ export default function MarktplaatsPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 12 }}>
                   <div>
                     <div style={{ fontSize: "0.9rem", fontWeight: 600, color: C.white }}>
-                      {order.clientName}
+                      {order.client_name}
                     </div>
                     <div style={{ fontSize: "0.65rem", color: C.muted }}>
                       Status: {order.status} • Prijs: {formatEuro(order.price || 0)}
@@ -413,5 +415,6 @@ export default function MarktplaatsPage() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }
