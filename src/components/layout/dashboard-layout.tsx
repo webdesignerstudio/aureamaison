@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useOrders } from "@/hooks/use-orders";
 import { SidebarShell, type NavCat } from "./sidebar-shell";
 import { SettingsGear } from "@/components/modules/settings-gear";
+import { CommandSearch } from "@/components/ui/command-search";
 import { C } from "@/lib/landing/colors";
 
 const eur = (v: number) => (v > 0 ? `€ ${v.toLocaleString("nl-NL", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : "—");
@@ -113,15 +114,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SidebarShell
-      cats={cats}
-      logoSubtitle="Eigenaar Dashboard"
-      userName={user.name || user.email}
-      statsSlot={statsSlot}
-      settingsSlot={<SettingsGear userId={user.id} email={user.email} name={user.name || ""} />}
-      onLogout={signOut}
-    >
-      {children}
-    </SidebarShell>
+    <>
+      <CommandSearch />
+      <SidebarShell
+        cats={cats}
+        logoSubtitle="Eigenaar Dashboard"
+        userName={user.name || user.email}
+        statsSlot={statsSlot}
+        settingsSlot={<SettingsGear userId={user.id} email={user.email} name={user.name || ""} />}
+        onLogout={signOut}
+      >
+        {children}
+      </SidebarShell>
+    </>
   );
 }
