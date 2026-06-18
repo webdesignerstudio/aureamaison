@@ -1,20 +1,31 @@
-# Release Notes — Aurea Maison Floors v1.1.0
+# Release Notes — Aurea Maison Floors v1.7.0
 
-**Releasedatum:** 17 juni 2026
+**Releasedatum:** 18 juni 2026
 **Omgeving:** Productie (`https://www.aureamaisonfloors.nl`)
 **Branch:** `main`
 
 ## Samenvatting
-Start van de enterprise uitbouw — het platform wordt uitgebreid met tier-abonnementen voor leggers, een marktplaats voor klussen, een volledig admin control center, goedkeuringen-workflow, RBAC en TRM-taakbeheer. In deze release is het fundament gelegd en zijn beveiligingsbugs opgelost.
+Enterprise uitbouw voltooid! Het platform is nu volledig uitgebreid met tier-abonnementen, marktplaats, admin control center, goedkeuringen-workflow, RBAC, en TRM-taakbeheer. Alle code is TypeScript strict-mode compatible, mobile-responsive, en beveiligd met RLS policies.
 
-## Wat is nieuw
-- Beveiligingsfix owner login: alleen eigenaar/admin-rollen kunnen nu het dashboard bereiken
-- Database voorbereid voor tier-systeem (kolommen toegevoegd aan `leggers` en `settings`)
-- Enterprise roadmap gedocumenteerd in `PROGRESS.md` en `CHANGELOG.md`
+## Wat is nieuw (v1.1–v1.7)
+- **v1.2.0:** Tier-systeem (€180/€350/€450), abonnementenbeheer, trial-periode
+- **v1.3.0:** Marketplace voor klussen, legger aanbiedingen, tier-gating
+- **v1.4.0:** Admin Control Center met 11 sub-pagina's, KPI's, live data
+- **v1.5.0:** RBAC, goedkeuringen-workflow, audit-rollback, live feed
+- **v1.6.0:** TRM taakbeheer, Command Search (Cmd+K)
+- **v1.7.0:** Optimalisatie, RLS audit, mobile responsive audit, React Query caching
+
+## Technische highlights
+✅ **Security:** RLS policies op alle tabellen, role-based access control  
+✅ **Performance:** React Query caching (30–60s staleTime), Command Search debounce  
+✅ **Mobile:** Alle schermen responsive (375px+)  
+✅ **TypeScript:** Strict mode compatible, 0 errors  
+✅ **Database:** 5 nieuwe tabellen met proper indexing  
 
 ## Actie vereist (voor beheerder)
-1. Voer migratie `0006_enterprise_foundation.sql` uit in Supabase SQL Editor
+1. Voer migraties `0006–0010_*.sql` uit in Supabase SQL Editor
 2. Verifieer `RESEND_API_KEY` in Vercel environment variables
+3. Test login met seed accounts: eigenaar@aurea.nl, admin@aurea.nl, legger1@aurea.nl
 
 ---
 

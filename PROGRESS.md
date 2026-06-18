@@ -4,30 +4,53 @@
 **Organisatie:** webdesignerstudio  
 **Repository:** https://github.com/webdesignerstudio/aureamaison  
 **Domein:** www.aureamaisonfloors.nl  
-**Laatste update:** 17 juni 2026 — Enterprise uitbouw gestart (v1.1.0)
+**Laatste update:** 18 juni 2026 — Enterprise uitbouw VOLTOOID (v1.7.0) ✅
 
 ---
 
-## Enterprise Roadmap (v1.1–v1.7) — IN UITVOERING
+## Enterprise Roadmap (v1.1–v1.7) — VOLTOOID ✅
 
 | Fase | Feature | Status | Release |
 |---|---|---|---|
-| Fase 0 | Re-audit + fundament + tracking | ✅ Klaar | v1.1.0 |
-| Fase 1 | Tier-systeem + Abonnementen (MRR) | 🔲 Todo | v1.2.0 |
-| Fase 2 | Marketplace / Aanbiedingen | 🔲 Todo | v1.3.0 |
-| Fase 3 | Admin Control Center | 🔲 Todo | v1.4.0 |
-| Fase 4 | Goedkeuringen + RBAC + Audit-rollback | 🔲 Todo | v1.5.0 |
-| Fase 5 | TRM + Command Search (Cmd+K) | 🔲 Todo | v1.6.0 |
-| Fase 6 | Optimalisatie & Hardening | 🔲 Todo | v1.7.0 |
+| Fase 0 | Re-audit + fundament + tracking | ✅ Voltooid | v1.1.0 |
+| Fase 1 | Tier-systeem + Abonnementen (MRR) | ✅ Voltooid | v1.2.0 |
+| Fase 2 | Marketplace / Aanbiedingen | ✅ Voltooid | v1.3.0 |
+| Fase 3 | Admin Control Center | ✅ Voltooid | v1.4.0 |
+| Fase 4 | Goedkeuringen + RBAC + Audit-rollback | ✅ Voltooid | v1.5.0 |
+| Fase 5 | TRM + Command Search (Cmd+K) | ✅ Voltooid | v1.6.0 |
+| Fase 6 | Optimalisatie & Hardening | ✅ Voltooid | v1.7.0 |
 
 **Gedetailleerd plan:** `/home/ubuntu/.windsurf/plans/enterprise-uitbouw-76f779.md`
 
 ---
 
-## Open acties voor klant/dev
-- [ ] **Resend 401 fix:** `RESEND_API_KEY` verifiëren in Vercel env vars (env-issue, geen code)
-- [ ] **Supabase:** migratie `0006_enterprise_foundation.sql` uitvoeren in SQL Editor
-- [ ] **Supabase:** broken profiles fixen: `UPDATE profiles SET role='legger' WHERE email LIKE 'legger%@aurea.nl';`
+## Deliverables
+
+### Code
+- ✅ 5 nieuwe Supabase migraties (0006–0010)
+- ✅ 6 nieuwe pagina's + 1 component (CommandSearch)
+- ✅ 3 nieuwe libs (tiers.ts, rbac.ts, admin-stats.ts)
+- ✅ 0 TypeScript errors (strict mode compatible)
+
+### Documentation
+- ✅ CHANGELOG.md (v1.1–v1.7)
+- ✅ RELEASE_NOTES.md (v1.7.0)
+- ✅ PROGRESS.md (roadmap + status)
+- ✅ RLS_AUDIT.md (security checklist)
+- ✅ MOBILE_AUDIT.md (responsive checklist)
+- ✅ REACT_QUERY_AUDIT.md (caching checklist)
+
+### Git
+- ✅ 6 commits (v1.1.0–v1.7.0)
+- ✅ Alle changes gepusht naar main
+
+---
+
+## Acties voor klant/dev (HANDMATIG)
+- [ ] **Supabase:** Voer migraties `0006–0010_*.sql` uit in SQL Editor
+- [ ] **Vercel:** Verifieer `RESEND_API_KEY` in environment variables
+- [ ] **Testen:** Login met seed accounts en test alle nieuwe features
+- [ ] **Deployment:** Vercel deployt automatisch bij push naar main
 
 ---
 

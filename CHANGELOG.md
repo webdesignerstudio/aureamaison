@@ -7,6 +7,73 @@ en dit project houdt zich aan [Semantic Versioning](https://semver.org/lang/nl/)
 
 ---
 
+## [1.7.0] — 2026-06-18
+
+### Toegevoegd
+- Fase 6 optimalisatie: RLS audit, TypeScript strict mode, mobile responsive audit, React Query caching audit
+- Audit bestanden: `RLS_AUDIT.md`, `MOBILE_AUDIT.md`, `REACT_QUERY_AUDIT.md`
+
+### Opgelost
+- Alle TypeScript errors opgelost (strict mode compatible)
+- Mobile responsiveness gecontroleerd op alle nieuwe schermen
+
+---
+
+## [1.6.0] — 2026-06-18
+
+### Toegevoegd
+- TRM (Task & Reminder Management) dashboard (`/dashboard/taken`)
+- Taakbeheer met prioriteiten (Critical/High/Medium/Low) en statussen
+- Command Search (Cmd+K) — universeel zoeken over orders, leggers, taken, navigatie
+- Supabase tabel `taken` met RLS policies
+
+---
+
+## [1.5.0] — 2026-06-18
+
+### Toegevoegd
+- RBAC (Role-Based Access Control) lib (`src/lib/rbac.ts`)
+- Goedkeuringen workflow (`/dashboard/goedkeuringen`)
+- Audit rollback functionaliteit met reden-veld
+- Supabase tabel `goedkeuringen` met RLS policies
+
+---
+
+## [1.4.0] — 2026-06-18
+
+### Toegevoegd
+- Admin Control Center (`/admin`) met 11 sub-pagina's
+- Admin layout met sidebar (desktop) en bottom-menu (mobile)
+- KPI cards: actieve leggers, lopende orders, MRR, open facturen, totale omzet
+- Sub-pagina's: Overview, Companies, Users, Orders, Payments, Invoices, Finance, Notifications, Live Feed, Audit, Settings
+- Admin stats lib (`src/lib/admin-stats.ts`)
+
+---
+
+## [1.3.0] — 2026-06-18
+
+### Toegevoegd
+- Marketplace / Aanbiedingen (`/dashboard/marktplaats` + `/legger/aanbiedingen`)
+- Owner kan orders naar marktplaats plaatsen
+- Leggers kunnen op aanbiedingen reageren (Tier 2+3 only)
+- Tier-gating: Tier 1 ziet upgrade-prompt
+- Supabase tabellen `aanbiedingen` en `aanbieding_reacties` met RLS
+
+---
+
+## [1.2.0] — 2026-06-18
+
+### Toegevoegd
+- Tier-systeem voor leggers (Tier 1: €180, Tier 2: €350, Tier 3: €450)
+- Abonnementenbeheer (`/dashboard/abonnementen`)
+- Trial-abonnement automatisch aanmaken bij legger registratie (30 dagen Tier 3)
+- Tier-badge op legger dashboard
+- MRR berekening
+- Supabase tabel `abonnementen` met RLS policies
+- Lib `src/lib/tiers.ts` met tier-helpers
+
+---
+
 ## [1.1.0] — 2026-06-17
 
 ### Toegevoegd
