@@ -36,6 +36,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const isZakelijk = (user.onboarding_data as Record<string, unknown>)?.type === "zakelijk";
+  const portaalLabel = isZakelijk ? "Zakelijk Portaal" : "Particulier Portaal";
+
   const cats: NavCat[] = [
     {
       id: "portaal", icon: "📋", label: "Mijn Portaal",
@@ -44,18 +47,36 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         { href: "/client/opdracht", icon: "➕", label: "Nieuwe Opdracht" },
         { href: "/client/offertes", icon: "📄", label: "Offertes" },
         { href: "/client/facturen", icon: "🧾", label: "Facturen" },
-        { href: "/client/profiel", icon: "👤", label: "Profiel" },
+        ...(isZakelijk ? [{ href: "/client/marktplaats", icon: "🛒", label: "Leggers vinden" }] : []),
+        { href: "/client/profiel", icon: "👤", label: isZakelijk ? "Bedrijfsprofiel" : "Profiel" },
         { href: "/client/instellingen", icon: "⚙️", label: "Instellingen" },
       ],
     },
   ];
 
+  const userCard = (
+    <div style={{ padding: "12px 14px", borderTop: `1px solid ${C.bdr}`, marginBottom: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "rgba(255,255,255,.03)", borderRadius: 8 }}>
+        <div style={{ width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg,${C.gold},#8B6E3E)`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: C.bg, flexShrink: 0 }}>
+          {(user.name || user.email || "?")[0].toUpperCase()}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: "0.72rem", color: C.white, fontWeight: 500, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name || user.email}</div>
+          {isZakelijk && (
+            <div style={{ fontSize: "0.54rem", color: C.muted, marginTop: 1 }}>Zakelijk account</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <SidebarShell
       cats={cats}
       flat
-      logoSubtitle="Particulier Portaal"
+      logoSubtitle={portaalLabel}
       userName={user.name || user.email}
+      statsSlot={userCard}
       settingsSlot={<SettingsGear userId={user.id} email={user.email} name={user.name || ""} />}
       onLogout={signOut}
     >

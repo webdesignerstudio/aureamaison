@@ -51,6 +51,14 @@ function SettingRow({ label, sub, children }: { label: string; sub?: string; chi
   );
 }
 
+function ToggleSwitch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button onClick={() => onChange(!value)} style={{ width: 40, height: 22, borderRadius: 99, background: value ? C.green : "rgba(255,255,255,.1)", border: "none", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
+      <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: value ? 21 : 3, transition: "left .2s" }} />
+    </button>
+  );
+}
+
 function pwStrength(pw: string): number {
   if (!pw) return 0;
   let s = 0;
@@ -72,6 +80,14 @@ const SUBTABS = [
   { id: "systeem", icon: "⚙️", label: "Systeem" },
 ];
 
+const NOTIF_KEYS = ["emailNieuwOrder", "emailStatusUpdate", "emailOfferte", "emailLegger"] as const;
+const NOTIF_LABELS: Record<string, [string, string]> = {
+  emailNieuwOrder:    ["Nieuw order",       "Klant dient een nieuwe opdracht in"],
+  emailStatusUpdate:  ["Status update",     "Statuswijziging naar klant"],
+  emailOfferte:       ["Offerte reacties",  "Klant accepteert of wijst af"],
+  emailLegger:        ["Legger updates",    "Legger start of rondt klus af"],
+};
+
 export function SettingsForm({ companyId, user }: SettingsFormProps) {
   const { data: settings, isLoading } = useSettings(companyId);
   const updateSettings = useUpdateSettings();
@@ -81,6 +97,8 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
   const [form, setForm] = useState<Partial<Settings>>({});
   const [saved, setSaved] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [notifs, setNotifs] = useState<Record<string, boolean>>(Object.fromEntries(NOTIF_KEYS.map((k) => [k, true])));
 
   const [pwOud, setPwOud] = useState("");
   const [pwNieuw, setPwNieuw] = useState("");
@@ -113,7 +131,7 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
 
   const handlePwChange = async () => {
     setPwErr(""); setPwOk("");
-    if (!pwNieuw || !pwBevestig) { setPwErr("Vul alle velden in"); return; }
+    if (!pwOud || !pwNieuw || !pwBevestig) { setPwErr("Vul alle velden in"); return; }
     if (pwNieuw !== pwBevestig) { setPwErr("Wachtwoorden komen niet overeen"); return; }
     if (pwNieuw.length < 8) { setPwErr("Minimaal 8 tekens vereist"); return; }
     setPwSaving(true);
@@ -232,6 +250,10 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
                 <SSelect value={s.offerte_geldigheid ?? 14} onChange={(v) => upd("offerte_geldigheid", parseInt(v))}
                   options={[[7,"7 dagen"],[14,"14 dagen"],[21,"21 dagen"],[30,"30 dagen"]]} />
               </SettingRow>
+              <SettingRow label="Voettekst offerte" sub="Voorwaarden / toelichting onderaan offerte">
+                <SInp value={(s as Record<string, unknown>).offerte_voetnoot as string || ""} onChange={(v) => setForm((p) => ({ ...p, offerte_voetnoot: v } as Partial<Settings>))} rows={3}
+                  placeholder="Deze offerte is vrijblijvend…" />
+              </SettingRow>
             </SettingSection>
 
             <div style={{ padding: "12px 16px", background: "rgba(198,165,107,.04)", border: `1px solid ${C.bdr}`, borderRadius: 8, fontSize: "0.68rem", color: C.muted, lineHeight: 1.8 }}>
@@ -244,24 +266,26 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
         {subTab === "notif" && (
           <div style={{ animation: "slideUp .2s ease" }}>
             <div style={{ padding: "12px 16px", background: "rgba(74,158,232,.05)", border: "1px solid rgba(74,158,232,.18)", borderRadius: 8, marginBottom: 24, fontSize: "0.68rem", color: C.muted, lineHeight: 1.8 }}>
-              📬 E-mails worden automatisch verzonden via de geconfigureerde e-mailprovider.<br />
+              📬 E-mails worden gelogd in <strong style={{ color: C.white }}>E-mail log</strong>. Koppel aan Resend of SendGrid voor echte verzending.<br />
               Afzender: <strong style={{ color: C.white }}>{s.bedrijf_naam || "—"}</strong> · <strong style={{ color: C.white }}>{s.bedrijf_email || "—"}</strong>
             </div>
-            <SettingSection title="Geconfigureerde e-mails" icon="✉️">
-              {[
-                ["Nieuwe opdracht", "Bij elke nieuwe klantopdracht"],
-                ["Status update klant", "Bij elke statuswijziging van een opdracht"],
-                ["Offerte reactie", "Als klant een offerte accepteert of afwijst"],
-                ["Legger toegewezen", "Als een legger wordt toegewezen"],
-                ["Betaalbevestiging", "Na markeren als betaald"],
-              ].map(([label, sub]) => (
-                <SettingRow key={label} label={label} sub={sub}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.65rem" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.green, display: "inline-block" }} />
-                    <span style={{ color: C.green }}>Actief</span>
-                  </div>
-                </SettingRow>
-              ))}
+            <SettingSection title="E-mail notificaties" icon="📧">
+              {NOTIF_KEYS.map((k) => {
+                const [label, sub] = NOTIF_LABELS[k];
+                return (
+                  <SettingRow key={k} label={label} sub={sub}>
+                    <ToggleSwitch value={notifs[k] !== false} onChange={(v) => setNotifs((p) => ({ ...p, [k]: v }))} />
+                  </SettingRow>
+                );
+              })}
+            </SettingSection>
+            <SettingSection title="E-mail configuratie" icon="⚙️">
+              <SettingRow label="Afzendernaam" sub="Naam in inbox van klant">
+                <SInp value={s.bedrijf_naam || ""} onChange={(v) => upd("bedrijf_naam", v)} />
+              </SettingRow>
+              <SettingRow label="Reply-to adres">
+                <SInp value={s.bedrijf_email || ""} onChange={(v) => upd("bedrijf_email", v)} type="email" />
+              </SettingRow>
             </SettingSection>
           </div>
         )}
@@ -270,10 +294,16 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
         {subTab === "account" && (
           <div style={{ animation: "slideUp .2s ease" }}>
             <SettingSection title="Accountgegevens" icon="👤">
-              <SettingRow label="E-mailadres" sub="Inlogadres — wijzig via Supabase Auth">
+              <SettingRow label="Naam">
+                <SInp value={(form as Record<string, unknown>).eig_naam as string || user?.name || ""} onChange={(v) => setForm((p) => ({ ...p, eig_naam: v } as Partial<Settings>))} placeholder="Uw naam" />
+              </SettingRow>
+              <SettingRow label="E-mailadres" sub="Inlogadres — niet wijzigbaar">
                 <div style={{ padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, fontSize: "0.72rem", color: C.muted, display: "flex", alignItems: "center", gap: 8 }}>
                   🔒 {user?.email || "—"}
                 </div>
+              </SettingRow>
+              <SettingRow label="Telefoonnummer">
+                <SInp value={(form as Record<string, unknown>).eig_tel as string || ""} onChange={(v) => setForm((p) => ({ ...p, eig_tel: v } as Partial<Settings>))} type="tel" placeholder="06 00 00 00 00" />
               </SettingRow>
               <SettingRow label="Rol">
                 <div style={{ padding: "9px 12px", background: "rgba(255,255,255,.04)", border: `1px solid ${C.bdr}`, borderRadius: 7, fontSize: "0.72rem", color: C.muted }}>
@@ -283,6 +313,9 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
             </SettingSection>
 
             <SettingSection title="Wachtwoord wijzigen" icon="🔐">
+              <SettingRow label="Huidig wachtwoord">
+                <input type="password" value={pwOud} onChange={(e) => setPwOud(e.target.value)} placeholder="••••••••" style={inp} />
+              </SettingRow>
               <SettingRow label="Nieuw wachtwoord" sub="Minimaal 8 tekens">
                 <div>
                   <input type="password" value={pwNieuw} onChange={(e) => setPwNieuw(e.target.value)} placeholder="••••••••" style={inp} />
@@ -302,8 +335,8 @@ export function SettingsForm({ companyId, user }: SettingsFormProps) {
               {pwErr && <div style={{ padding: "10px 14px", background: "rgba(224,90,90,.08)", border: "1px solid rgba(224,90,90,.25)", borderRadius: 7, fontSize: "0.68rem", color: C.red, margin: "8px 0" }}>⚠ {pwErr}</div>}
               {pwOk && <div style={{ padding: "10px 14px", background: "rgba(60,184,122,.08)", border: "1px solid rgba(60,184,122,.25)", borderRadius: 7, fontSize: "0.68rem", color: C.green, margin: "8px 0" }}>✓ {pwOk}</div>}
               <div style={{ paddingTop: 14 }}>
-                <button onClick={handlePwChange} disabled={!pwNieuw || !pwBevestig || pwSaving}
-                  style={{ padding: "10px 22px", background: (!pwNieuw || !pwBevestig) ? "rgba(255,255,255,.04)" : "rgba(198,165,107,.12)", border: `1px solid ${(!pwNieuw || !pwBevestig) ? C.bdr : C.gold}`, color: (!pwNieuw || !pwBevestig) ? C.dim : C.gold, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: (!pwNieuw || !pwBevestig || pwSaving) ? "not-allowed" : "pointer", borderRadius: 8, opacity: (!pwNieuw || !pwBevestig) ? 0.5 : 1 }}>
+                <button onClick={handlePwChange} disabled={!pwOud || !pwNieuw || !pwBevestig || pwSaving}
+                  style={{ padding: "10px 22px", background: (!pwOud || !pwNieuw || !pwBevestig) ? "rgba(255,255,255,.04)" : "rgba(198,165,107,.12)", border: `1px solid ${(!pwOud || !pwNieuw || !pwBevestig) ? C.bdr : C.gold}`, color: (!pwOud || !pwNieuw || !pwBevestig) ? C.dim : C.gold, fontSize: "0.63rem", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: (!pwOud || !pwNieuw || !pwBevestig || pwSaving) ? "not-allowed" : "pointer", borderRadius: 8, opacity: (!pwOud || !pwNieuw || !pwBevestig) ? 0.5 : 1 }}>
                   {pwSaving ? "Opslaan…" : "🔐 Wachtwoord wijzigen"}
                 </button>
               </div>
